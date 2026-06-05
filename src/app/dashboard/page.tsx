@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 
 import ServiceCostChart from '@/components/ServiceCostChart'
+import ServiceCostPieChart from '@/components/ServiceCostPieChart'
 
 type TopRecommendation = {
   resourceType: string
@@ -103,6 +104,8 @@ const DashboardPage = () => {
     return <div className="p-6">Failed to load data</div>
   }
 
+  const filtered = data.byService.filter(s => s.cost > 1)
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="flex justify-center text-2xl font-bold">AWS Cost Dashboard</h1>
@@ -147,8 +150,6 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      <ServiceCostChart data={data.byService} />
-
       {/* Service breakdown table */}
       <div className="border rounded p-4">
         <h2 className="font-semibold mb-4">Cost by Service</h2>
@@ -162,7 +163,7 @@ const DashboardPage = () => {
           </thead>
 
           <tbody>
-            {data.byService.map((service) => (
+            {filtered.map((service) => (
               <tr
                 key={service.service}
                 className="border-b"
@@ -179,6 +180,10 @@ const DashboardPage = () => {
           </tbody>
         </table>
       </div>
+
+      <ServiceCostChart data={filtered} />
+
+      <ServiceCostPieChart data={filtered} />
 
       {/* Recommendations table */}
       <div className="border rounded p-4">
