@@ -4,6 +4,8 @@
 
 import { useEffect, useState } from 'react'
 
+import ServiceCostChart from '@/components/ServiceCostChart'
+
 type TopRecommendation = {
   resourceType: string
   action: string
@@ -144,6 +146,8 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+      <ServiceCostChart data={data.byService} />
 
       {/* Service breakdown table */}
       <div className="border rounded p-4">
