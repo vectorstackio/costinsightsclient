@@ -27,13 +27,6 @@ type CostData = {
   topRecommendations: TopRecommendation[]
 }
 
-// type CostData = {
-//   currentMonthCost: number
-//   potentialSavings: number
-//   recommendationCount: number
-//   topRecommendations: TopRecommendation[]
-// }
-
 const  SkeletonCard = () => {
   return (
     <div className="p-4 border rounded animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200">
