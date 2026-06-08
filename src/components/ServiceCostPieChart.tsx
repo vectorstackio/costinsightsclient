@@ -39,6 +39,11 @@ type DrilldownResponse = {
   items: DrilldownItem[]
 }
 
+type PreviewState = {
+  key: string
+  items: DrilldownItem[]
+} | null
+
 /**
  * -----------------------
  * CONFIG
@@ -92,12 +97,16 @@ const ROOT: DrillLevel = {
  */
 
 const ServiceCostPieChart = () => {
-  //const [stack, setStack] = useState<DrillLevel[]>([])
   const [stack, setStack] = useState<DrillLevel[]>(() => [ROOT])
   const [drilldown, setDrilldown] = useState<DrilldownItem[] | null>(null)
   const [loading, setLoading] = useState(false)
 
   const loaded = useRef(false)
+
+  const previewCache = useRef(new Map<string, DrilldownItem[]>())
+
+  const [preview, setPreview] = useState<PreviewState>(null)
+  const [hovering, setHovering] = useState<string | null>(null)
 
   /**
    * Prevent stale responses overwriting newer ones
@@ -140,6 +149,72 @@ const ServiceCostPieChart = () => {
       if (id === requestId.current) {
         setLoading(false)
       }
+    }
+  }
+
+  async function loadPreview(level: DrillLevel, itemKey: string) {
+    const nextGroupBy =
+      NEXT_LEVEL_MAP[level.groupBy] ?? 'USAGE_TYPE'
+
+    const previewLevel: DrillLevel = {
+      groupBy: nextGroupBy,
+      filters: [
+        ...level.filters,
+        {
+          key: level.groupBy,
+          value: itemKey
+        }
+      ]
+    }
+
+    const key = cacheKey(previewLevel)
+
+    // -----------------------
+    // 1. CACHE HIT
+    // -----------------------
+    const cached = previewCache.current.get(key)
+    if (cached) {
+      setPreview({
+        key: itemKey,
+        items: cached
+      })
+      return
+    }
+
+    // -----------------------
+    // 2. FETCH
+    // -----------------------
+    try {
+      const res = await fetch('/api/costs/drilldown', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(previewLevel)
+      })
+
+      const json: DrilldownResponse = await res.json()
+
+      // -----------------------
+      // 3. CACHE RESULT
+      // -----------------------
+      previewCache.current.set(key, json.items)
+
+      // -----------------------
+      // 4. APPLY ONLY IF STILL RELEVANT
+      // (prevents stale hover flashes)
+      // -----------------------
+      setPreview((prev) => {
+        // if user moved off this item, ignore update
+        if (hovering !== itemKey) return prev
+
+        return {
+          key: itemKey,
+          items: json.items
+        }
+      })
+    } catch {
+      // intentionally silent (hover UX must never break UI)
     }
   }
 
@@ -237,7 +312,27 @@ const ServiceCostPieChart = () => {
       </div>
 
       {/* PIE CHART */}
-      <div style={{ width: '100%', height: 350 }}>
+      <div className="relative" style={{ width: '100%', height: 350 }}>
+        {preview && hovering && (
+          <div className="absolute right-6 top-24 w-64 bg-white border shadow-lg rounded p-3 text-sm z-50">
+            <div className="font-semibold mb-2">
+              Preview: {hovering}
+            </div>
+
+            {preview.items.length === 0 ? (
+              <div className="text-gray-500">No breakdown</div>
+            ) : (
+              <div className="space-y-1">
+                {preview.items.slice(0, 5).map((item) => (
+                  <div key={item.key} className="flex justify-between">
+                    <span className="truncate">{item.key}</span>
+                    <span>£{item.cost.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <ResponsiveContainer>
           <PieChart>
             <Pie
@@ -250,6 +345,19 @@ const ServiceCostPieChart = () => {
               onClick={(_, index) => {
                 const item = drilldown?.[index]
                 if (item) drillInto(item.key)
+              }}
+              onMouseEnter={(_, index) => {
+                const item = drilldown?.[index]
+                if (!item) return
+
+                setHovering(item.key)
+
+                const current = stack[stack.length - 1]
+                loadPreview(current, item.key)
+              }}
+              onMouseLeave={() => {
+                setHovering(null)
+                setPreview(null)
               }}
             >
               {drilldown?.map((_, index) => (
@@ -297,6 +405,7 @@ const ServiceCostPieChart = () => {
             No data
           </div>
         )}
+
       </div>
     </div>
   )
