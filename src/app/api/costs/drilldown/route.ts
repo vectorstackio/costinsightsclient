@@ -1,17 +1,15 @@
 // app/api/costs/drilldown/route.ts
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const service = searchParams.get('service')
+export async function POST(req: Request) {
+  const body = await req.json()
 
-  if (!service) {
-    return Response.json({ error: 'Missing service' }, { status: 400 })
-  }
-
-  const res = await fetch(
-    //`${process.env.COST_API_URL}/drilldown?service=${encodeURIComponent(service)}`
-    `${process.env.COST_API_URL}?service=${encodeURIComponent(service)}`
-  )
+  const res = await fetch(`${process.env.COST_API_URL}/query`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  })
 
   const data = await res.json()
 

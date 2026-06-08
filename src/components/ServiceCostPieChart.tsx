@@ -10,15 +10,17 @@ import {
   Cell
 } from 'recharts'
 
-import { useEffect, useState } from 'react'
+import { /*useEffect,*/ useState } from 'react'
+
+/**
+ * -----------------------
+ * Types
+ * -----------------------
+ */
 
 type ServiceCost = {
   service: string
   cost: number
-}
-
-type Props = {
-  data: ServiceCost[]
 }
 
 type DrilldownItem = {
@@ -26,7 +28,15 @@ type DrilldownItem = {
   cost: number
 }
 
-// Optional: nicer colors (AWS-style muted palette)
+type CostFilter = {
+  key: string
+  value: string
+}
+
+type Props = {
+  data: ServiceCost[]
+}
+
 const COLORS = [
   '#6366f1',
   '#22c55e',
@@ -37,25 +47,68 @@ const COLORS = [
   '#84cc16'
 ]
 
+/**
+ * -----------------------
+ * Component
+ * -----------------------
+ */
+
 const ServiceCostPieChart = ({ data }: Props) => {
   const [selectedService, setSelectedService] = useState<string | null>(null)
+
   const [drilldown, setDrilldown] = useState<DrilldownItem[] | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (!selectedService) return
+  /**
+   * -----------------------
+   * Load drilldown (NEW ENGINE)
+   * -----------------------
+   */
+  async function loadDrilldown(service: string) {
+    setLoading(true)
 
-    async function loadDrilldown() {
-      if (!selectedService) return
-      const res = await fetch(
-        `/api/costs/drilldown?service=${encodeURIComponent(selectedService)}`
-      )
+    try {
+      const filters: CostFilter[] = [
+        {
+          key: 'SERVICE',
+          value: service
+        }
+      ]
+
+      const res = await fetch('/api/costs/drilldown', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filters,
+          groupBy: 'INSTANCE_TYPE'
+        })
+      })
+
       const json = await res.json()
 
-      setDrilldown(json.drilldown)
+      setDrilldown(json.items)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    loadDrilldown()
-  }, [selectedService])
+  /**
+   * -----------------------
+   * Handle selection
+   * -----------------------
+   */
+  function handleSelect(service: string) {
+    setSelectedService(service)
+    loadDrilldown(service)
+  }
+
+  /**
+   * -----------------------
+   * UI
+   * -----------------------
+   */
 
   return (
     <div className="border rounded p-4">
@@ -63,6 +116,7 @@ const ServiceCostPieChart = ({ data }: Props) => {
         Cost Distribution
       </h2>
 
+      {/* ---------------- Pie chart ---------------- */}
       <div style={{ width: '100%', height: 350 }}>
         <ResponsiveContainer>
           <PieChart>
@@ -75,16 +129,18 @@ const ServiceCostPieChart = ({ data }: Props) => {
               outerRadius={120}
               onClick={(_, index) => {
                 const item = data[index]
-
-                if (item) {
-                  setSelectedService(item.service)
-                }
+                if (item) handleSelect(item.service)
               }}
-              label={({ name, percent }): string => {
-                const safeName = typeof name === 'string' ? name : 'Unknown'
-                const safePercent = typeof percent === 'number' ? percent : 0
+              label={({ name, percent }) => {
+                const safeName =
+                  typeof name === 'string' ? name : 'Unknown'
 
-                return `${safeName.slice(0, 12)}... (${(safePercent * 100).toFixed(0)}%)`
+                const safePercent =
+                  typeof percent === 'number' ? percent : 0
+
+                return `${safeName.slice(0, 12)}... (${(
+                  safePercent * 100
+                ).toFixed(0)}%)`
               }}
             >
               {data.map((_, index) => (
@@ -102,18 +158,22 @@ const ServiceCostPieChart = ({ data }: Props) => {
             />
           </PieChart>
         </ResponsiveContainer>
-
       </div>
 
+      {/* ---------------- Drilldown ---------------- */}
       {selectedService && (
         <div className="mt-6 border-t pt-4">
           <h3 className="font-semibold mb-2">
             {selectedService} breakdown
           </h3>
 
-          {!drilldown ? (
+          {loading ? (
             <div className="text-sm text-gray-500">
               Loading...
+            </div>
+          ) : !drilldown ? (
+            <div className="text-sm text-gray-500">
+              No data
             </div>
           ) : (
             <table className="w-full text-sm">
