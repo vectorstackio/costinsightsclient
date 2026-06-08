@@ -190,7 +190,7 @@ const DashboardPage = () => {
       {/* -----------------------
           Cost by service table
       ----------------------- */}
-      <div className="border rounded p-4">
+      {/*<div className="border rounded p-4">
         <h2 className="font-semibold mb-4">
           Cost by Service
         </h2>
@@ -219,14 +219,14 @@ const DashboardPage = () => {
             ))}
           </tbody>
         </table>
-      </div>
+      </div>*/}
 
       {/* -----------------------
           Charts (NEW responsibility split)
       ----------------------- */}
       <ServiceCostChart data={filteredServices} />
 
-      <ServiceCostPieChart data={filteredServices} />
+      <ServiceCostPieChart  />
 
       {/* -----------------------
           Recommendations
