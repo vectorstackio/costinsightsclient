@@ -69,10 +69,7 @@ const ServiceCostPieChart = ({ data }: Props) => {
 
     try {
       const filters: CostFilter[] = [
-        {
-          key: 'SERVICE',
-          value: service
-        }
+        { key: 'SERVICE', value: service }
       ]
 
       const res = await fetch('/api/costs/drilldown', {
@@ -86,13 +83,44 @@ const ServiceCostPieChart = ({ data }: Props) => {
         })
       })
 
-      const json = await res.json()
+      const json: {
+        items: DrilldownItem[]
+      } = await res.json()
 
       setDrilldown(json.items)
     } finally {
       setLoading(false)
     }
   }
+  // async function loadDrilldown(service: string) {
+  //   setLoading(true)
+
+  //   try {
+  //     const filters: CostFilter[] = [
+  //       {
+  //         key: 'SERVICE',
+  //         value: service
+  //       }
+  //     ]
+
+  //     const res = await fetch('/api/costs/drilldown', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({
+  //         filters,
+  //         groupBy: 'INSTANCE_TYPE'
+  //       })
+  //     })
+
+  //     const json = await res.json()
+
+  //     setDrilldown(json.items)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   /**
    * -----------------------
@@ -101,8 +129,13 @@ const ServiceCostPieChart = ({ data }: Props) => {
    */
   function handleSelect(service: string) {
     setSelectedService(service)
+    setDrilldown(null)
     loadDrilldown(service)
   }
+  // function handleSelect(service: string) {
+  //   setSelectedService(service)
+  //   loadDrilldown(service)
+  // }
 
   /**
    * -----------------------
@@ -171,11 +204,7 @@ const ServiceCostPieChart = ({ data }: Props) => {
             <div className="text-sm text-gray-500">
               Loading...
             </div>
-          ) : !drilldown ? (
-            <div className="text-sm text-gray-500">
-              No data
-            </div>
-          ) : (
+          ) : drilldown?.length ? (
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left border-b">
@@ -195,6 +224,10 @@ const ServiceCostPieChart = ({ data }: Props) => {
                 ))}
               </tbody>
             </table>
+          ) : (
+            <div className="text-sm text-gray-500">
+              No data
+            </div>
           )}
         </div>
       )}
