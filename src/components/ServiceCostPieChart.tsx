@@ -10,11 +10,11 @@ import {
   Cell
 } from 'recharts'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * -----------------------
- * Types
+ * TYPES
  * -----------------------
  */
 
@@ -76,7 +76,7 @@ function cacheKey(level: DrillLevel) {
 
 /**
  * -----------------------
- * COMPONENT
+ * ROOT
  * -----------------------
  */
 
@@ -85,19 +85,28 @@ const ROOT: DrillLevel = {
   filters: []
 }
 
+/**
+ * -----------------------
+ * COMPONENT
+ * -----------------------
+ */
+
 const ServiceCostPieChart = () => {
+  //const [stack, setStack] = useState<DrillLevel[]>([])
+  const [stack, setStack] = useState<DrillLevel[]>(() => [ROOT])
   const [drilldown, setDrilldown] = useState<DrilldownItem[] | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const [stack, setStack] = useState<DrillLevel[]>(() => {
-    // IMPORTANT: trigger initial load safely
-    loadLevel(ROOT)
-    return [ROOT]
-  })
+  const loaded = useRef(false)
+
+  /**
+   * Prevent stale responses overwriting newer ones
+   */
+  const requestId = useRef(0)
 
   /**
    * -----------------------
-   * LOAD LEVEL (cached engine)
+   * LOAD LEVEL (safe + cached + race-proof)
    * -----------------------
    */
   async function loadLevel(level: DrillLevel) {
@@ -108,6 +117,7 @@ const ServiceCostPieChart = () => {
       return
     }
 
+    const id = ++requestId.current
     setLoading(true)
 
     try {
@@ -121,12 +131,30 @@ const ServiceCostPieChart = () => {
 
       const json: DrilldownResponse = await res.json()
 
+      // ignore stale responses
+      if (id !== requestId.current) return
+
       drillCache.set(key, json.items)
       setDrilldown(json.items)
     } finally {
-      setLoading(false)
+      if (id === requestId.current) {
+        setLoading(false)
+      }
     }
   }
+
+  /**
+   * -----------------------
+   * INIT (safe lazy init pattern)
+   * -----------------------
+   */
+  useEffect(() => {
+    if (loaded.current) return
+    loaded.current = true
+
+    setStack([ROOT])
+    loadLevel(ROOT)
+  }, [])
 
   /**
    * -----------------------
@@ -136,11 +164,10 @@ const ServiceCostPieChart = () => {
   function drillInto(itemKey: string) {
     const current = stack[stack.length - 1]
 
-    const nextGroupBy =
-      NEXT_LEVEL_MAP[current.groupBy] ?? 'USAGE_TYPE'
+    if (!current) return // 👈 critical safety guard
 
     const next: DrillLevel = {
-      groupBy: nextGroupBy,
+      groupBy: NEXT_LEVEL_MAP[current.groupBy] ?? 'USAGE_TYPE',
       filters: [
         ...current.filters,
         {
@@ -157,50 +184,56 @@ const ServiceCostPieChart = () => {
 
   /**
    * -----------------------
-   * BACK NAVIGATION
+   * BREADCRUMB JUMP (true AWS console behavior)
    * -----------------------
    */
-  function goBack() {
-    if (stack.length <= 1) return
+  function jumpTo(index: number) {
+    const trimmed = stack.slice(0, index + 1)
+    const target = trimmed[trimmed.length - 1]
 
-    const newStack = stack.slice(0, -1)
-    setStack(newStack)
-
-    loadLevel(newStack[newStack.length - 1])
+    setStack(trimmed)
+    loadLevel(target)
   }
 
   /**
    * -----------------------
-   * CURRENT LEVEL
+   * UI
    * -----------------------
    */
-  const current = stack[stack.length - 1]
 
   return (
     <div className="border rounded p-4">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-3">
         <h2 className="font-semibold">Cost Distribution</h2>
 
-        {stack.length > 1 && (
-          <button
-            onClick={goBack}
-            className="text-sm text-blue-600 underline"
-          >
-            ← Back
-          </button>
-        )}
-      </div>
+        {/* BREADCRUMB */}
+        <div className="text-xs text-gray-500 mt-2 flex flex-wrap gap-1">
+          {stack.map((level, i) => {
+            const isLast = i === stack.length - 1
 
-      {/* BREADCRUMB */}
-      <div className="text-xs text-gray-500 mb-3 flex gap-1 flex-wrap">
-        {stack.map((level, i) => (
-          <span key={i}>
-            {level.groupBy}
-            {i < stack.length - 1 && ' > '}
-          </span>
-        ))}
+            return (
+              <span key={i} className="flex items-center">
+                <button
+                  onClick={() => jumpTo(i)}
+                  className={`hover:underline ${isLast
+                    ? 'text-gray-900 font-medium'
+                    : 'text-blue-600'
+                  }`}
+                >
+                  {level.groupBy}
+                </button>
+
+                {!isLast && (
+                  <span className="mx-1 text-gray-400">
+                    /
+                  </span>
+                )}
+              </span>
+            )
+          })}
+        </div>
       </div>
 
       {/* PIE CHART */}
@@ -218,17 +251,6 @@ const ServiceCostPieChart = () => {
                 const item = drilldown?.[index]
                 if (item) drillInto(item.key)
               }}
-              label={({ name, percent }) => {
-                const safeName =
-                  typeof name === 'string' ? name : 'Unknown'
-
-                const safePercent =
-                  typeof percent === 'number' ? percent : 0
-
-                return `${safeName.slice(0, 12)}... (${(
-                  safePercent * 100
-                ).toFixed(0)}%)`
-              }}
             >
               {drilldown?.map((_, index) => (
                 <Cell
@@ -239,8 +261,8 @@ const ServiceCostPieChart = () => {
             </Pie>
 
             <Tooltip
-              formatter={(value) =>
-                `£${Number(value ?? 0).toFixed(2)}`
+              formatter={(v) =>
+                `£${Number(v ?? 0).toFixed(2)}`
               }
             />
           </PieChart>
@@ -249,22 +271,16 @@ const ServiceCostPieChart = () => {
 
       {/* TABLE */}
       <div className="mt-6 border-t pt-4">
-
         <h3 className="font-semibold mb-2">
-          Level: {current.groupBy}
+          Level: {stack[stack.length - 1]?.groupBy}
         </h3>
 
         {loading ? (
-          <div className="text-sm text-gray-500">Loading...</div>
+          <div className="text-sm text-gray-500">
+            Loading...
+          </div>
         ) : drilldown?.length ? (
           <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left border-b">
-                <th className="py-2">Item</th>
-                <th className="py-2">Cost</th>
-              </tr>
-            </thead>
-
             <tbody>
               {drilldown.map((item) => (
                 <tr key={item.key} className="border-b">
@@ -287,240 +303,3 @@ const ServiceCostPieChart = () => {
 }
 
 export default ServiceCostPieChart
-
-// 'use client'
-
-// import {
-//   PieChart,
-//   Pie,
-//   Tooltip,
-//   ResponsiveContainer,
-//   Cell
-// } from 'recharts'
-
-// import { /*useEffect,*/ useState } from 'react'
-
-// /**
-//  * -----------------------
-//  * Types
-//  * -----------------------
-//  */
-
-// type ServiceCost = {
-//   service: string
-//   cost: number
-// }
-
-// type DrilldownItem = {
-//   key: string
-//   cost: number
-// }
-
-// type CostFilter = {
-//   key: string
-//   value: string
-// }
-
-// type Props = {
-//   data: ServiceCost[]
-// }
-
-// const COLORS = [
-//   '#6366f1',
-//   '#22c55e',
-//   '#f59e0b',
-//   '#ef4444',
-//   '#06b6d4',
-//   '#a855f7',
-//   '#84cc16'
-// ]
-
-// /**
-//  * -----------------------
-//  * Component
-//  * -----------------------
-//  */
-
-// const ServiceCostPieChart = ({ data }: Props) => {
-//   const [selectedService, setSelectedService] = useState<string | null>(null)
-
-//   const [drilldown, setDrilldown] = useState<DrilldownItem[] | null>(null)
-//   const [loading, setLoading] = useState(false)
-
-//   /**
-//    * -----------------------
-//    * Load drilldown (NEW ENGINE)
-//    * -----------------------
-//    */
-//   async function loadDrilldown(service: string) {
-//     setLoading(true)
-
-//     try {
-//       const filters: CostFilter[] = [
-//         { key: 'SERVICE', value: service }
-//       ]
-
-//       const res = await fetch('/api/costs/drilldown', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({
-//           filters,
-//           groupBy: 'INSTANCE_TYPE'
-//         })
-//       })
-
-//       const json: {
-//         items: DrilldownItem[]
-//       } = await res.json()
-
-//       setDrilldown(json.items)
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
-//   // async function loadDrilldown(service: string) {
-//   //   setLoading(true)
-
-//   //   try {
-//   //     const filters: CostFilter[] = [
-//   //       {
-//   //         key: 'SERVICE',
-//   //         value: service
-//   //       }
-//   //     ]
-
-//   //     const res = await fetch('/api/costs/drilldown', {
-//   //       method: 'POST',
-//   //       headers: {
-//   //         'Content-Type': 'application/json'
-//   //       },
-//   //       body: JSON.stringify({
-//   //         filters,
-//   //         groupBy: 'INSTANCE_TYPE'
-//   //       })
-//   //     })
-
-//   //     const json = await res.json()
-
-//   //     setDrilldown(json.items)
-//   //   } finally {
-//   //     setLoading(false)
-//   //   }
-//   // }
-
-//   /**
-//    * -----------------------
-//    * Handle selection
-//    * -----------------------
-//    */
-//   function handleSelect(service: string) {
-//     setSelectedService(service)
-//     setDrilldown(null)
-//     loadDrilldown(service)
-//   }
-//   // function handleSelect(service: string) {
-//   //   setSelectedService(service)
-//   //   loadDrilldown(service)
-//   // }
-
-//   /**
-//    * -----------------------
-//    * UI
-//    * -----------------------
-//    */
-
-//   return (
-//     <div className="border rounded p-4">
-//       <h2 className="font-semibold mb-4">
-//         Cost Distribution
-//       </h2>
-
-//       {/* ---------------- Pie chart ---------------- */}
-//       <div style={{ width: '100%', height: 350 }}>
-//         <ResponsiveContainer>
-//           <PieChart>
-//             <Pie
-//               data={data}
-//               dataKey="cost"
-//               nameKey="service"
-//               cx="50%"
-//               cy="50%"
-//               outerRadius={120}
-//               onClick={(_, index) => {
-//                 const item = data[index]
-//                 if (item) handleSelect(item.service)
-//               }}
-//               label={({ name, percent }) => {
-//                 const safeName =
-//                   typeof name === 'string' ? name : 'Unknown'
-
-//                 const safePercent =
-//                   typeof percent === 'number' ? percent : 0
-
-//                 return `${safeName.slice(0, 12)}... (${(
-//                   safePercent * 100
-//                 ).toFixed(0)}%)`
-//               }}
-//             >
-//               {data.map((_, index) => (
-//                 <Cell
-//                   key={index}
-//                   fill={COLORS[index % COLORS.length]}
-//                 />
-//               ))}
-//             </Pie>
-
-//             <Tooltip
-//               formatter={(value) =>
-//                 `£${Number(value ?? 0).toFixed(2)}`
-//               }
-//             />
-//           </PieChart>
-//         </ResponsiveContainer>
-//       </div>
-
-//       {/* ---------------- Drilldown ---------------- */}
-//       {selectedService && (
-//         <div className="mt-6 border-t pt-4">
-//           <h3 className="font-semibold mb-2">
-//             {selectedService} breakdown
-//           </h3>
-
-//           {loading ? (
-//             <div className="text-sm text-gray-500">
-//               Loading...
-//             </div>
-//           ) : drilldown?.length ? (
-//             <table className="w-full text-sm">
-//               <thead>
-//                 <tr className="text-left border-b">
-//                   <th className="py-2">Item</th>
-//                   <th className="py-2">Cost</th>
-//                 </tr>
-//               </thead>
-
-//               <tbody>
-//                 {drilldown.map((item) => (
-//                   <tr key={item.key} className="border-b">
-//                     <td className="py-2">{item.key}</td>
-//                     <td className="py-2">
-//                       £{item.cost.toFixed(2)}
-//                     </td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           ) : (
-//             <div className="text-sm text-gray-500">
-//               No data
-//             </div>
-//           )}
-//         </div>
-//       )}
-//     </div>
-//   )
-// }
-
-// export default ServiceCostPieChart
