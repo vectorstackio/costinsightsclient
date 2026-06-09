@@ -12,7 +12,7 @@ import {
   ReferenceLine
 } from 'recharts'
 
-import { ServiceComparison } from '@/app/dashboard/page'
+import { ServiceComparison } from '@/hooks/useCostExplorerController'
 
 type Props = {
   data: ServiceComparison[]

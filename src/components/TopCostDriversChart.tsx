@@ -11,7 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
-import { CostIncreaseDriver } from '@/app/dashboard/page'
+import { CostIncreaseDriver } from '@/hooks/useCostExplorerController'
 
 type Props = {
   data: CostIncreaseDriver[]
