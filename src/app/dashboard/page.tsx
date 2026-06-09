@@ -8,6 +8,9 @@ import ServiceCostChart from '@/components/ServiceCostChart'
 import ServiceCostPieChart from '@/components/ServiceCostPieChart'
 import InsightsPanel from '@/components/Insights'
 import CostHistoryPanel from '@/components/CostHistory'
+import CostTrendLineChart from '@/components/CostTrendLineChart'
+import TopCostDriversChart from '@/components/TopCostDriversChart'
+import CostWaterfallChart from '@/components/CostWaterfallChart'
 
 
 /**
@@ -52,6 +55,14 @@ type TrendPoint = {
   cost: number
 }
 
+export type ServiceComparison = {
+  service: string
+  currentCost: number
+  previousCost: number
+  change: number
+  changePercent: number
+}
+
 type CostData = {
   currentMonthCost: number
   potentialSavings: number
@@ -63,16 +74,8 @@ type CostData = {
   trend: TrendPoint[]   // 👈 ADD THIS
   monthOverMonthChangePercent: number
   previousMonthCost: number
+  byServiceComparison: ServiceComparison[]
 }
-// type CostData = {
-//   currentMonthCost: number
-//   potentialSavings: number
-//   recommendationCount: number
-//   byService: ServiceCost[]
-//   topRecommendations: TopRecommendation[]
-//   topCostIncreaseDrivers: CostIncreaseDriver[]
-//   anomalies: ServiceAnomaly[]
-// }
 
 /**
  * -----------------------
@@ -297,11 +300,15 @@ const DashboardPage = () => {
       {/* -----------------------
           Charts (NEW responsibility split)
       ----------------------- */}
-      {/* <InsightsPanel
-        drivers={data.topCostIncreaseDrivers}
-        anomalies={data.anomalies}
-      /> */}
       <CostHistoryPanel trend={data.trend} />
+      <div className="grid grid-cols-1 gap-6">
+        <CostTrendLineChart data={data.trend} />
+
+        <div className="grid grid-cols-2 gap-6">
+          <TopCostDriversChart data={data.topCostIncreaseDrivers} />
+          <CostWaterfallChart data={data.byServiceComparison} />
+        </div>
+      </div>
       <InsightsPanel
         drivers={data?.topCostIncreaseDrivers}
         anomalies={data.anomalies}
