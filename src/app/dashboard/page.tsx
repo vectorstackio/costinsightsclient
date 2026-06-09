@@ -98,6 +98,7 @@ const DashboardPage = () => {
   const [data, setData] = useState<CostData | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [selectedService, setSelectedService] = useState<string | null>(null)
 
   /**
    * -----------------------
@@ -233,7 +234,20 @@ const DashboardPage = () => {
 
           <div className="text-sm text-gray-500">Top Cost Driver</div>
           <div className="text-lg font-bold">
-            {data.topCostIncreaseDrivers?.[0]?.service ?? '—'}
+            <button
+              onClick={() =>
+                setSelectedService(
+                  data.topCostIncreaseDrivers?.[0]?.service ?? null
+                )
+              }
+              className={`
+                font-bold
+                hover:text-red-600
+                ${selectedService === data.topCostIncreaseDrivers?.[0]?.service ? 'text-blue-600' : ''}
+              `}
+            >
+              {data.topCostIncreaseDrivers?.[0]?.service ?? '—'}
+            </button>
           </div>
 
           <div className="text-sm text-gray-500">
@@ -255,7 +269,20 @@ const DashboardPage = () => {
             Primary Anomaly
           </div>
           <div className="text-sm font-medium">
-            {data.anomalies?.[0]?.service ?? 'None'}
+            <button
+              onClick={() =>
+                setSelectedService(
+                  data.anomalies?.[0]?.service ?? null
+                )
+              }
+              className={`
+                font-bold
+                hover:text-red-600
+                ${selectedService === data.anomalies?.[0]?.service ? 'text-blue-600' : ''}
+              `}
+            >
+              {data.anomalies?.[0]?.service ?? 'None'}
+            </button>
           </div>
 
           <div className="mt-3 text-sm text-gray-500">
@@ -280,7 +307,7 @@ const DashboardPage = () => {
         anomalies={data.anomalies}
       />
       <ServiceCostChart data={filteredServices} />
-      <ServiceCostPieChart  />
+      <ServiceCostPieChart selectedService={selectedService} />
 
       {/* -----------------------
           Recommendations

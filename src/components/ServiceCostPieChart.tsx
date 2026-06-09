@@ -44,6 +44,10 @@ type PreviewState = {
   items: DrilldownItem[]
 } | null
 
+type Props = {
+  selectedService: string | null
+}
+
 /**
  * -----------------------
  * CONFIG
@@ -96,13 +100,13 @@ const ROOT: DrillLevel = {
  * -----------------------
  */
 
-const ServiceCostPieChart = () => {
+const ServiceCostPieChart = ({ selectedService }: Props) => {
   const [stack, setStack] = useState<DrillLevel[]>(() => [ROOT])
   const [drilldown, setDrilldown] = useState<DrilldownItem[] | null>(null)
   const [loading, setLoading] = useState(false)
 
   const loaded = useRef(false)
-
+  const previousSelection = useRef<string | null>(null)
   const previewCache = useRef(new Map<string, DrilldownItem[]>())
 
   const [preview, setPreview] = useState<PreviewState>(null)
@@ -231,6 +235,34 @@ const ServiceCostPieChart = () => {
     loadLevel(ROOT)
   }, [])
 
+  function handleExternalSelection(service: string) {
+    const next: DrillLevel = {
+      groupBy: 'USAGE_TYPE',
+      filters: [
+        {
+          key: 'SERVICE',
+          value: service
+        }
+      ]
+    }
+
+    setStack([ROOT, next])
+    loadLevel(next)
+  }
+
+  useEffect(() => {
+    if (
+      !selectedService ||
+      selectedService === previousSelection.current
+    ) {
+      return
+    }
+
+    previousSelection.current = selectedService
+
+    handleExternalSelection(selectedService)
+  }, [selectedService])
+
   /**
    * -----------------------
    * DRILL DOWN
@@ -310,6 +342,15 @@ const ServiceCostPieChart = () => {
           })}
         </div>
       </div>
+
+      {selectedService && (
+        <div className="mb-4 p-3 border rounded bg-blue-50">
+          Investigating:
+          <span className="font-semibold ml-2">
+            {selectedService}
+          </span>
+        </div>
+      )}
 
       {/* PIE CHART */}
       <div className="relative" style={{ width: '100%', height: 350 }}>

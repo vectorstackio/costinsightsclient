@@ -6,7 +6,8 @@
     "dev": "next dev -p 3024",
     "build": "next build",
     "start": "next start -p 3024",
-    "lint": "eslint"
+    "lint": "eslint --quiet",
+    "codelint": "npm run lint src/ && tsc --noEmit"
   },
   "dependencies": {
     "next": "16.2.7",
