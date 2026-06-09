@@ -17,7 +17,6 @@ export type Dimension =
   | 'OPERATION'
   | 'LINKED_ACCOUNT'
   | 'RESOURCE_ID'
-  | 'INSTANCE_TYPE'
 
 export type CostFilter = {
   key: Dimension
@@ -148,7 +147,6 @@ export function useCostExplorerController() {
 
   const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [drilldown, setDrilldown] = useState<DrilldownResponse | null>(null)
-
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [loadingDrilldown, setLoadingDrilldown] = useState(false)
 
@@ -196,6 +194,7 @@ export function useCostExplorerController() {
         })
 
         const json = await res.json()
+
         setDrilldown(json)
       } finally {
         setLoadingDrilldown(false)

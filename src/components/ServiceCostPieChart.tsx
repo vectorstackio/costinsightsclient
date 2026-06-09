@@ -54,9 +54,16 @@ const COLORS = [
 const NEXT_LEVEL_MAP: Partial<Record<Dimension, Dimension>> = {
   SERVICE: 'USAGE_TYPE',
   USAGE_TYPE: 'REGION',
-  REGION: 'INSTANCE_TYPE' as Dimension,
-  INSTANCE_TYPE: 'RESOURCE_ID'
+  REGION: 'OPERATION',
+  OPERATION: 'LINKED_ACCOUNT',
+  LINKED_ACCOUNT: 'RESOURCE_ID'
 }
+// const NEXT_LEVEL_MAP: Partial<Record<Dimension, Dimension>> = {
+//   SERVICE: 'USAGE_TYPE',
+//   USAGE_TYPE: 'REGION',
+//   REGION: 'INSTANCE_TYPE' as Dimension,
+//   INSTANCE_TYPE: 'RESOURCE_ID'
+// }
 // const NEXT_LEVEL_MAP: Record<string, string> = {
 //   SERVICE: 'USAGE_TYPE',
 //   USAGE_TYPE: 'REGION',
@@ -111,8 +118,7 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
 
   async function loadPreview(groupBy: Dimension, itemKey: string) {
     //const nextGroupBy = NEXT_LEVEL_MAP[groupBy] ?? 'USAGE_TYPE'
-    const nextGroupBy: Dimension =
-      NEXT_LEVEL_MAP[groupBy] ?? 'USAGE_TYPE'
+    const nextGroupBy: Dimension = NEXT_LEVEL_MAP[groupBy] ?? 'USAGE_TYPE'
 
     const level = {
       groupBy: nextGroupBy,
@@ -188,8 +194,7 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
   function drillInto(itemKey: string) {
     const currentGroupBy = stack[stack.length - 1]
 
-    const nextGroupBy =
-      NEXT_LEVEL_MAP[currentGroupBy] ?? 'USAGE_TYPE'
+    const nextGroupBy = NEXT_LEVEL_MAP[currentGroupBy] ?? 'USAGE_TYPE'
 
     setFilters([
       ...context.filters,
@@ -276,11 +281,11 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
               Preview: {hovering}
             </div>
 
-            {preview.items.length === 0 ? (
+            {(preview.items ?? []).length === 0 ? (
               <div className="text-gray-500">No breakdown</div>
             ) : (
               <div className="space-y-1">
-                {preview.items.slice(0, 5).map((item) => (
+                {(preview.items ?? []).slice(0, 5).map((item) => (
                   <div key={item.key} className="flex justify-between">
                     <span className="truncate">{item.key}</span>
                     <span>£{item.cost.toFixed(2)}</span>
