@@ -162,7 +162,7 @@ const DashboardPage = () => {
   /**
    * Filter for charts only (pure presentation logic)
    */
-  const filteredServices = data.byService.filter(
+  const filteredServices = [...data.byService].filter(
     (s) => s.cost > 1
   ).sort((a, b) => b.cost - a.cost)
 
