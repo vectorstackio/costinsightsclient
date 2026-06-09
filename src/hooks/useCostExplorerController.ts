@@ -17,6 +17,7 @@ export type Dimension =
   | 'OPERATION'
   | 'LINKED_ACCOUNT'
   | 'RESOURCE_ID'
+  | 'INSTANCE_TYPE'
 
 export type CostFilter = {
   key: Dimension
@@ -185,7 +186,7 @@ export function useCostExplorerController() {
       setLoadingDrilldown(true)
 
       try {
-        const res = await fetch('/api/costs', {
+        const res = await fetch('/api/costs/drilldown', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
