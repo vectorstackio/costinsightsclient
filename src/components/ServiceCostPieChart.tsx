@@ -83,7 +83,8 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
     drilldown,
     loadingDrilldown,
     context,
-    setFilters
+    setFilters,
+    setGroupBy
   } = useCostExplorerController()
 
   /**
@@ -184,7 +185,6 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
    * (NOW: delegate state to hook instead of local API calls)
    * -----------------------
    */
-
   function drillInto(itemKey: string) {
     const currentGroupBy = stack[stack.length - 1]
 
@@ -198,6 +198,8 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
         value: itemKey
       }
     ])
+
+    setGroupBy(nextGroupBy)
 
     setStack(prev => [...prev, nextGroupBy])
   }
@@ -217,6 +219,10 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
     const baseFilters = context.filters.slice(0, index)
 
     setFilters(baseFilters)
+
+    const targetGroup = trimmed[trimmed.length - 1]
+
+    setGroupBy(targetGroup)
   }
 
   /**
