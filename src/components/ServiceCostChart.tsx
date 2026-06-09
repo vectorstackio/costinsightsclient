@@ -18,9 +18,10 @@ type ServiceCost = {
 
 type Props = {
   data: ServiceCost[]
+  onSelectService?: (service: string | null) => void
 }
 
-const ServiceCostChart = ({ data }: Props) => {
+const ServiceCostChart = ({ data, onSelectService }: Props) => {
   return (
     <div className="border rounded p-4">
       <h2 className="font-semibold mb-4">
@@ -51,7 +52,14 @@ const ServiceCostChart = ({ data }: Props) => {
             ]}
           />
 
-          <Bar dataKey="cost" />
+          <Bar
+            dataKey="cost"
+            cursor="pointer"
+            onClick={(data) => {
+              const service = data.payload?.service ?? null
+              onSelectService?.(service)
+            }}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

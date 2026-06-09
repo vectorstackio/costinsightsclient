@@ -203,9 +203,24 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 gap-6">
         <CostTrendLineChart data={summary.trend} />
 
+        <ServiceCostChart
+          data={filteredServices}
+          onSelectService={(service) => {
+            setSelectedService(service)
+          }}
+        />
+
         <div className="grid grid-cols-2 gap-6">
-          <TopCostDriversChart data={summary.topCostIncreaseDrivers} />
-          <CostWaterfallChart data={summary.byServiceComparison ?? []} />
+          <TopCostDriversChart
+            data={summary.topCostIncreaseDrivers}
+            onSelectService={(service) => {
+              setSelectedService(service)
+            }} />
+          <CostWaterfallChart
+            data={summary.byServiceComparison ?? []}
+            onSelectService={(service) => {
+              setSelectedService(service)
+            }} />
         </div>
       </div>
 
@@ -213,8 +228,6 @@ const DashboardPage = () => {
         drivers={summary.topCostIncreaseDrivers}
         anomalies={summary.anomalies}
       />
-
-      <ServiceCostChart data={filteredServices} />
 
       <ServiceCostPieChart selectedService={selectedService} />
 

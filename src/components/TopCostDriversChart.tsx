@@ -15,9 +15,10 @@ import { CostIncreaseDriver } from '@/hooks/useCostExplorerController'
 
 type Props = {
   data: CostIncreaseDriver[]
+  onSelectService?: (service: string | null) => void
 }
 
-const TopCostDriversChart = ({ data }: Props) => {
+const TopCostDriversChart = ({ data, onSelectService }: Props) => {
   const chartData = data.map(d => ({
     service: d.service,
     increase: d.increase
@@ -33,7 +34,15 @@ const TopCostDriversChart = ({ data }: Props) => {
             <XAxis dataKey="service" />
             <YAxis />
             <Tooltip formatter={(v) => `£${Number(v).toFixed(2)}`} />
-            <Bar dataKey="increase" fill="#ef4444" />
+            <Bar
+              dataKey="increase"
+              fill="#ef4444"
+              cursor="pointer"
+              onClick={(data) => {
+                const service = data.payload?.service ?? null
+                onSelectService?.(service)
+              }}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>

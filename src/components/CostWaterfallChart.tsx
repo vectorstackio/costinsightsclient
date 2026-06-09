@@ -16,9 +16,10 @@ import { ServiceComparison } from '@/hooks/useCostExplorerController'
 
 type Props = {
   data: ServiceComparison[]
+  onSelectService?: (service: string | null) => void
 }
 
-const CostWaterfallChart = ({ data }: Props) => {
+const CostWaterfallChart = ({ data, onSelectService }: Props) => {
   const chartData = data
     .filter(d => d.change !== 0)
     .map(d => ({
@@ -43,6 +44,11 @@ const CostWaterfallChart = ({ data }: Props) => {
             <Bar
               dataKey="change"
               fill="#f59e0b"
+              cursor="pointer"
+              onClick={(data) => {
+                const service = data?.payload?.service ?? null
+                onSelectService?.(service)
+              }}
             />
           </BarChart>
         </ResponsiveContainer>
