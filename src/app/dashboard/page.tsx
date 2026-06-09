@@ -164,7 +164,7 @@ const DashboardPage = () => {
    */
   const filteredServices = data.byService.filter(
     (s) => s.cost > 1
-  )
+  ).sort((a, b) => b.cost - a.cost)
 
   /**
    * -----------------------
