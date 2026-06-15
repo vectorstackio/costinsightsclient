@@ -32,4 +32,4 @@ const RootCauseNodeView = ({ node }: Props) => {
   )
 }
 
-export default RootCauseNodeView;
+export default RootCauseNodeView
