@@ -7,6 +7,7 @@ import ExecutiveSummary from '@/components/insights/ExecutiveSummary'
 import InvestigationTargets from '@/components/insights/InvestigationTargets'
 import RootCauseNodeView from '@/components/insights/RootCauseExplorer'
 import AnomalyExplorer from '@/components/insights/AnomalyExplorer'
+import Recommendations from '@/components/insights/Recommendations'
 
 const InsightsPage = () => {
   const { summary, loadingSummary } = useCostExplorerController()
@@ -50,6 +51,8 @@ const InsightsPage = () => {
       </div>
 
       <AnomalyExplorer anomalies={summary.anomalies} />
+
+      <Recommendations topRecommendations={summary.topRecommendations} />
 
     </div>
   )
