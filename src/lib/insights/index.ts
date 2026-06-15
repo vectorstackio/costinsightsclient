@@ -2,15 +2,12 @@
 
 import type { SummaryResponse,CostInsightsInput } from '@/types'
 
-export function mapSummaryToInsights(
-  summary: SummaryResponse
-): CostInsightsInput {
+export const mapSummaryToInsights = (summary: SummaryResponse): CostInsightsInput => {
   return {
     period: {
       currentMonthCost: summary.currentMonthCost,
       previousMonthCost: summary.previousMonthCost,
-      monthOverMonthChangePercent:
-        summary.monthOverMonthChangePercent
+      monthOverMonthChangePercent: summary.monthOverMonthChangePercent
     },
 
     services: summary.byService,
@@ -33,4 +30,20 @@ export function mapSummaryToInsights(
       recommendationCount: summary.recommendationCount
     }
   }
+}
+
+export const buildNarrative = (summary: SummaryResponse) => {
+  const driver =
+    summary.topCostIncreaseDrivers[0]
+
+  return `
+    Spend changed by
+    ${summary.monthOverMonthChangePercent}%.
+
+    Largest contributor was
+    ${driver.service}
+    contributing
+    ${driver.contributionPercent}% of
+    the increase.
+  `
 }

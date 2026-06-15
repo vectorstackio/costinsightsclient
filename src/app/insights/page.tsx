@@ -3,6 +3,7 @@
 'use client'
 
 import { useCostExplorerController } from '@/hooks/useCostExplorerController'
+import { useCostInsights } from '@/hooks/useCostInsights'
 import ExecutiveSummary from '@/components/insights/ExecutiveSummary'
 import InvestigationTargets from '@/components/insights/InvestigationTargets'
 import RootCauseNodeView from '@/components/insights/RootCauseExplorer'
@@ -11,8 +12,9 @@ import Recommendations from '@/components/insights/Recommendations'
 
 const InsightsPage = () => {
   const { summary, loadingSummary } = useCostExplorerController()
+  const insights = useCostInsights(summary)
 
-  if (loadingSummary || !summary) {
+  if (loadingSummary || !summary || !insights) {
     return <div>Loading...</div>
   }
 
@@ -23,16 +25,14 @@ const InsightsPage = () => {
       </h1>
 
       <ExecutiveSummary
-        currentCost={summary.currentMonthCost}
-        previousCost={summary.previousMonthCost}
-        changePercent={
-          summary.monthOverMonthChangePercent
-        }
+        currentCost={insights.data.period.currentMonthCost}
+        previousCost={insights.data.period.previousMonthCost}
+        changePercent={insights.data.period.monthOverMonthChangePercent}
       />
 
       <InvestigationTargets
-        drivers={summary.topCostIncreaseDrivers}
-        anomalies={summary.anomalies}
+        drivers={insights.data.drivers}
+        anomalies={insights.data.anomalies}
       />
 
       <div className="border rounded p-4 bg-white">
@@ -41,7 +41,7 @@ const InsightsPage = () => {
         </h2>
 
         <div className="space-y-2">
-          {summary.rootCauseTree?.map((node) => (
+          {insights.data.rootCause.tree?.map((node) => (
             <RootCauseNodeView
               key={node.key}
               node={node}
@@ -50,9 +50,9 @@ const InsightsPage = () => {
         </div>
       </div>
 
-      <AnomalyExplorer anomalies={summary.anomalies} />
+      <AnomalyExplorer anomalies={insights.data.anomalies} />
 
-      <Recommendations topRecommendations={summary.topRecommendations} />
+      <Recommendations topRecommendations={insights.data.recommendations} />
 
     </div>
   )

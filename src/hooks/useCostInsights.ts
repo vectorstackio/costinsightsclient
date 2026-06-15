@@ -7,11 +7,39 @@ import { mapSummaryToInsights } from '@/lib/insights'
 
 export type CostInsightHealth = 'healthy' | 'warning' | 'critical'
 
-export type CostInsightsResult = {
-  data: ReturnType<typeof mapSummaryToInsights>
+export type CostInsightsInput = {
+  period: {
+    currentMonthCost: number
+    previousMonthCost: number
+    monthOverMonthChangePercent: number
+  }
 
-  topDriver?: ReturnType<typeof mapSummaryToInsights>['drivers'][number]
-  topAnomaly?: ReturnType<typeof mapSummaryToInsights>['anomalies'][number]
+  services: SummaryResponse['byService']
+  serviceComparison: SummaryResponse['byServiceComparison']
+
+  drivers: SummaryResponse['topCostIncreaseDrivers']
+  anomalies: SummaryResponse['anomalies']
+
+  trends: SummaryResponse['trend']
+
+  recommendations: SummaryResponse['topRecommendations']
+
+  rootCause: {
+    tree: SummaryResponse['rootCauseTree']
+    topChains: SummaryResponse['topCausalChains']
+  }
+
+  savings: {
+    potential: number
+    recommendationCount: number
+  }
+}
+
+export type CostInsightsResult = {
+  data: CostInsightsInput
+
+  topDriver?: CostInsightsInput['drivers'][number]
+  topAnomaly?: CostInsightsInput['anomalies'][number]
 
   health: CostInsightHealth
 
