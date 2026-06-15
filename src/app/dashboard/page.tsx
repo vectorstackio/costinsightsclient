@@ -4,6 +4,8 @@
 
 import { useState } from 'react'
 
+import Link from 'next/link'
+
 import ServiceCostChart from '@/components/dashboard/ServiceCostChart'
 import ServiceCostPieChart from '@/components/dashboard/ServiceCostPieChart'
 import InsightsPanel from '@/components/dashboard/Insights'
@@ -79,9 +81,20 @@ const DashboardPage = () => {
    */
   return (
     <div className="p-6 space-y-6">
-      <h1 className="flex justify-center text-2xl font-bold">
-        AWS Cost Dashboard
-      </h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">
+          AWS Cost Dashboard
+        </h1>
+
+        <div className="flex items-center gap-4">
+          <Link
+            href="/insights"
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 underline"
+          >
+            View Insights →
+          </Link>
+        </div>
+      </div>
 
       <div className="flex justify-end text-sm text-gray-500">
         {/* hook currently doesn’t expose timestamp — keep simple */}
