@@ -2,13 +2,13 @@
 
 'use client'
 
-import ExecutiveSummary from '@/components/insights/ExecutiveSummary'
 import { useCostExplorerController } from '@/hooks/useCostExplorerController'
+import ExecutiveSummary from '@/components/insights/ExecutiveSummary'
 import InvestigationTargets from '@/components/insights/InvestigationTargets'
+import RootCauseNodeView from '@/components/insights/RootCauseExplorer'
 
 const InsightsPage = () => {
-  const { summary, loadingSummary } =
-    useCostExplorerController()
+  const { summary, loadingSummary } = useCostExplorerController()
 
   if (loadingSummary || !summary) {
     return <div>Loading...</div>
@@ -32,6 +32,22 @@ const InsightsPage = () => {
         drivers={summary.topCostIncreaseDrivers}
         anomalies={summary.anomalies}
       />
+
+      <div className="border rounded p-4 bg-white">
+        <h2 className="font-semibold mb-4">
+          Root Cause Analysis
+        </h2>
+
+        <div className="space-y-2">
+          {summary.rootCauseTree?.map((node) => (
+            <RootCauseNodeView
+              key={node.key}
+              node={node}
+            />
+          ))}
+        </div>
+      </div>
+
     </div>
   )
 }
