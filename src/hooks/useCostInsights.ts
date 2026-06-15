@@ -5,47 +5,7 @@ import { useMemo } from 'react'
 import type { SummaryResponse } from '@/types'
 import { mapSummaryToInsights } from '@/lib/insights'
 
-export type CostInsightHealth = 'healthy' | 'warning' | 'critical'
-
-export type CostInsightsInput = {
-  period: {
-    currentMonthCost: number
-    previousMonthCost: number
-    monthOverMonthChangePercent: number
-  }
-
-  services: SummaryResponse['byService']
-  serviceComparison: SummaryResponse['byServiceComparison']
-
-  drivers: SummaryResponse['topCostIncreaseDrivers']
-  anomalies: SummaryResponse['anomalies']
-
-  trends: SummaryResponse['trend']
-
-  recommendations: SummaryResponse['topRecommendations']
-
-  rootCause: {
-    tree: SummaryResponse['rootCauseTree']
-    topChains: SummaryResponse['topCausalChains']
-  }
-
-  savings: {
-    potential: number
-    recommendationCount: number
-  }
-}
-
-export type CostInsightsResult = {
-  data: CostInsightsInput
-
-  topDriver?: CostInsightsInput['drivers'][number]
-  topAnomaly?: CostInsightsInput['anomalies'][number]
-
-  health: CostInsightHealth
-
-  hasSavings: boolean
-  savingsPotential: number
-}
+import type { CostInsightHealth, CostInsightsResult } from '@/types'
 
 /**
  * Core insights hook

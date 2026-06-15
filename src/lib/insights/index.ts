@@ -1,6 +1,6 @@
 // lib/insights/index.ts
 
-import type { SummaryResponse,CostInsightsInput } from '@/types'
+import type { SummaryResponse, CostInsightsInput } from '@/types'
 
 export const mapSummaryToInsights = (summary: SummaryResponse): CostInsightsInput => {
   return {

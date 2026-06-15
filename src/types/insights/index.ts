@@ -10,6 +10,8 @@ import type {
   TopRecommendation
 } from '@/types'
 
+export type CostInsightHealth = 'healthy' | 'warning' | 'critical'
+
 export type CostInsightsInput = {
   period: {
     currentMonthCost: number
@@ -36,4 +38,16 @@ export type CostInsightsInput = {
     potential: number
     recommendationCount: number
   }
+}
+
+export type CostInsightsResult = {
+  data: CostInsightsInput
+
+  topDriver?: CostInsightsInput['drivers'][number]
+  topAnomaly?: CostInsightsInput['anomalies'][number]
+
+  health: CostInsightHealth
+
+  hasSavings: boolean
+  savingsPotential: number
 }
