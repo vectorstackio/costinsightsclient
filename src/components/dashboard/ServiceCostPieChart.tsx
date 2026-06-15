@@ -13,7 +13,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { useCostExplorerController } from '@/hooks/useCostExplorerController'
 
-import type { Dimension } from '@/hooks/useCostExplorerController'
+import type { Dimension } from '@/types'
 
 /**
  * -----------------------
