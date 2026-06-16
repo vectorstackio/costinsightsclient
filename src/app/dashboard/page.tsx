@@ -36,12 +36,14 @@ const SkeletonCard = () => (
 const DashboardPage = () => {
   const {
     summary,
-    //drilldown,
     loadingSummary,
-    //loadingDrilldown,
   } = useCostExplorerController()
 
   const [selectedService, setSelectedService] = useState<string | null>(null)
+  const currentMonthLabel = new Date().toLocaleString('en-GB', {
+    month: 'long',
+    year: 'numeric'
+  })
 
   /**
    * -----------------------
@@ -51,7 +53,7 @@ const DashboardPage = () => {
   if (loadingSummary || !summary) {
     return (
       <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold">AWS Cost Dashboard</h1>
+        <h1 className="text-2xl font-bold">TBC AWS Cost Explorer</h1>
 
         <div className="grid grid-cols-4 gap-4">
           <SkeletonCard />
@@ -83,7 +85,7 @@ const DashboardPage = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">
-          AWS Cost Dashboard
+          TBC AWS Cost Explorer for {currentMonthLabel}
         </h1>
 
         <div className="flex items-center gap-4">
