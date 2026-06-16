@@ -1,0 +1,21 @@
+@page {
+  margin: 40px;
+}
+
+@media print {
+  body {
+    padding-top: 40px;
+  }
+
+  .section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 24px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+}
