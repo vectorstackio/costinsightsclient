@@ -192,3 +192,20 @@ export const buildReport = async (
     }
   }
 }
+
+export const getReportByMonth = async (month: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/reports?month=${month}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch summary: ${response.statusText}`)
+  }
+
+  const result = await response.json()
+
+  return result
+}
