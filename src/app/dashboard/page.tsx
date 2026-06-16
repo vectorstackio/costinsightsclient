@@ -91,7 +91,14 @@ const DashboardPage = () => {
             href="/insights"
             className="text-sm font-medium text-blue-600 hover:text-blue-800 underline"
           >
-            View Insights →
+            View Insights
+          </Link>
+
+          <Link
+            href="/reports"
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 underline"
+          >
+            Report History
           </Link>
         </div>
       </div>

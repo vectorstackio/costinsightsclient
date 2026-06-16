@@ -107,3 +107,10 @@ export type NarrativeOutput = {
   recommendationsNarrative: string
   rootCauseNarrative: string
 }
+
+export type ReportHistoryItem = {
+  month: string
+  key: string
+  pdfUrl: string
+  generatedAt: string
+}
