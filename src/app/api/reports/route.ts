@@ -2,12 +2,22 @@
 
 import { mapSummaryToInsights } from '@/lib/insights'
 import { buildReport } from '@/lib/reports'
+import { getReportJson, saveReportJson } from '@/lib/s3/reports'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
 
-  const month = searchParams.get('month') // "2026-05" or null
+  const month = searchParams.get('month')
 
+  // 1. Try S3 first (cache hit)
+  if (month) {
+    const cached = await getReportJson(month)
+    if (cached) {
+      return Response.json(cached)
+    }
+  }
+
+  // 2. Build fresh report (cache miss)
   const url = new URL(`${process.env.COST_API_URL}/summary`)
 
   if (month) {
@@ -30,6 +40,11 @@ export async function GET(request: Request) {
   const insights = mapSummaryToInsights(summary)
 
   const report = await buildReport(insights)
+
+  // 3. Store in S3
+  if (month) {
+    await saveReportJson(month, report)
+  }
 
   return Response.json(report)
 }
