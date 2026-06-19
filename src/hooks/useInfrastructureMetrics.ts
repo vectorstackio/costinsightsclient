@@ -4,29 +4,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-import type { ApiResponse, State } from '@/types/infrastrucure'
-
-// export type InstanceMetrics = {
-//   instanceId: string
-//   name: string
-//   host: string
-//   privateIp: string
-//   cpuUsedPercent: number | null
-//   memoryUsedPercent: number | null
-//   diskUsedPercent: number | null
-// }
-
-// type ApiResponse = {
-//   generatedAt: string
-//   instances: InstanceMetrics[]
-// }
-
-// type State = {
-//   data: InstanceMetrics[]
-//   loading: boolean
-//   error: string | null
-//   lastUpdated: string | null
-// }
+import type { State } from '@/types/infrastrucure'
 
 export function useInfrastructureMetrics(url: string) {
   const [state, setState] = useState<State>({
@@ -50,9 +28,7 @@ export function useInfrastructureMetrics(url: string) {
         throw new Error(`Request failed: ${res.status}`)
       }
 
-      const wrapper = await res.json()
-
-      const data: ApiResponse = JSON.parse(wrapper.body)
+      const data = await res.json()
 
       setState({
         data: data.instances,
