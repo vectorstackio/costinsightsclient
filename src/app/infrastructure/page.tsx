@@ -124,6 +124,10 @@ const InfrastructurePage = () => {
                 </th>
 
                 <th className="px-6 py-3 text-left font-medium text-slate-600">
+                  Type
+                </th>
+
+                <th className="px-6 py-3 text-left font-medium text-slate-600">
                   Status
                 </th>
 
@@ -177,6 +181,10 @@ const InfrastructurePage = () => {
                         </div>
                         
                       </div>
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-500">
+                      {instance.instanceType}
                     </td>
 
                     <td className="px-6 py-4">

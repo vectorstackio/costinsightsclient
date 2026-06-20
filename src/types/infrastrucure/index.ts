@@ -5,6 +5,7 @@ export type InstanceMetrics = {
   name: string
   host: string
   privateIp: string
+  instanceType: string
   cpuUsedPercent: number | null
   memoryUsedPercent: number | null
   diskUsedPercent: number | null
