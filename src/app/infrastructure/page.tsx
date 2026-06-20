@@ -186,15 +186,15 @@ const InfrastructurePage = () => {
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      {cpu.toFixed(1)}%
+                      <UsageBar value={cpu} />
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      {memory.toFixed(1)}%
+                      <UsageBar value={memory} />
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      {disk.toFixed(1)}%
+                      <UsageBar value={disk} />
                     </td>
 
                     <td className="px-6 py-4 text-slate-500">
@@ -231,6 +231,35 @@ const MetricCard = ({
           {subtitle}
         </div>
       )}
+    </div>
+  )
+}
+
+const UsageBar = ({
+  value
+}: {
+  value: number
+}) => {
+  return (
+    <div className="flex items-center justify-end gap-3">
+
+      {/* Outer track */}
+      <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
+
+        {/* Inner coloured bar */}
+        <div
+          className={`h-full rounded-full ${getBarColour(value)}`}
+          style={{
+            width: `${Math.min(value, 100)}%`
+          }}
+        />
+      </div>
+
+      {/* Percentage label */}
+      <span className="w-12 text-right text-sm">
+        {value.toFixed(1)}%
+      </span>
+
     </div>
   )
 }
@@ -313,6 +342,12 @@ const InfrastructureSkeleton = () => {
       </div>
     </div>
   )
+}
+
+const getBarColour = (value: number) => {
+  if (value >= 90) return 'bg-red-500'
+  if (value >= 75) return 'bg-amber-500'
+  return 'bg-emerald-500'
 }
 
 export default InfrastructurePage
