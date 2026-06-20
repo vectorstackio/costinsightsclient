@@ -148,10 +148,9 @@ const InfrastructurePage = () => {
             <tbody>
               {data.map(instance => {
                 const cpu = instance.cpuUsedPercent ?? 0
-                const memory =
-                  instance.memoryUsedPercent ?? 0
-                const disk =
-                  instance.diskUsedPercent ?? 0
+                const memory = instance.memoryUsedPercent ?? 0
+                const isRightsize = cpu < 5 && memory < 30
+                const disk = instance.diskUsedPercent ?? 0
 
                 const status =
                   cpu > 80 || memory > 90 || disk > 90
@@ -165,7 +164,7 @@ const InfrastructurePage = () => {
                 return (
                   <tr
                     key={instance.instanceId}
-                    className="border-t border-slate-100 hover:bg-slate-50"
+                    className={`border-t border-slate-100 hover:bg-slate-50 ${isRightsize ? 'border-l-4 border-l-emerald-500 bg-emerald-50/40' : ''}`}
                   >
                     <td className="px-6 py-4">
                       <div>
@@ -176,6 +175,7 @@ const InfrastructurePage = () => {
                         <div className="text-xs text-slate-500">
                           {instance.instanceId}
                         </div>
+                        
                       </div>
                     </td>
 
