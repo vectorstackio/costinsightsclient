@@ -5,6 +5,8 @@
 import { RefreshCw } from 'lucide-react'
 import { useInfrastructureMetrics } from '@/hooks/useInfrastructureMetrics'
 
+import type { InstanceMetrics } from '@/types'
+
 type MetricCardProps = {
   title: string
   value: string | number
@@ -44,6 +46,16 @@ const InfrastructurePage = () => {
     data.reduce((sum, i) => sum + (i.diskUsedPercent ?? 0), 0) /
     data.length
 
+  const fleetHealth = data.reduce(
+    (acc, instance) => {
+      const status = getStatus(instance)
+
+      acc[status]++
+      return acc
+    },
+    { healthy: 0, warning: 0, critical: 0 }
+  )
+
   // const idleInstances = data.filter(
   //   i => (i.cpuUsedPercent ?? 100) < 5
   // ).length
@@ -78,6 +90,32 @@ const InfrastructurePage = () => {
             <RefreshCw className="h-4 w-4" />
             Refresh
           </button>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="text-sm font-medium text-slate-600">
+          Fleet Health
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-4">
+          <HealthBlock
+            label="Healthy"
+            value={fleetHealth.healthy}
+            colour="bg-emerald-500"
+          />
+
+          <HealthBlock
+            label="Warning"
+            value={fleetHealth.warning}
+            colour="bg-amber-500"
+          />
+
+          <HealthBlock
+            label="Critical"
+            value={fleetHealth.critical}
+            colour="bg-red-500"
+          />
         </div>
       </div>
 
@@ -219,6 +257,32 @@ const InfrastructurePage = () => {
   )
 }
 
+const HealthBlock = ({
+  label,
+  value,
+  colour
+}: {
+  label: string
+  value: number
+  colour: string
+}) => {
+  return (
+    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+      <div className="text-xs text-slate-500">
+        {label}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between">
+        <div className="text-xl font-semibold">
+          {value}
+        </div>
+
+        <div className={`h-2 w-10 rounded-full ${colour}`} />
+      </div>
+    </div>
+  )
+}
+
 const MetricCard = ({
   title,
   value,
@@ -352,6 +416,22 @@ const getBarColour = (value: number) => {
   if (value >= 90) return 'bg-red-500'
   if (value >= 75) return 'bg-amber-500'
   return 'bg-emerald-500'
+}
+
+const getStatus = (instance: InstanceMetrics) => {
+  const cpu = instance.cpuUsedPercent ?? 0
+  const memory = instance.memoryUsedPercent ?? 0
+  const disk = instance.diskUsedPercent ?? 0
+
+  if (cpu > 80 || memory > 90 || disk > 90) {
+    return 'critical'
+  }
+
+  if (cpu > 50 || memory > 75 || disk > 75) {
+    return 'warning'
+  }
+
+  return 'healthy'
 }
 
 export default InfrastructurePage

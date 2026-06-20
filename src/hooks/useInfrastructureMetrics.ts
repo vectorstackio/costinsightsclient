@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-import type { State } from '@/types/infrastrucure'
+import type { State } from '@/types'
 
 export function useInfrastructureMetrics(url: string) {
   const [state, setState] = useState<State>({
