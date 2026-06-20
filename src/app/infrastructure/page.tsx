@@ -250,11 +250,13 @@ const UsageBar = ({
 }) => {
   return (
     <div className="flex items-center justify-end gap-3">
+      {/* Label */}
+      <span className="w-12 text-right text-sm text-slate-600">
+        {value.toFixed(1)}%
+      </span>
 
-      {/* Outer track */}
+      {/* Bar */}
       <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
-
-        {/* Inner coloured bar */}
         <div
           className={`h-full rounded-full ${getBarColour(value)}`}
           style={{
@@ -262,12 +264,6 @@ const UsageBar = ({
           }}
         />
       </div>
-
-      {/* Percentage label */}
-      <span className="w-12 text-right text-sm">
-        {value.toFixed(1)}%
-      </span>
-
     </div>
   )
 }
