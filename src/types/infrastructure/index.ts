@@ -49,3 +49,59 @@ export type HistoryRange =
   | '24h'
   | '7d'
   | '30d'
+
+export type InfrastructureSummary = {
+  generatedAt: string
+
+  period: string
+
+  instances: InfrastructureSummaryInstance[]
+
+  totals: {
+    instanceCount: number
+
+    avgCpu: number
+    avgMemory: number
+    avgDisk: number
+
+    underutilisedCount: number
+    overprovisionedCount: number
+    healthyCount: number
+
+    wasteScorePercent: number
+
+    estimatedMonthlyWasteGBP?: number
+  }
+}
+
+export type InfrastructureSummaryInstance = {
+  instanceId: string
+
+  name: string
+
+  instanceType: string
+
+  privateIp: string
+
+  host: string
+
+  cpuUsedPercent: number | null
+
+  memoryUsedPercent: number | null
+
+  diskUsedPercent: number | null
+
+  // Derived classification
+  status: 'healthy' | 'underutilised' | 'overprovisioned' | 'critical'
+
+  // Compute Optimizer-style fields (future-proofing)
+  recommendation?: {
+    action: 'none' | 'downsize' | 'upsize' | 'investigate'
+
+    targetInstanceType?: string
+
+    confidence: number
+
+    reason: string
+  }
+}
