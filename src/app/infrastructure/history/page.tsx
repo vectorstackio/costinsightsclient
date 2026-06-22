@@ -119,11 +119,8 @@ const InstanceHistoryCard = ({
   const memoryValues = instance.memory.map(p => p.value)
   const diskValues = instance.disk.map(p => p.value)
 
-  const avg = (arr: number[]) =>
-    arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
-
-  const max = (arr: number[]) =>
-    arr.length ? Math.max(...arr) : 0
+  const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
+  const max = (arr: number[]) => arr.length ? Math.max(...arr) : 0
 
   const avgCpu = avg(cpuValues)
   const avgMemory = avg(memoryValues)
@@ -141,6 +138,43 @@ const InstanceHistoryCard = ({
       : isUnderutilised
         ? 'underutilised'
         : 'healthy'
+
+  const tone =
+    status === 'critical'
+      ? 'critical'
+      : status === 'underutilised'
+        ? 'underutilised'
+        : 'healthy'
+
+  let confidence = 0
+  let recommendation: 'downsize' | 'keep' | 'investigate' = 'keep'
+  let reason = 'Usage looks balanced'
+
+  if (avgCpu < 10 && avgMemory < 40 && peakCpu < 25) {
+    recommendation = 'downsize'
+    confidence = 80 + (10 - avgCpu) * 1.2 + (40 - avgMemory) * 0.5
+    reason = 'Consistently low CPU and memory utilisation'
+  }
+
+  if (avgCpu > 75 || avgMemory > 80) {
+    recommendation = 'investigate'
+    confidence = 70
+    reason = 'Sustained high utilisation detected'
+  }
+
+  confidence = Math.min(99, Math.max(10, confidence))
+
+  const downgradeMap: Record<string, string> = {
+    'm6a.large': 't3.medium',
+    'm6a.xlarge': 'm6a.large',
+    't3.medium': 't3.small'
+  }
+
+  const currentType = instance.instanceType
+  const suggestedType =
+    recommendation === 'downsize'
+      ? downgradeMap[currentType] ?? 'smaller instance'
+      : null
 
   const chartData = instance.cpu.map((cpu, index) => ({
     timestamp: cpu.timestamp,
@@ -176,16 +210,37 @@ const InstanceHistoryCard = ({
         <SummaryTile label="Peak CPU" value={`${peakCpu.toFixed(1)}%`} />
 
         <SummaryTile
-          label="Right-sizing"
+          label="Recommendation"
           value={
-            status === 'underutilised'
-              ? 'Underused'
-              : status === 'critical'
-                ? 'Overloaded'
-                : 'Healthy'
+            recommendation === 'downsize'
+              ? `Downsize → ${suggestedType}`
+              : recommendation === 'investigate'
+                ? 'Investigate'
+                : 'Keep as-is'
           }
-          tone={status}
-        />
+          tone={tone}
+        >
+
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>Confidence</span>
+              <span>{confidence.toFixed(0)}%</span>
+            </div>
+
+            <div className="mt-1 h-2 w-full rounded-full bg-slate-100">
+              <div
+                className="h-2 rounded-full bg-blue-500"
+                style={{ width: `${confidence}%` }}
+              />
+            </div>
+
+            <div className="mt-1 text-xs text-slate-500">
+              {reason}
+            </div>
+          </div>
+
+        </SummaryTile>
+
       </div>
 
       <div className="h-72">
@@ -305,11 +360,13 @@ const RangeSelector = ({
 const SummaryTile = ({
   label,
   value,
-  tone = 'neutral'
+  tone = 'neutral',
+  children
 }: {
   label: string
   value: string
   tone?: 'neutral' | 'healthy' | 'critical' | 'underutilised'
+  children?: React.ReactNode
 }) => {
   const tones = {
     neutral: 'text-slate-600',
@@ -324,6 +381,7 @@ const SummaryTile = ({
       <div className={`mt-1 text-sm font-semibold ${tones[tone]}`}>
         {value}
       </div>
+      {children && <div className="mt-3">{children}</div>}
     </div>
   )
 }
