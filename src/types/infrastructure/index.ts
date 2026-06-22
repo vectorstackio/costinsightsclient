@@ -105,3 +105,32 @@ export type InfrastructureSummaryInstance = {
     reason: string
   }
 }
+
+export type TopCostResponse = {
+  generatedAt: string
+
+  totalMonthlyCost: number
+
+  totalPotentialSavings: number
+
+  instances: TopCostInstance[]
+}
+
+export type TopCostInstance = {
+  instanceId: string
+
+  name: string
+
+  instanceType: string
+
+  monthlyCost: number
+
+  estimatedWaste: number
+
+  confidence: number
+
+  recommendation?: string
+
+  cpuUsedPercent: number | null
+  memoryUsedPercent: number | null
+}
