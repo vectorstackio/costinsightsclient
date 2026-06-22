@@ -105,6 +105,7 @@ const InstanceHistoryCard = ({
               type="monotone"
               dataKey="cpu"
               strokeWidth={2}
+              stroke="#3b82f6"
               name="CPU"
             />
 
@@ -112,6 +113,7 @@ const InstanceHistoryCard = ({
               type="monotone"
               dataKey="memory"
               strokeWidth={2}
+              stroke="#10b981"
               name="Memory"
             />
 
@@ -119,6 +121,7 @@ const InstanceHistoryCard = ({
               type="monotone"
               dataKey="disk"
               strokeWidth={2}
+              stroke="#f59e0b"
               name="Disk"
             />
           </LineChart>
