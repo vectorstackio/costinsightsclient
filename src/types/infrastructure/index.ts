@@ -30,6 +30,7 @@ export type HistoryPoint = {
 
 export type InstanceHistory = {
   instanceId: string
+  instanceType: string
   name: string
   host: string
   cpu: HistoryPoint[]
@@ -42,3 +43,9 @@ export type InfrastructureHistoryResponse = {
   period: string
   instances: InstanceHistory[]
 }
+
+export type HistoryRange =
+  | '1h'
+  | '24h'
+  | '7d'
+  | '30d'

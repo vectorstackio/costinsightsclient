@@ -12,11 +12,14 @@ import {
   CartesianGrid
 } from 'recharts'
 
+import { useState } from 'react'
+
 import { useInfrastructureHistory } from '@/lib/hooks/useInfrastructureHistory'
-import type { InstanceHistory } from '@/types'
+import type { InstanceHistory, HistoryRange } from '@/types'
 
 const MetricsHistoryPage = () => {
-  const { data, loading, error } = useInfrastructureHistory()
+  const [range, setRange] = useState<HistoryRange>('24h')
+  const { data, loading, error } = useInfrastructureHistory(range)
 
   if (!data) {
     return null
@@ -46,10 +49,24 @@ const MetricsHistoryPage = () => {
         </p>
       </div>
 
+      <div className="mt-4">
+        <RangeSelector
+          value={range}
+          onChange={setRange}
+        />
+
+        {loading && (
+          <span className="text-sm text-slate-500">
+            Loading...
+          </span>
+        )}
+      </div>
+
       {data.instances.map(instance => (
         <InstanceHistoryCard
           key={instance.instanceId}
           instance={instance}
+          range={range}
         />
       ))}
     </div>
@@ -57,17 +74,48 @@ const MetricsHistoryPage = () => {
 }
 
 const InstanceHistoryCard = ({
-  instance
+  instance,
+  range
 }: {
-  instance: InstanceHistory
+  instance: InstanceHistory,
+  range: HistoryRange
 }) => {
+  const formatTick = (value: string) => {
+    const date = new Date(value)
+
+    if (range === '1h') {
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    if (range === '24h') {
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    if (range === '7d') {
+      return date.toLocaleDateString([], {
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    if (range === '30d') {
+      return date.toLocaleDateString([], {
+        day: '2-digit',
+        month: 'short'
+      })
+    }
+
+    return value
+  }
   const chartData = instance.cpu.map((cpu, index) => ({
-    timestamp: new Date(
-      cpu.timestamp
-    ).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    }),
+    timestamp: cpu.timestamp,
     cpu: cpu.value,
     memory: instance.memory[index]?.value ?? null,
     disk: instance.disk[index]?.value ?? null
@@ -83,6 +131,14 @@ const InstanceHistoryCard = ({
         <div className="text-xs text-slate-500">
           {instance.instanceId}
         </div>
+
+        <div className="text-xs text-slate-500">
+          {instance.instanceType}
+        </div>
+
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
+          {range}
+        </span>
       </div>
 
       <div className="h-72">
@@ -93,7 +149,7 @@ const InstanceHistoryCard = ({
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
 
-            <XAxis dataKey="timestamp" />
+            <XAxis dataKey="timestamp" tickFormatter={formatTick} />
 
             <YAxis
               domain={[0, 100]}
@@ -147,5 +203,58 @@ const HistorySkeleton = () => (
     ))}
   </div>
 )
+
+type RangeSelectorProps = {
+  value: HistoryRange
+  onChange: (range: HistoryRange) => void
+}
+
+const RangeSelector = ({
+  value,
+  onChange
+}: RangeSelectorProps) => {
+  const options: Array<{
+    value: HistoryRange
+    label: string
+  }> = [
+    {
+      value: '1h',
+      label: '1 Hour'
+    },
+    {
+      value: '24h',
+      label: '24 Hours'
+    },
+    {
+      value: '7d',
+      label: '7 Days'
+    },
+    {
+      value: '30d',
+      label: '30 Days'
+    }
+  ]
+
+  return (
+    <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+      {options.map(option => (
+        <button
+          key={option.value}
+          onClick={() =>
+            onChange(option.value)
+          }
+          className={`rounded-md px-4 py-2 text-sm font-medium transition ${value === option.value
+            ? 'bg-slate-900 text-white'
+            : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+
 
 export default MetricsHistoryPage

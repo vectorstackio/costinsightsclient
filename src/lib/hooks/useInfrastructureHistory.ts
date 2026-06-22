@@ -2,19 +2,20 @@
 
 import { useEffect, useState } from 'react'
 
-import type { InfrastructureHistoryResponse } from '@/types'
+import type { InfrastructureHistoryResponse, HistoryRange } from '@/types'
 
-export const useInfrastructureHistory = () => {
+export const useInfrastructureHistory = (range: HistoryRange) => {
   const [data, setData] = useState<InfrastructureHistoryResponse | null>(null)
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/infrastructure/history')
+        setLoading(true)
+        const res = await fetch(`/api/infrastructure/history?range=${range}`)
 
         const json = await res.json()
 
@@ -27,7 +28,7 @@ export const useInfrastructureHistory = () => {
     }
 
     load()
-  }, [])
+  }, [range])
 
   return {
     data,
