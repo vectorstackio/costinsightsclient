@@ -114,6 +114,34 @@ const InstanceHistoryCard = ({
 
     return value
   }
+
+  const cpuValues = instance.cpu.map(p => p.value)
+  const memoryValues = instance.memory.map(p => p.value)
+  const diskValues = instance.disk.map(p => p.value)
+
+  const avg = (arr: number[]) =>
+    arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
+
+  const max = (arr: number[]) =>
+    arr.length ? Math.max(...arr) : 0
+
+  const avgCpu = avg(cpuValues)
+  const avgMemory = avg(memoryValues)
+  const avgDisk = avg(diskValues)
+
+  const peakCpu = max(cpuValues)
+
+  const isUnderutilised = avgCpu < 10 && avgMemory < 40
+
+  const isOverloaded = avgCpu > 80 || avgMemory > 85 || avgDisk > 90
+
+  const status =
+    isOverloaded
+      ? 'critical'
+      : isUnderutilised
+        ? 'underutilised'
+        : 'healthy'
+
   const chartData = instance.cpu.map((cpu, index) => ({
     timestamp: cpu.timestamp,
     cpu: cpu.value,
@@ -139,6 +167,25 @@ const InstanceHistoryCard = ({
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
           {range}
         </span>
+      </div>
+
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-5">
+        <SummaryTile label="Avg CPU" value={`${avgCpu.toFixed(1)}%`} />
+        <SummaryTile label="Avg Memory" value={`${avgMemory.toFixed(1)}%`} />
+        <SummaryTile label="Avg Disk" value={`${avgDisk.toFixed(1)}%`} />
+        <SummaryTile label="Peak CPU" value={`${peakCpu.toFixed(1)}%`} />
+
+        <SummaryTile
+          label="Right-sizing"
+          value={
+            status === 'underutilised'
+              ? 'Underused'
+              : status === 'critical'
+                ? 'Overloaded'
+                : 'Healthy'
+          }
+          tone={status}
+        />
       </div>
 
       <div className="h-72">
@@ -255,6 +302,30 @@ const RangeSelector = ({
   )
 }
 
+const SummaryTile = ({
+  label,
+  value,
+  tone = 'neutral'
+}: {
+  label: string
+  value: string
+  tone?: 'neutral' | 'healthy' | 'critical' | 'underutilised'
+}) => {
+  const tones = {
+    neutral: 'text-slate-600',
+    healthy: 'text-green-600',
+    critical: 'text-red-600',
+    underutilised: 'text-amber-600'
+  }
 
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3">
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className={`mt-1 text-sm font-semibold ${tones[tone]}`}>
+        {value}
+      </div>
+    </div>
+  )
+}
 
 export default MetricsHistoryPage
