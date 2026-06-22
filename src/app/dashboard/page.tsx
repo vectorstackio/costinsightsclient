@@ -97,6 +97,13 @@ const DashboardPage = () => {
           </Link>
 
           <Link
+            href="/infrastructure"
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 underline"
+          >
+            View Infrastructure
+          </Link>
+
+          <Link
             href="/reports"
             className="text-sm font-medium text-blue-600 hover:text-blue-800 underline"
           >

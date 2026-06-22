@@ -49,6 +49,15 @@ const MetricsHistoryPage = () => {
         </p>
       </div>
 
+      <div className="mt-4 border-b border-slate-200">
+        <nav className="flex gap-6 text-sm font-medium">
+          <a href="/infrastructure" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Health</a>
+          <a href="/infrastructure/summary" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Summary</a>
+          <a href="/infrastructure/history" className="border-b-2 border-blue-600 pb-2 text-blue-600">History</a>
+          <a href="/infrastructure/topCost" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Top Cost</a>
+        </nav>
+      </div>
+
       <div className="mt-4">
         <RangeSelector
           value={range}
