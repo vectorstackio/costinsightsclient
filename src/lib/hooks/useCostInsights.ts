@@ -1,4 +1,4 @@
-// hooks/useCostInsights.ts
+// lib/hooks/useCostInsights.ts
 
 import { useMemo } from 'react'
 

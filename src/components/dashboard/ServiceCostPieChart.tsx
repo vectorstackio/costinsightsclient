@@ -11,7 +11,7 @@ import {
 } from 'recharts'
 
 import { useEffect, useRef, useState } from 'react'
-import { useCostExplorerController } from '@/hooks/useCostExplorerController'
+import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
 
 import type { Dimension } from '@/types'
 

@@ -4,8 +4,8 @@
 
 import Link from 'next/link'
 
-import { useCostExplorerController } from '@/hooks/useCostExplorerController'
-import { useCostInsights } from '@/hooks/useCostInsights'
+import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
+import { useCostInsights } from '@/lib/hooks/useCostInsights'
 import ExecutiveSummary from '@/components/insights/ExecutiveSummary'
 import InvestigationTargets from '@/components/insights/InvestigationTargets'
 import RootCauseNodeView from '@/components/insights/RootCauseExplorer'

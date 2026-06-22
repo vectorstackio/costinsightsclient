@@ -12,7 +12,7 @@ import {
   CartesianGrid
 } from 'recharts'
 
-import { useInfrastructureHistory } from '@/hooks/useInfrastructureHistory'
+import { useInfrastructureHistory } from '@/lib/hooks/useInfrastructureHistory'
 import type { InstanceHistory } from '@/types'
 
 const MetricsHistoryPage = () => {

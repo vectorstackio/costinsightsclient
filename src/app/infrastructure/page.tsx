@@ -3,7 +3,7 @@
 'use client'
 
 import { RefreshCw } from 'lucide-react'
-import { useInfrastructureMetrics } from '@/hooks/useInfrastructureMetrics'
+import { useInfrastructureMetrics } from '@/lib/hooks/useInfrastructureMetrics'
 
 import type { InstanceMetrics } from '@/types'
 

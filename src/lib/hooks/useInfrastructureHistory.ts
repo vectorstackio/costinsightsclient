@@ -1,4 +1,4 @@
-// hooks/useInfrastructureHistory.ts
+// lib/hooks/useInfrastructureHistory.ts
 
 import { useEffect, useState } from 'react'
 

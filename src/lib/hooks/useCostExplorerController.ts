@@ -1,4 +1,4 @@
-// hooks/useCostExplorerController.ts
+// lib/hooks/useCostExplorerController.ts
 
 'use client'
 

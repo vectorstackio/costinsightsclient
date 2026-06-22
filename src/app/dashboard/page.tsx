@@ -14,7 +14,7 @@ import CostTrendLineChart from '@/components/dashboard/CostTrendLineChart'
 import TopCostDriversChart from '@/components/dashboard/TopCostDriversChart'
 import CostWaterfallChart from '@/components/dashboard/CostWaterfallChart'
 
-import { useCostExplorerController } from '@/hooks/useCostExplorerController'
+import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
 
 /**
  * -----------------------

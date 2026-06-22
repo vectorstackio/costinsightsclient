@@ -1,4 +1,4 @@
-// hooks/useInfrastructureMetrics.ts
+// lib/hooks/useInfrastructureMetrics.ts
 
 'use client'
 
