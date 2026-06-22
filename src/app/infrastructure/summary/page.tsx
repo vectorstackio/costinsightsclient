@@ -52,6 +52,10 @@ const MetricsSummaryPage = () => {
 
     const monthlyCost = INSTANCE_MONTHLY_COSTS[instance.instanceType] ?? 0
 
+    if (cpu < 5 && memory < 20) {
+      return monthlyCost * 0.75
+    }
+
     if (cpu < 10 && memory < 40) {
       return monthlyCost * 0.5
     }
