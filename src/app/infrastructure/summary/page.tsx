@@ -4,6 +4,8 @@
 
 import { useInfrastructureSummary } from '@/lib/hooks/useInfrastructureSummary'
 
+import type { InfrastructureSummaryInstance } from '@/types'
+
 const MetricsSummaryPage = () => {
   const { data, loading, error } = useInfrastructureSummary()
 
@@ -21,8 +23,7 @@ const MetricsSummaryPage = () => {
 
   const { instances } = data
 
-  const avg = (arr: number[]) =>
-    arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
+  const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
 
   const underutilised = instances.filter(i =>
     (i.cpuUsedPercent ?? 0) < 10 &&
@@ -33,8 +34,41 @@ const MetricsSummaryPage = () => {
   const avgMemory = avg(instances.map(i => i.memoryUsedPercent ?? 0))
   //const avgDisk = avg(instances.map(i => i.diskUsedPercent ?? 0))
 
-  const wasteScore =
-    (underutilised.length / instances.length) * 100
+  const wasteScore = (underutilised.length / instances.length) * 100
+
+  const INSTANCE_MONTHLY_COSTS: Record<string, number> = {
+    't3.medium': 30,
+
+    'm6a.large': 55,
+    'm6a.xlarge': 110,
+
+    'm6i.large': 60,
+    'm6i.xlarge': 120
+  }
+
+  const calculateWaste = (instance: InfrastructureSummaryInstance) => {
+    const cpu = instance.cpuUsedPercent ?? 0
+    const memory = instance.memoryUsedPercent ?? 0
+
+    const monthlyCost = INSTANCE_MONTHLY_COSTS[instance.instanceType] ?? 0
+
+    if (cpu < 10 && memory < 40) {
+      return monthlyCost * 0.5
+    }
+
+    if (cpu < 20 && memory < 50) {
+      return monthlyCost * 0.25
+    }
+
+    return 0
+  }
+
+  const estimatedMonthlyWaste = instances.reduce(
+    (sum, instance) => sum + calculateWaste(instance),
+    0
+  )
+
+  const estimatedAnnualWaste = estimatedMonthlyWaste * 12
 
   return (
     <div className="space-y-6 p-6">
@@ -51,6 +85,8 @@ const MetricsSummaryPage = () => {
         <Kpi title="Avg CPU" value={`${avgCpu.toFixed(1)}%`} />
         <Kpi title="Avg Memory" value={`${avgMemory.toFixed(1)}%`} />
         <Kpi title="Waste Score" value={`${wasteScore.toFixed(1)}%`} />
+        <Kpi title="Potential Savings" value={`£${estimatedMonthlyWaste.toFixed(0)}/mo`} />
+        <Kpi title="Annual Savings" value={`£${estimatedAnnualWaste.toFixed(0)}/yr`} />
       </div>
 
       {/* WASTE INSIGHTS */}
@@ -90,10 +126,7 @@ const MetricsSummaryPage = () => {
             )
             .slice(0, 5)
             .map(i => (
-              <div
-                key={i.instanceId}
-                className="flex justify-between text-sm border-b py-2"
-              >
+              <div key={i.instanceId} className="flex justify-between text-sm border-b py-2">
                 <div>
                   <div className="font-medium">{i.name}</div>
                   <div className="text-xs text-slate-500">
@@ -103,6 +136,16 @@ const MetricsSummaryPage = () => {
 
                 <div className="text-right text-slate-600">
                   {i.cpuUsedPercent?.toFixed(1)}% CPU
+                </div>
+
+                <div className="text-right">
+                  <div className="font-medium">
+                    £{calculateWaste(i).toFixed(0)}/mo
+                  </div>
+
+                  <div className="text-xs text-slate-500">
+                    {i.cpuUsedPercent?.toFixed(1)}% CPU
+                  </div>
                 </div>
               </div>
             ))}
