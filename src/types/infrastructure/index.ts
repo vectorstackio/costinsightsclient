@@ -22,3 +22,23 @@ export type State = {
   error: string | null
   lastUpdated: string | null
 }
+
+export type HistoryPoint = {
+  timestamp: string
+  value: number
+}
+
+export type InstanceHistory = {
+  instanceId: string
+  name: string
+  host: string
+  cpu: HistoryPoint[]
+  memory: HistoryPoint[]
+  disk: HistoryPoint[]
+}
+
+export type InfrastructureHistoryResponse = {
+  generatedAt: string
+  period: string
+  instances: InstanceHistory[]
+}

@@ -1,6 +1,6 @@
 // types/index.ts
 
 export * from './costs'
-export * from './infrastrucure'
+export * from './infrastructure'
 export * from './insights'
 export * from './reports'
