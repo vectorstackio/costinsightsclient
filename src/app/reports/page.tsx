@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 const ReportsPage = async () => {
   const reports = await getReports()
+  const filteredReports = reports.filter(report => (report.key.endsWith('pdf') && !report.key.includes('scheduled')))
 
   return (
     <div className="p-10">
@@ -51,7 +52,7 @@ const ReportsPage = async () => {
         </thead>
 
         <tbody>
-          {reports.map(report => (
+          {filteredReports.map(report => (
             <tr
               key={report.month}
               className="border-b"
@@ -75,7 +76,7 @@ const ReportsPage = async () => {
                 </a>
 
                 <a
-                  href={report.pdfUrl}
+                  href={`/api/reports/${report.month}/pdf`}
                   className="text-green-600"
                 >
                   PDF
