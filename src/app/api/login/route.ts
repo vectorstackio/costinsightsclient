@@ -12,7 +12,7 @@ const USERS:Record<string, string> = {
   'nikki.labrum@thebrilliantclub.org': 'Password_112',
 }
 
-const PW_SALT = '03aDe1350%d900eb5753C7119a60c_65'
+import { PW_SALT } from '@/app/api/auth/route'
 
 const ERROR_MSG = 'Invalid email or password'
 

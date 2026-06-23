@@ -13,8 +13,10 @@ import CostHistoryPanel from '@/components/dashboard/CostHistory'
 import CostTrendLineChart from '@/components/dashboard/CostTrendLineChart'
 import TopCostDriversChart from '@/components/dashboard/TopCostDriversChart'
 import CostWaterfallChart from '@/components/dashboard/CostWaterfallChart'
+import Forbidden from '@/components/Forbidden'
 
 import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 /**
  * -----------------------
@@ -40,10 +42,17 @@ const DashboardPage = () => {
   } = useCostExplorerController()
 
   const [selectedService, setSelectedService] = useState<string | null>(null)
+  const [forbidden, setForbidden] = useState(false)
   const currentMonthLabel = new Date().toLocaleString('en-GB', {
     month: 'long',
     year: 'numeric'
   })
+
+  useAuth(setForbidden)
+
+  if (forbidden) {
+    return <Forbidden />
+  }
 
   /**
    * -----------------------
