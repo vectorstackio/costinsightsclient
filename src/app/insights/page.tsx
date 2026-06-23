@@ -2,15 +2,19 @@
 
 'use client'
 
+import { useState } from 'react'
+
 import Link from 'next/link'
 
 import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { useCostInsights } from '@/lib/hooks/useCostInsights'
 import ExecutiveSummary from '@/components/insights/ExecutiveSummary'
 import InvestigationTargets from '@/components/insights/InvestigationTargets'
 import RootCauseNodeView from '@/components/insights/RootCauseExplorer'
 import AnomalyExplorer from '@/components/insights/AnomalyExplorer'
 import Recommendations from '@/components/insights/Recommendations'
+import Forbidden from '@/components/Forbidden'
 
 /**
  * -----------------------
@@ -25,12 +29,19 @@ const SkeletonCard = () => (
 )
 
 const InsightsPage = () => {
+  const [forbidden, setForbidden] = useState(false)
   const { summary, loadingSummary } = useCostExplorerController()
   const insights = useCostInsights(summary)
   const currentMonthLabel = new Date().toLocaleString('en-GB', {
     month: 'long',
     year: 'numeric'
   })
+
+  useAuth(setForbidden)
+
+  if (forbidden) {
+    return <Forbidden />
+  }
 
   if (loadingSummary || !summary || !insights) {
     return(

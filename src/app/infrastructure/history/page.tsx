@@ -17,11 +17,20 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 import { useInfrastructureHistory } from '@/lib/hooks/useInfrastructureHistory'
+import { useAuth } from '@/lib/hooks/useAuth'
+import Forbidden from '@/components/Forbidden'
+
 import type { InstanceHistory, HistoryRange } from '@/types'
 
 const MetricsHistoryPage = () => {
+  const [forbidden, setForbidden] = useState(false)
   const [range, setRange] = useState<HistoryRange>('24h')
   const { data, loading, error } = useInfrastructureHistory(range)
+  useAuth(setForbidden)
+
+  if (forbidden) {
+    return <Forbidden />
+  }
 
   if (!data) {
     return null

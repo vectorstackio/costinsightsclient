@@ -3,8 +3,14 @@
 'use client'
 
 import { RefreshCw } from 'lucide-react'
-import { useInfrastructureMetrics } from '@/lib/hooks/useInfrastructureMetrics'
+
+import { useState } from 'react'
 import Link from 'next/link'
+
+import { useInfrastructureMetrics } from '@/lib/hooks/useInfrastructureMetrics'
+import { useAuth } from '@/lib/hooks/useAuth'
+import Forbidden from '@/components/Forbidden'
+
 
 import type { InstanceMetrics } from '@/types'
 
@@ -15,6 +21,10 @@ type MetricCardProps = {
 }
 
 const InfrastructurePage = () => {
+  const [forbidden, setForbidden] = useState(false)
+
+  useAuth(setForbidden)
+
   const {
     data,
     loading,
@@ -22,6 +32,10 @@ const InfrastructurePage = () => {
     lastUpdated,
     refetch
   } = useInfrastructureMetrics('/api/infrastructure')
+
+  if (forbidden) {
+    return <Forbidden />
+  }
 
   if (loading) {
     return <InfrastructureSkeleton />

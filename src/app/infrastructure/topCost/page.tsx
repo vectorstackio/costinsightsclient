@@ -2,15 +2,25 @@
 
 'use client'
 
+import { useState } from 'react'
+
 import Link from 'next/link'
 
 import { useInfrastructureTopCost } from '@/lib/hooks/useInfrastructureTopCost'
+import { useAuth } from '@/lib/hooks/useAuth'
+import Forbidden from '@/components/Forbidden'
 
 import type { TopCostInstance } from '@/types'
 
 const TopCostPage = () => {
-  const { data, loading, error } =
-    useInfrastructureTopCost()
+  const [forbidden, setForbidden] = useState(false)
+  const { data, loading, error } = useInfrastructureTopCost()
+
+  useAuth(setForbidden)
+
+  if (forbidden) {
+    return <Forbidden />
+  }
 
   if (loading) {
     return <TopCostSkeleton />

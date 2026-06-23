@@ -2,14 +2,25 @@
 
 'use client'
 
+import { useState } from 'react'
+
 import Link from 'next/link'
 
 import { useInfrastructureSummary } from '@/lib/hooks/useInfrastructureSummary'
+import { useAuth } from '@/lib/hooks/useAuth'
+import Forbidden from '@/components/Forbidden'
 
 import type { InfrastructureSummaryInstance } from '@/types'
 
 const MetricsSummaryPage = () => {
+  const [forbidden, setForbidden] = useState(false)
   const { data, loading, error } = useInfrastructureSummary()
+
+  useAuth(setForbidden)
+
+  if (forbidden) {
+    return <Forbidden />
+  }
 
   if (loading) return <SummarySkeleton />
 
