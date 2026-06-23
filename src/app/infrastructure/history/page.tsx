@@ -14,6 +14,8 @@ import {
 
 import { useState } from 'react'
 
+import Link from 'next/link'
+
 import { useInfrastructureHistory } from '@/lib/hooks/useInfrastructureHistory'
 import type { InstanceHistory, HistoryRange } from '@/types'
 
@@ -51,10 +53,11 @@ const MetricsHistoryPage = () => {
 
       <div className="mt-4 border-b border-slate-200">
         <nav className="flex gap-6 text-sm font-medium">
-          <a href="/infrastructure" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Health</a>
-          <a href="/infrastructure/summary" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Summary</a>
-          <a href="/infrastructure/history" className="border-b-2 border-blue-600 pb-2 text-blue-600">History</a>
-          <a href="/infrastructure/topCost" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Top Cost</a>
+          <Link href="/dashboard" className="border-b-2 border-transparent pb-2 text-slate-500">Home</Link>
+          <Link href="/infrastructure" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Health</Link>
+          <Link href="/infrastructure/summary" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Summary</Link>
+          <Link href="/infrastructure/history" className="border-b-2 border-blue-600 pb-2 text-blue-600">History</Link>
+          <Link href="/infrastructure/topCost" className="border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-700">Top Cost</Link>
         </nav>
       </div>
 
