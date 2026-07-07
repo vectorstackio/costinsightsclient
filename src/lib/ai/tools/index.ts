@@ -6,7 +6,7 @@ import { z } from 'zod'
 export const getInfrastructureHealth = tool(
   async () => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/infrastructure`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/infrastructure`
     )
 
     if (!res.ok) {
@@ -26,7 +26,7 @@ export const getInfrastructureHealth = tool(
 export const getMonthlyCosts = tool(
   async () => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/costs`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/costs`
     )
 
     if (!res.ok) {
