@@ -3,6 +3,30 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 
+type ServiceComparison = {
+  service: string
+  change: number
+}
+
+type ServiceCost = {
+  service: string
+  cost: number
+}
+
+type Recommendation = {
+  current: string
+  recommended: string
+}
+
+interface MonthlyCostData {
+  currentMonthCost: number
+  previousMonthCost: number
+  monthOverMonthChangePercent: number
+  byService: ServiceCost[]
+  byServiceComparison: ServiceComparison[]
+  topRecommendations: Recommendation[]
+}
+
 export const getInfrastructureHealth = tool(
   async () => {
     const res = await fetch(
@@ -33,7 +57,9 @@ export const getMonthlyCosts = tool(
       throw new Error('Failed to fetch monthly costs')
     }
 
-    return await res.json()
+    const data = await res.json()
+
+    return summariseCosts(data)
   },
   {
     name: 'getMonthlyCosts',
@@ -47,6 +73,35 @@ export const tools = [
   getInfrastructureHealth,
   getMonthlyCosts
 ]
+
+function summariseCosts(data: MonthlyCostData) {
+  return {
+    summary: {
+      currentMonthCost: data.currentMonthCost,
+      previousMonthCost: data.previousMonthCost,
+      changePercent: data.monthOverMonthChangePercent
+    },
+
+    topCostDrivers: data.byService
+      .sort((a: ServiceCost, b: ServiceCost) => b.cost - a.cost)
+      .slice(0, 5),
+
+    largestChanges: data.byServiceComparison
+      .sort((a: ServiceComparison, b: ServiceComparison) => a.change - b.change)
+      .slice(0, 5)
+      .map((item: ServiceComparison) => ({
+        service: item.service,
+        change: item.change
+      })),
+
+    recommendations: data.topRecommendations
+      .slice(0, 5)
+      .map((item: Recommendation) => ({
+        action: item.recommended,
+        resource: item.current
+      }))
+  }
+}
 
 // import { tool } from '@langchain/core/tools'
 // import { z } from 'zod'

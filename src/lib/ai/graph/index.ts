@@ -1,9 +1,9 @@
 // lib/ai/graph/index.ts
 
 import { END, START, StateGraph } from '@langchain/langgraph'
-import { Annotation } from '@langchain/langgraph'
+import { Annotation, messagesStateReducer } from '@langchain/langgraph'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
-import { AIMessage } from '@langchain/core/messages'
+import { AIMessage, BaseMessage } from '@langchain/core/messages'
 
 import { agentNode } from '@/lib/ai/node/agent'
 import { tools } from '@/lib/ai/tools'
@@ -14,8 +14,8 @@ const GraphState = Annotation.Root({
     default: () => ''
   }),
 
-  messages: Annotation<unknown[]>({
-    reducer: (x, y) => [...x, ...y],
+  messages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
     default: () => []
   }),
 

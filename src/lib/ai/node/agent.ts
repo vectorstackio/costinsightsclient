@@ -1,28 +1,45 @@
 // lib/ai/node/agent.ts
 
+import { SystemMessage, AIMessage } from '@langchain/core/messages'
+
 import { AgentState } from '../state'
 import { model } from '../llm'
 import { tools } from '../tools'
-import { HumanMessage } from '@langchain/core/messages'
+
+const systemPrompt = `
+You are an AWS infrastructure assistant.
+
+Always verify the data before answering.
+If the user's assumption is incorrect, explain the correction clearly.
+
+Do not blindly agree with the user's question.
+`
 
 const modelWithTools = model.bindTools(tools)
 
 export async function agentNode(
   state: AgentState
 ): Promise<Partial<AgentState>> {
+  const response = await modelWithTools.invoke([
+    new SystemMessage(systemPrompt),
+    ...(state.messages ?? [])
+  ])
 
-  const messages = state.messages?.length
-    ? state.messages
-    : [
-      new HumanMessage(state.question)
-    ]
-
-  const response = await modelWithTools.invoke(messages)
+  // If the model wants to call a tool, don't update the answer yet.
+  if (
+    response instanceof AIMessage &&
+    response.tool_calls?.length
+  ) {
+    return {
+      messages: [response]
+    }
+  }
 
   return {
-    messages: [
-      response
-    ],
-    answer: response.content.toString()
+    messages: [response],
+    answer:
+      response instanceof AIMessage
+        ? response.content.toString()
+        : ''
   }
 }
