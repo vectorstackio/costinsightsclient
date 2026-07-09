@@ -8,7 +8,7 @@ import rehypeHighlight from 'rehype-highlight'
 
 import 'highlight.js/styles/github.css'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type ChatMessage = {
   role: 'user' | 'assistant'
@@ -20,6 +20,13 @@ export default function CopilotChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    })
+  }, [messages])
 
 
   async function sendQuestion() {
@@ -167,6 +174,8 @@ export default function CopilotChat() {
           </div>
 
         ))}
+
+        <div ref={chatEndRef} />
 
 
         {loading && (
