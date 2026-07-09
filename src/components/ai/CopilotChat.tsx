@@ -59,77 +59,83 @@ export default function CopilotChat() {
     setQuestion('')
     setLoading(true)
 
-
-    const response = await fetch(
-      '/api/ai',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          question: userQuestion,
-          messages
-        })
-      }
-    )
-
-
-    if (!response.body) {
-      setLoading(false)
-      throw new Error('No response body')
-    }
-
-
-    const reader =
-      response.body.getReader()
-
-    const decoder =
-      new TextDecoder()
-
-
-    let assistantContent = ''
-
-
-    while (true) {
-
-      const {
-        done,
-        value
-      } = await reader.read()
-
-
-      if (done) break
-
-
-      const chunk =
-        decoder.decode(
-          value,
-          {
-            stream: true
-          }
-        )
-
-
-      assistantContent += chunk
-
-
-      setMessages(prev => {
-
-        const updated = [...prev]
-
-        updated[updated.length - 1] = {
-          role: 'assistant',
-          content: assistantContent
+    try {
+      const response = await fetch(
+        '/api/ai',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            question: userQuestion,
+            //messages
+            messages: [
+              ...messages,
+              userMessage
+            ]
+          })
         }
+      )
 
-        return updated
-      })
+      if (!response.body) {
+        setLoading(false)
+        throw new Error('No response body')
+      }
 
+
+      const reader = response.body.getReader()
+
+      const decoder = new TextDecoder()
+
+
+      let assistantContent = ''
+
+
+      while (true) {
+
+        const {
+          done,
+          value
+        } = await reader.read()
+
+
+        if (done) break
+
+
+        const chunk =
+          decoder.decode(
+            value,
+            {
+              stream: true
+            }
+          )
+
+
+        assistantContent += chunk
+
+
+        setMessages(prev => {
+
+          const updated = [...prev]
+
+          updated[updated.length - 1] = {
+            role: 'assistant',
+            content: assistantContent
+          }
+
+          return updated
+        })
+
+      }
+    } catch(err) {
+      if(err instanceof Error) {
+        setLoading(false)
+      }
+      //console.log(err)
+    } finally {
+      setLoading(false)
     }
-
-
-    setLoading(false)
   }
 
 
