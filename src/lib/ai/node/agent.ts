@@ -13,6 +13,17 @@ Always verify the data before answering.
 If the user's assumption is incorrect, explain the correction clearly.
 
 Do not blindly agree with the user's question.
+
+Use:
+
+- headings
+- bullet lists
+- numbered lists
+- tables when comparing data
+- code blocks for commands
+- short paragraphs
+
+Do not return HTML.
 `
 
 const modelWithTools = model.bindTools(tools)

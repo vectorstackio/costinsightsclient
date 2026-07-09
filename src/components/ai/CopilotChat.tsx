@@ -2,6 +2,12 @@
 
 'use client'
 
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
+
+import 'highlight.js/styles/github.css'
+
 import { useState } from 'react'
 
 type ChatMessage = {
@@ -70,11 +76,16 @@ export default function CopilotChat() {
             <div
               className={
                 message.role === 'user'
-                  ? 'inline-block rounded bg-blue-600 px-4 py-2 text-white'
-                  : 'inline-block rounded bg-slate-200 px-4 py-2'
+                  ? 'inline-block rounded bg-blue-600 px-4 py-2 text-white prose prose-sm max-w-none dark:prose-invert'
+                  : 'inline-block rounded bg-slate-200 px-4 py-2 prose prose-sm max-w-none dark:prose-invert'
               }
             >
-              {message.content}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
           </div>
         ))}
