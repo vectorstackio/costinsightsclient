@@ -1,6 +1,6 @@
 // lib/messages/index.ts
 
-import type { Message } from '@/types'
+import type { Message, Conversation } from '@/types'
 
 export const getConversationHistory = async (userId: string, conversationId: string) => {
   try {
@@ -9,8 +9,8 @@ export const getConversationHistory = async (userId: string, conversationId: str
         `/api/messages?userId=${userId}&conversationId=${conversationId}`
       )
 
-    const data = await response.json()
-    const messages = data.records ?? []
+    const result = await response.json()
+    const messages = result.data.records ?? []
     return messages
   } catch (err) {
     return {
@@ -26,6 +26,43 @@ export async function createMessage(data: Message): Promise<{
 }> {
   try {
     await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+
+    return {
+      success: true,
+    }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    }
+  }
+}
+
+export const getConversations = async (userId: string) => {
+  try {
+    const response =
+      await fetch(
+        `/api/conversations?userId=${userId}`
+      )
+
+    const result = await response.json()
+    const conversations = result.data.records ?? []
+    return conversations
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    }
+  }
+}
+
+export const createConversation = async (data: Conversation) => {
+  try {
+    await fetch('/api/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),

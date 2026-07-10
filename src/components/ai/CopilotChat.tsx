@@ -11,9 +11,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { USER_ID_NAME } from '@/lib/auth'
-import { getConversationHistory, createMessage } from '@/lib/messages'
+import { getConversationHistory, createMessage, getConversations, createConversation } from '@/lib/messages'
 
-import type { Message } from '@/types'
+import type { Message, Conversation } from '@/types'
 
 import 'highlight.js/styles/github.css'
 
@@ -23,13 +23,12 @@ type ChatMessage = {
 }
 
 export default function CopilotChat() {
-
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
-  const [conversations/*, setConversations*/] = useState<{
+  const [conversations, setConversations] = useState<{
     id: string
     title: string
   }[]>([
@@ -59,8 +58,8 @@ export default function CopilotChat() {
         return
       }
       setUserId(id)
-      const history = await getConversationHistory(id, '12345')
-      setMessages(history)
+      const results = await getConversations(id)
+      setConversations(results)
     }
 
     load()
@@ -78,6 +77,18 @@ export default function CopilotChat() {
 
     if (!conversationId) {
       setConversationId(id)
+      const update: Conversation = {
+        userId,
+        id,
+        title: 'Mike Testing 3'
+      }
+
+      await createConversation(update)
+      const updatedConversations = [
+        ...conversations,
+        update
+      ]
+      setConversations(updatedConversations)
     }
 
     const remoteUserMessage: Message = {
@@ -192,7 +203,7 @@ export default function CopilotChat() {
 
   }
 
-  function startNewConversation() {
+  const startNewConversation = () => {
 
     setConversationId(null)
     setMessages([])

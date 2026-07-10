@@ -7,3 +7,9 @@ export interface Message {
   conversationId: string
   threadId: string
 }
+
+export interface Conversation {
+  userId: string | null
+  title: string
+  id: string
+}
