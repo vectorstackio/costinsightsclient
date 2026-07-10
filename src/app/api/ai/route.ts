@@ -16,6 +16,7 @@ type ClientMessage = {
 export async function POST(req: Request) {
 
   const {
+    //conversationId,
     question,
     messages
   } = await req.json()

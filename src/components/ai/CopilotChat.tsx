@@ -2,6 +2,7 @@
 
 'use client'
 
+import crypto from 'crypto'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
@@ -20,6 +21,7 @@ export default function CopilotChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -33,6 +35,14 @@ export default function CopilotChat() {
     if (!question.trim()) return
 
     const userQuestion = question
+
+    const id =
+      conversationId ??
+      crypto.randomUUID()
+
+    if (!conversationId) {
+      setConversationId(id)
+    }
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -67,6 +77,7 @@ export default function CopilotChat() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
+            conversationId: id,
             question: userQuestion,
             messages: conversation
           })
@@ -122,114 +133,11 @@ export default function CopilotChat() {
 
   }
 
+  // function startNewConversation() {
 
-  // async function sendQuestion() {
+  //   setConversationId(null)
+  //   setMessages([])
 
-  //   if (!question.trim()) return
-
-
-  //   const userQuestion = question
-
-
-  //   const userMessage: ChatMessage = {
-  //     role: 'user',
-  //     content: userQuestion
-  //   }
-
-
-  //   const assistantMessage: ChatMessage = {
-  //     role: 'assistant',
-  //     content: ''
-  //   }
-
-
-  //   setMessages(prev => [
-  //     ...prev,
-  //     userMessage,
-  //     assistantMessage
-  //   ])
-
-
-  //   setQuestion('')
-  //   setLoading(true)
-
-  //   try {
-  //     const response = await fetch(
-  //       '/api/ai',
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json'
-  //         },
-  //         body: JSON.stringify({
-  //           question: userQuestion,
-  //           //messages
-  //           messages: [
-  //             ...messages,
-  //             userMessage
-  //           ]
-  //         })
-  //       }
-  //     )
-
-  //     if (!response.body) {
-  //       setLoading(false)
-  //       throw new Error('No response body')
-  //     }
-
-
-  //     const reader = response.body.getReader()
-
-  //     const decoder = new TextDecoder()
-
-
-  //     let assistantContent = ''
-
-
-  //     while (true) {
-
-  //       const {
-  //         done,
-  //         value
-  //       } = await reader.read()
-
-
-  //       if (done) break
-
-
-  //       const chunk =
-  //         decoder.decode(
-  //           value,
-  //           {
-  //             stream: true
-  //           }
-  //         )
-
-
-  //       assistantContent += chunk
-
-
-  //       setMessages(prev => {
-
-  //         const updated = [...prev]
-
-  //         updated[updated.length - 1] = {
-  //           role: 'assistant',
-  //           content: assistantContent
-  //         }
-
-  //         return updated
-  //       })
-
-  //     }
-  //   } catch(err) {
-  //     if(err instanceof Error) {
-  //       setLoading(false)
-  //     }
-  //     //console.log(err)
-  //   } finally {
-  //     setLoading(false)
-  //   }
   // }
 
 
@@ -239,7 +147,6 @@ export default function CopilotChat() {
       <h1 className='text-3xl font-bold'>
         AI Cloud Operations Copilot
       </h1>
-
 
       <div className='h-[600px] space-y-4 overflow-y-auto rounded-lg border p-4'>
 
