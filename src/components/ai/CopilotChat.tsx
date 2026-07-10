@@ -2,14 +2,20 @@
 
 'use client'
 
-import crypto from 'crypto'
+//import crypto from 'crypto'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 
-import 'highlight.js/styles/github.css'
-
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+import { USER_ID_NAME } from '@/lib/auth'
+import { getConversationHistory, createMessage } from '@/lib/messages'
+
+import type { Message } from '@/types'
+
+import 'highlight.js/styles/github.css'
 
 type ChatMessage = {
   role: 'user' | 'assistant'
@@ -22,13 +28,30 @@ export default function CopilotChat() {
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({
       behavior: 'smooth'
     })
   }, [messages])
+
+  useEffect(() => {
+    const load = async () => {
+      const id = sessionStorage.getItem(USER_ID_NAME) ?? ''
+      if (!id) {
+        router.push('/logout')
+        return
+      }
+      setUserId(id)
+      const history = await getConversationHistory(id, '12345')
+      setMessages(history)
+    }
+
+    load()
+  }, [])
 
   async function sendQuestion() {
 
@@ -43,6 +66,16 @@ export default function CopilotChat() {
     if (!conversationId) {
       setConversationId(id)
     }
+
+    const remoteUserMessage: Message = {
+      userId,
+      conversationId: id,
+      threadId: '12345',
+      role: 'user',
+      content: userQuestion
+    }
+
+    await createMessage(remoteUserMessage)
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -102,12 +135,15 @@ export default function CopilotChat() {
 
         if (done) break
 
-        assistantContent += decoder.decode(
-          value,
-          {
-            stream: true
-          }
-        )
+        const chunk =
+          decoder.decode(
+            value,
+            {
+              stream: true
+            }
+          )
+
+        assistantContent += chunk
 
         setMessages([
           ...conversation,
@@ -118,6 +154,16 @@ export default function CopilotChat() {
         ])
 
       }
+
+      const remoteAssistantMessage: Message = {
+        userId,
+        conversationId: id,
+        threadId: '12345',
+        role: 'assistant',
+        content: assistantContent
+      }
+
+      await createMessage(remoteAssistantMessage)
 
     } catch (err) {
 

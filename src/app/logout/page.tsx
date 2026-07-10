@@ -7,7 +7,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteCookie } from 'cookies-next'
 
-import { AUTH_TOKEN_NAME } from '@/lib/auth'
+import { AUTH_TOKEN_NAME, USER_ID_NAME } from '@/lib/auth'
 
 declare global {
   interface Window {
@@ -23,6 +23,7 @@ const Logout = () => {
       window.lastPageLoad = null
       deleteCookie(AUTH_TOKEN_NAME)
       sessionStorage.removeItem(AUTH_TOKEN_NAME)
+      sessionStorage.removeItem(USER_ID_NAME)
       router.push('/login')
     }
 

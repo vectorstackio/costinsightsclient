@@ -12,6 +12,14 @@ const USERS:Record<string, string> = {
   'nikki.labrum@thebrilliantclub.org': 'Password_112',
 }
 
+const USER_IDS:Record<string, string> = {
+  'michaelgarthwaite@gmail.com': '0052E000002tBFrQAM',
+  'sophie.callin@thebrilliantclub.org': '0052E000002tB7cQAE',
+  'apoorwa.saxena@thebrilliantclub.org': '0052E000002tB7oQAE',
+  'leanne@thebrilliantclub.org': '0052E000002tB7vQAE',
+  'nikki.labrum@thebrilliantclub.org': '0052E000002tB8BQAW',
+}
+
 import { PW_SALT } from '@/app/api/auth/route'
 
 const ERROR_MSG = 'Invalid email or password'
@@ -24,7 +32,7 @@ export async function POST(req: Request) {
     if(!email || ! password) throw new Error(ERROR_MSG)
     if (!USERS[email] || USERS[email] !== password) throw new Error(ERROR_MSG)
     const token = jwt.sign({ id: email }, PW_SALT, { expiresIn: '1y' })  // Sign token for one year.
-    const data = { success: true, token: token }
+    const data = { success: true, token: token, userId: USER_IDS[email] }
     return NextResponse.json(data, { status: 200 })
   } catch (err: unknown) {
     if (err instanceof Error) {

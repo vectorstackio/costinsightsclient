@@ -1,6 +1,7 @@
 // lib/auth/index.ts
 
 export const AUTH_TOKEN_NAME = 'atk'
+export const USER_ID_NAME = 'uid'
 
 export const login = async (email: string, password: string) => {
   try {
@@ -16,11 +17,11 @@ export const login = async (email: string, password: string) => {
 
     if(data.success) {
       sessionStorage.setItem(AUTH_TOKEN_NAME, data.token)
+      sessionStorage.setItem(USER_ID_NAME, data.userId)
       return { success: true}
     }
     return { success: false, error: data.error }
   } catch(err) {
-    //console.error('Error during login:', err)
     if (err instanceof Error) {
       return { success: false, error: err.message }
     }
