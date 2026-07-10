@@ -29,6 +29,19 @@ export default function CopilotChat() {
   const [loading, setLoading] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [conversations/*, setConversations*/] = useState<{
+    id: string
+    title: string
+  }[]>([
+    {
+      id: '12345',
+      title: 'Infrastructure Health'
+    },
+    {
+      id: '67890',
+      title: 'AWS Costs'
+    }
+  ])
   const chatEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -179,96 +192,167 @@ export default function CopilotChat() {
 
   }
 
-  // function startNewConversation() {
+  function startNewConversation() {
 
-  //   setConversationId(null)
-  //   setMessages([])
+    setConversationId(null)
+    setMessages([])
+    setQuestion('')
+  }
 
-  // }
+  async function selectConversation(id: string) {
+
+    if (!userId) return
+
+    setConversationId(id)
+
+    const history =
+      await getConversationHistory(
+        userId,
+        id
+      )
+
+    setMessages(history)
+
+  }
 
 
   return (
-    <div className='mx-auto flex max-w-4xl flex-col gap-4'>
 
-      <h1 className='text-3xl font-bold'>
-        AI Cloud Operations Copilot
-      </h1>
+    <div className='flex h-screen'>
 
-      <div className='h-[600px] space-y-4 overflow-y-auto rounded-lg border p-4'>
+      {/* Sidebar */}
 
-        {messages.map((message, index) => (
+      <aside className='w-72 border-r bg-slate-100 flex flex-col'>
 
-          <div
-            key={index}
-            className={
-              message.role === 'user'
-                ? 'text-right'
-                : ''
-            }
+        <div className='p-4'>
+
+          <button
+            onClick={startNewConversation}
+            className='w-full rounded bg-blue-600 px-4 py-2 text-white'
           >
+            + New conversation
+          </button>
 
-            <div
+        </div>
+
+        <div className='flex-1 overflow-y-auto'>
+
+          {conversations.map(conversation => (
+
+            <button
+              key={conversation.id}
+              onClick={() => selectConversation(conversation.id)}
               className={
-                message.role === 'user'
-                  ? 'inline-block rounded bg-blue-600 px-4 py-2 text-white prose prose-sm max-w-none dark:prose-invert'
-                  : 'inline-block rounded bg-slate-200 px-4 py-2 prose prose-sm max-w-none dark:prose-invert'
+                `w-full border-b px-4 py-3 text-left hover:bg-slate-200 ${conversation.id === conversationId
+                  ? 'bg-slate-300'
+                  : ''
+                }`
               }
             >
 
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeHighlight]}
+              <div className='truncate font-medium'>
+                {conversation.title}
+              </div>
+
+            </button>
+
+          ))}
+
+        </div>
+
+      </aside>
+
+      {/* Main */}
+
+      <main className='flex flex-1 flex-col overflow-hidden'>
+
+        <header className='border-b'>
+          <div className='mx-auto w-full max-w-4xl p-4'>
+            <h1 className='text-2xl font-bold'>
+              AI Cloud Operations Copilot
+            </h1>
+          </div>
+        </header>
+
+        <div className='flex-1 overflow-y-auto'>
+          <div className='mx-auto w-full max-w-4xl space-y-4 p-6'>
+
+            {messages.map((message, index) => (
+
+              <div
+                key={index}
+                className={
+                  message.role === 'user'
+                    ? 'text-right'
+                    : ''
+                }
               >
-                {message.content}
-              </ReactMarkdown>
+
+                <div
+                  className={
+                    message.role === 'user'
+                      ? 'inline-block rounded bg-blue-600 px-4 py-2 text-white prose prose-sm max-w-none'
+                      : 'inline-block rounded bg-slate-200 px-4 py-2 prose prose-sm max-w-none'
+                  }
+                >
+
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+
+                </div>
+
+              </div>
+
+            ))}
+
+            <div ref={chatEndRef} />
+
+            {loading && (
+              <div className='italic text-slate-500'>
+                Analysing your AWS environment...
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        <div className='border-t'>
+          <div className='mx-auto w-full max-w-4xl p-4'>
+
+            <div className='flex items-end gap-2'>
+
+              <input
+                className='flex-1 rounded-lg border px-4 py-3'
+                placeholder='Ask about your AWS environment...'
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    sendQuestion()
+                  }
+                }}
+              />
+
+              <button
+                onClick={sendQuestion}
+                disabled={loading}
+                className='rounded-lg bg-blue-600 px-6 py-3 text-white disabled:opacity-50'
+              >
+                Ask
+              </button>
 
             </div>
 
           </div>
+        </div>
 
-        ))}
-
-        <div ref={chatEndRef} />
-
-
-        {loading && (
-          <div className='italic text-slate-500'>
-            Analysing your AWS environment...
-          </div>
-        )}
-
-      </div>
-
-
-      <div className='flex gap-2'>
-
-        <input
-          className='flex-1 rounded border px-3 py-2'
-          placeholder='Ask about your AWS environment...'
-          value={question}
-          onChange={
-            e => setQuestion(e.target.value)
-          }
-          onKeyDown={
-            e => {
-              if (e.key === 'Enter') {
-                sendQuestion()
-              }
-            }
-          }
-        />
-
-
-        <button
-          onClick={sendQuestion}
-          disabled={loading}
-          className='rounded bg-blue-600 px-6 py-2 text-white disabled:opacity-50'
-        >
-          Ask
-        </button>
-
-      </div>
+      </main>
 
     </div>
+
   )
 }
