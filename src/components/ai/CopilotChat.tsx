@@ -11,7 +11,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { USER_ID_NAME } from '@/lib/auth'
-import { getConversationHistory, createMessage, getConversations, createConversation } from '@/lib/messages'
+import {
+  getConversationHistory,
+  createMessage,
+  getConversations,
+  createConversation,
+  updateConversation,
+  getConversationTitle
+} from '@/lib/messages'
 
 import type { Message, Conversation } from '@/types'
 
@@ -23,6 +30,7 @@ type ChatMessage = {
 }
 
 export default function CopilotChat() {
+  const [errorMessage, setErrorMessage] = useState<string>('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
@@ -77,18 +85,41 @@ export default function CopilotChat() {
 
     if (!conversationId) {
       setConversationId(id)
+      let title = 'New Conversation'
+
       const update: Conversation = {
         userId,
         id,
-        title: 'Mike Testing 3'
+        title
       }
 
-      await createConversation(update)
-      const updatedConversations = [
-        ...conversations,
-        update
-      ]
-      setConversations(updatedConversations)
+      const result = await createConversation(update)
+
+      try {
+
+        title = await getConversationTitle(userQuestion)
+
+        const update: Conversation = {
+          userId,
+          id,
+          title
+        }
+
+        await updateConversation(update, result._id)
+        const updatedConversations = [
+          ...conversations,
+          update
+        ]
+        setConversations(updatedConversations)
+
+      } catch {
+
+        setErrorMessage('Error generating conversation title')
+        setTimeout(() => {
+          setErrorMessage('')
+        }, 5000)
+
+      }
     }
 
     const remoteUserMessage: Message = {
@@ -193,6 +224,10 @@ export default function CopilotChat() {
 
       if (err instanceof Error) {
         setLoading(false)
+        setErrorMessage('Error generating conversation response')
+        setTimeout(() => {
+          setErrorMessage('')
+        }, 5000)
       }
 
     } finally {
@@ -335,6 +370,10 @@ export default function CopilotChat() {
           <div className='mx-auto w-full max-w-4xl p-4'>
 
             <div className='flex items-end gap-2 rounded-2xl border bg-white p-2 shadow-sm'>
+
+              { errorMessage && (
+                <div className='text-red-500'>{errorMessage}</div>
+              )}
 
               <input
                 className='flex-1 border-0 bg-transparent px-3 py-2 outline-none'

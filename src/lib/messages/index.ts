@@ -62,15 +62,58 @@ export const getConversations = async (userId: string) => {
 
 export const createConversation = async (data: Conversation) => {
   try {
-    await fetch('/api/conversations', {
+    const response = await fetch('/api/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
 
+    const result = await response.json()
+
+    return {
+      success: true,
+      _id: result.data.record._id
+    }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    }
+  }
+}
+
+export const updateConversation = async (data: Conversation, id: string) => {
+  try {
+    const response = await fetch(`/api/conversations/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+
+    await response.json()
+
     return {
       success: true,
     }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    }
+  }
+}
+
+export const getConversationTitle = async (question: string) => {
+  try {
+    const response = await fetch('/api/conversations/title', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    })
+
+    const result = await response.json()
+
+    return result.title
   } catch (err) {
     return {
       success: false,
