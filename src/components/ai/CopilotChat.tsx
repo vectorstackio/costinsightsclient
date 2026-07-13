@@ -331,13 +331,13 @@ export default function CopilotChat() {
           </div>
         </div>
 
-        <div className='border-t'>
+        <div className='border-t bg-white'>
           <div className='mx-auto w-full max-w-4xl p-4'>
 
-            <div className='flex items-end gap-2'>
+            <div className='flex items-end gap-2 rounded-2xl border bg-white p-2 shadow-sm'>
 
               <input
-                className='flex-1 rounded-lg border px-4 py-3'
+                className='flex-1 border-0 bg-transparent px-3 py-2 outline-none'
                 placeholder='Ask about your AWS environment...'
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
@@ -351,7 +351,7 @@ export default function CopilotChat() {
               <button
                 onClick={sendQuestion}
                 disabled={loading}
-                className='rounded-lg bg-blue-600 px-6 py-3 text-white disabled:opacity-50'
+                className='rounded-xl bg-blue-600 px-5 py-2 text-white disabled:opacity-50'
               >
                 Ask
               </button>
