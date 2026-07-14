@@ -6,7 +6,8 @@ import {
 } from '@langchain/core/messages'
 
 import { graph } from '@/lib/ai/graph'
-import { model } from '@/lib/ai/llm'
+
+import type { AgentEvent } from '@/types'
 
 type ClientMessage = {
   role: 'user' | 'assistant'
@@ -14,9 +15,7 @@ type ClientMessage = {
 }
 
 export async function POST(req: Request) {
-
   const {
-    //conversationId,
     question,
     messages
   } = await req.json()
@@ -28,113 +27,80 @@ export async function POST(req: Request) {
         : new AIMessage(message.content)
   )
 
-  const result = await graph.invoke({
-    question,
-    messages: history
-  })
+  const eventStream = graph.streamEvents(
+    {
+      question,
+      messages: history
+    },
+    {
+      version: 'v2'
+    }
+  )
 
   const encoder = new TextEncoder()
-
   const stream = new ReadableStream({
-
     async start(controller) {
-
-      const responseStream = await model.stream(
-        result.messages
-      )
-
-      for await (const chunk of responseStream) {
-
-        if (chunk.content) {
-
-          controller.enqueue(
-            encoder.encode(
-              chunk.content.toString()
-            )
+      const sendEvent = (event: AgentEvent) => {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify(event)}\n\n`
           )
+        )
 
+      }
+
+      sendEvent({
+        type: 'status',
+        message: 'Analysing request...'
+      })
+
+      for await (const event of eventStream) {
+        /*
+         * Tool started
+         */
+        if (event.event === 'on_tool_start') {
+          sendEvent({
+            type: 'tool_start',
+            tool: event.name
+          })
+
+        }
+
+        /*
+         * Tool completed
+         */
+        if (event.event === 'on_tool_end') {
+          sendEvent({
+            type: 'tool_end',
+            tool: event.name
+          })
+
+        }
+
+        /*
+         * Final LLM response chunks
+         */
+        if (event.event === 'on_chat_model_stream') {
+          const chunk = event.data.chunk
+          if (chunk.content) {
+            sendEvent({
+              type: 'answer',
+              content: chunk.content.toString()
+            })
+          }
         }
 
       }
 
       controller.close()
-
     }
-
   })
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-cache'
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive'
     }
   })
-
 }
-
-// import { HumanMessage } from '@langchain/core/messages'
-
-// import { graph } from '@/lib/ai/graph'
-// import { model } from '@/lib/ai/llm'
-
-
-// export async function POST(req: Request) {
-
-//   const {
-//     question,
-//     messages
-//   } = await req.json()
-
-
-//   const result = await graph.invoke({
-//     question,
-//     messages:
-//       messages?.length
-//         ? messages
-//         : [
-//           new HumanMessage(question)
-//         ]
-//   })
-
-
-//   const encoder = new TextEncoder()
-
-
-//   const stream = new ReadableStream({
-
-//     async start(controller) {
-
-//       const responseStream = await model.stream(
-//         result.messages
-//       )
-
-
-//       for await (const chunk of responseStream) {
-
-//         if (chunk.content) {
-
-//           controller.enqueue(
-//             encoder.encode(
-//               chunk.content.toString()
-//             )
-//           )
-
-//         }
-//       }
-
-
-//       controller.close()
-//     }
-
-//   })
-
-
-//   return new Response(stream, {
-
-//     headers: {
-//       'Content-Type': 'text/plain; charset=utf-8',
-//       'Cache-Control': 'no-cache'
-//     }
-
-//   })
-// }

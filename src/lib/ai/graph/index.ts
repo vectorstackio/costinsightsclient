@@ -27,20 +27,17 @@ const toolNode = new ToolNode(tools)
 function shouldContinue(
   state: typeof GraphState.State
 ) {
-
   const lastMessage =
     state.messages[state.messages.length - 1]
 
-  if (
-    lastMessage instanceof AIMessage &&
-    lastMessage.tool_calls?.length
-  ) {
+  const message = lastMessage as AIMessage
+
+  if (message.tool_calls?.length) {
     return 'tools'
   }
 
   return END
 }
-
 
 export const graph = new StateGraph(GraphState)
   .addNode('agent', agentNode)

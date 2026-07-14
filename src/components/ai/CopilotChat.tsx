@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { USER_ID_NAME } from '@/lib/auth'
+import { useCopilot } from '@/lib/hooks/useCopilot'
 import {
   getConversationHistory,
   createMessage,
@@ -24,16 +25,9 @@ import type { Message, Conversation } from '@/types'
 
 import 'highlight.js/styles/github.css'
 
-type ChatMessage = {
-  role: 'user' | 'assistant'
-  content: string
-}
-
 export default function CopilotChat() {
   const [errorMessage, setErrorMessage] = useState<string>('')
-  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [question, setQuestion] = useState('')
-  const [loading, setLoading] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<{
@@ -51,6 +45,14 @@ export default function CopilotChat() {
   ])
   const chatEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const {
+    messages,
+    setMessages,
+    ask,
+    loading,
+    activity,
+    lastAnswer
+  } = useCopilot()
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({
@@ -73,15 +75,10 @@ export default function CopilotChat() {
     load()
   }, [])
 
-  async function sendQuestion() {
-
+  const sendQuestion = async() => {
     if (!question.trim()) return
-
     const userQuestion = question
-
-    const id =
-      conversationId ??
-      crypto.randomUUID()
+    const id = conversationId ?? crypto.randomUUID()
 
     if (!conversationId) {
       setConversationId(id)
@@ -96,7 +93,6 @@ export default function CopilotChat() {
       const result = await createConversation(update)
 
       try {
-
         title = await getConversationTitle(userQuestion)
 
         const update: Conversation = {
@@ -106,20 +102,20 @@ export default function CopilotChat() {
         }
 
         await updateConversation(update, result._id)
+
         const updatedConversations = [
           ...conversations,
           update
         ]
+
         setConversations(updatedConversations)
-
       } catch {
-
         setErrorMessage('Error generating conversation title')
         setTimeout(() => {
           setErrorMessage('')
         }, 5000)
-
       }
+
     }
 
     const remoteUserMessage: Message = {
@@ -131,134 +127,38 @@ export default function CopilotChat() {
     }
 
     await createMessage(remoteUserMessage)
-
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content: userQuestion
-    }
-
-    const assistantMessage: ChatMessage = {
-      role: 'assistant',
-      content: ''
-    }
-
-    const conversation = [
-      ...messages,
-      userMessage
-    ]
-
-    setMessages([
-      ...conversation,
-      assistantMessage
-    ])
-
     setQuestion('')
-    setLoading(true)
-
     try {
+      await ask(userQuestion, id)
 
-      const response = await fetch(
-        '/api/ai',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            conversationId: id,
-            question: userQuestion,
-            messages: conversation
-          })
-        }
-      )
-
-      if (!response.body) {
-        throw new Error('No response body')
-      }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-
-      let assistantContent = ''
-
-      while (true) {
-
-        const {
-          done,
-          value
-        } = await reader.read()
-
-        if (done) break
-
-        const chunk =
-          decoder.decode(
-            value,
-            {
-              stream: true
-            }
-          )
-
-        assistantContent += chunk
-
-        setMessages([
-          ...conversation,
-          {
-            role: 'assistant',
-            content: assistantContent
-          }
-        ])
-
-      }
-
-      const remoteAssistantMessage: Message = {
+      await createMessage({
         userId,
         conversationId: id,
         threadId: '12345',
         role: 'assistant',
-        content: assistantContent
-      }
-
-      await createMessage(remoteAssistantMessage)
-
-    } catch (err) {
-
-      if (err instanceof Error) {
-        setLoading(false)
-        setErrorMessage('Error generating conversation response')
-        setTimeout(() => {
-          setErrorMessage('')
-        }, 5000)
-      }
-
-    } finally {
-
-      setLoading(false)
+        content: lastAnswer
+      })
+    } catch {
+      setErrorMessage('Error generating conversation response')
+      setTimeout(() => {
+        setErrorMessage('')
+      }, 5000)
 
     }
 
   }
 
   const startNewConversation = () => {
-
     setConversationId(null)
     setMessages([])
     setQuestion('')
   }
 
-  async function selectConversation(id: string) {
-
+  const selectConversation = async(id: string) => {
     if (!userId) return
-
     setConversationId(id)
-
-    const history =
-      await getConversationHistory(
-        userId,
-        id
-      )
-
+    const history = await getConversationHistory(userId, id)
     setMessages(history)
-
   }
 
 
@@ -359,9 +259,15 @@ export default function CopilotChat() {
 
             {loading && (
               <div className='italic text-slate-500'>
-                Analysing your AWS environment...
+                {activity}
               </div>
             )}
+
+            {/*loading && (
+              <div className='italic text-slate-500'>
+                Analysing your AWS environment...
+              </div>
+            )*/}
 
           </div>
         </div>
