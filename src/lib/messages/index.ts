@@ -4,11 +4,7 @@ import type { Message, Conversation } from '@/types'
 
 export const getConversationHistory = async (userId: string, conversationId: string) => {
   try {
-    const response =
-      await fetch(
-        `/api/messages?userId=${userId}&conversationId=${conversationId}`
-      )
-
+    const response = await fetch(`/api/messages?userId=${userId}&conversationId=${conversationId}`)
     const result = await response.json()
     const messages = result.data.records ?? []
     return messages
@@ -44,11 +40,7 @@ export async function createMessage(data: Message): Promise<{
 
 export const getConversations = async (userId: string) => {
   try {
-    const response =
-      await fetch(
-        `/api/conversations?userId=${userId}`
-      )
-
+    const response = await fetch(`/api/conversations?userId=${userId}`)
     const result = await response.json()
     const conversations = result.data.records ?? []
     return conversations

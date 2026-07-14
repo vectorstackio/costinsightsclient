@@ -20,10 +20,7 @@ type TargetItem = {
   severity?: 'low' | 'medium' | 'high'
 }
 
-export default function InvestigationTargets({
-  drivers,
-  anomalies
-}: Props) {
+const InvestigationTargets = ({drivers, anomalies}: Props) => {
   /**
    * -----------------------
    * Build investigation list
@@ -107,3 +104,5 @@ export default function InvestigationTargets({
     </div>
   )
 }
+
+export default InvestigationTargets

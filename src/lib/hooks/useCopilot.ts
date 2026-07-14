@@ -9,25 +9,6 @@ type ChatMessage = {
   content: string
 }
 
-// type AgentEvent =
-//   | {
-//     type: 'status'
-//     message: string
-//   }
-//   | {
-//     type: 'tool_start'
-//     tool: string
-//   }
-//   | {
-//     type: 'tool_end'
-//     tool: string
-//   }
-//   | {
-//     type: 'answer'
-//     content: string
-//   }
-
-
 export const useCopilot = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [activity, setActivity] = useState<string>('')
@@ -79,22 +60,15 @@ export const useCopilot = () => {
       let assistantContent = ''
 
       while (true) {
-
         const {
           done,
           value
         } = await reader.read()
 
         if (done) break
-        const chunk =
-          decoder.decode(
-            value,
-            {
-              stream: true
-            }
-          )
-
+        const chunk = decoder.decode(value, { stream: true })
         const lines = chunk.split('\n').filter(Boolean)
+
         for (const line of lines) {
           if (!line.startsWith('data:')) continue
           const event: AgentEvent =
@@ -135,13 +109,10 @@ export const useCopilot = () => {
         }
 
       }
-
-
     } finally {
       setLoading(false)
       setActivity('')
     }
-
   }
 
   return {

@@ -9,7 +9,6 @@ import { agentNode } from '@/lib/ai/node/agent'
 import { tools } from '@/lib/ai/tools'
 
 const GraphState = Annotation.Root({
-
   question: Annotation<string>({
     reducer: (x, y) => y ?? x,
     default: () => ''
@@ -19,17 +18,12 @@ const GraphState = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => []
   })
-
 })
 
 const toolNode = new ToolNode(tools)
 
-function shouldContinue(
-  state: typeof GraphState.State
-) {
-  const lastMessage =
-    state.messages[state.messages.length - 1]
-
+const shouldContinue = (state: typeof GraphState.State) => {
+  const lastMessage = state.messages[state.messages.length - 1]
   const message = lastMessage as AIMessage
 
   if (message.tool_calls?.length) {

@@ -30,25 +30,15 @@ Do not return HTML.
 
 const modelWithTools = model.bindTools(tools)
 
-export async function agentNode(
-  state: AgentState
-): Promise<Partial<AgentState>> {
-
+export async function agentNode(state: AgentState): Promise<Partial<AgentState>> {
   const response = await modelWithTools.invoke([
     new SystemMessage(systemPrompt),
     ...(state.messages ?? [])
   ])
 
-  if (
-    response instanceof AIMessage &&
-    response.tool_calls?.length
-  ) {
-    return {
-      messages: [response]
-    }
+  if (response instanceof AIMessage && response.tool_calls?.length) {
+    return {messages: [response]}
   }
 
-  return {
-    messages: [response],
-  }
+  return {messages: [response]}
 }

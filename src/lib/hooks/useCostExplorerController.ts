@@ -6,24 +6,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   Dimension,
   CostFilter,
-  //DrilldownItem,
   DrilldownResponse,
-  //ServiceCost,
-  //TrendPoint,
-  //CostIncreaseDriver,
-  //ServiceAnomaly,
-  //RootCauseNode,
-  //ServiceComparison,
-  //TopRecommendation,
   SummaryResponse
-} from '@/types/costs'
+} from '@/types'
 
 /**
  * -----------------------
  * Controller state
  * -----------------------
  */
-
 type State = {
   groupBy: Dimension
   filters: CostFilter[]
@@ -35,7 +26,6 @@ type State = {
  * Hook
  * -----------------------
  */
-
 export function useCostExplorerController() {
   /**
    * -----------------------
@@ -70,7 +60,6 @@ export function useCostExplorerController() {
    * API calls
    * -----------------------
    */
-
   const fetchSummary = useCallback(async () => {
     setLoadingSummary(true)
     try {
@@ -97,7 +86,6 @@ export function useCostExplorerController() {
         })
 
         const json = await res.json()
-
         setDrilldown(json)
       } finally {
         setLoadingDrilldown(false)
@@ -156,7 +144,6 @@ export function useCostExplorerController() {
    * Derived state
    * -----------------------
    */
-
   const context = useMemo(() => {
     return {
       depth: state.filters.length,
@@ -178,16 +165,12 @@ export function useCostExplorerController() {
 
     load()
   }, [])
-  // useEffect(() => {
-  //   fetchSummary()
-  // }, [fetchSummary])
 
   /**
    * -----------------------
    * Auto-fetch DRILLDOWN (reactive engine)
    * -----------------------
    */
-
   useEffect(() => {
     debounce(() => {
       fetchDrilldown(state.groupBy, state.filters)
@@ -222,7 +205,6 @@ export function useCostExplorerController() {
    * Return API (what components use)
    * -----------------------
    */
-
   return {
     // data
     summary,
