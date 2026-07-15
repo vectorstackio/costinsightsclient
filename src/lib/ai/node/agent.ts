@@ -68,7 +68,16 @@ Use:
 - getMonthlyCosts()
 - getInfrastructureHealth()
 
+Question:
+"List all my EC2 instances"
+
+Use:
+- getEc2Instances()
+
 Combine the results into a single explanation.
+
+For questions about AWS resources or inventory, use the relevant read tool.
+Do not suggest AWS CLI commands when a tool can provide the information.
 
 ## Action tools
 
