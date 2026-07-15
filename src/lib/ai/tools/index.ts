@@ -2,15 +2,20 @@
 
 export * from './costs'
 export * from './infrastructure'
+export * from './actions'
 
 import { getMonthlyCosts } from './costs'
 import {
   getInfrastructureHealth,
-  getInfrastructureHistory
+  getInfrastructureHistory,
+  getEc2Instances
 } from './infrastructure'
+import { createEbsSnapshot } from './actions'
 
 export const tools = [
   getMonthlyCosts,
   getInfrastructureHealth,
-  getInfrastructureHistory
+  getInfrastructureHistory,
+  getEc2Instances,
+  createEbsSnapshot
 ]

@@ -134,3 +134,13 @@ export type TopCostInstance = {
   cpuUsedPercent: number | null
   memoryUsedPercent: number | null
 }
+
+export type EC2Instance = {
+  instanceId: string
+  name: string
+  instanceType: string
+  privateIp: string
+  cpuUsedPercent: number
+  memoryUsedPercent: number
+  diskUsedPercent: number
+}

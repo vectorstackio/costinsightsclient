@@ -3,6 +3,8 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 
+import type { EC2Instance } from '@/types/infrastructure'
+
 export const getInfrastructureHealth = tool(
   async () => {
     const res = await fetch(
@@ -56,5 +58,42 @@ export const getInfrastructureHistory = tool(
           'Number of hours of history to retrieve'
         )
     })
+  }
+)
+
+export const getEc2Instances = tool(
+  async () => {
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/infrastructure`
+    )
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch EC2 instances'
+      )
+    }
+
+    const data = await res.json()
+
+    return JSON.stringify(
+      data.instances.map((instance: EC2Instance) => ({
+        instanceId: instance.instanceId,
+        name: instance.name,
+        instanceType: instance.instanceType,
+        privateIp: instance.privateIp,
+        cpuUsedPercent: instance.cpuUsedPercent,
+        memoryUsedPercent: instance.memoryUsedPercent,
+        diskUsedPercent: instance.diskUsedPercent
+      })),
+      null,
+      2
+    )
+  },
+  {
+    name: 'getEc2Instances',
+    description:
+      'Returns all currently running EC2 instances with their instance details and utilisation metrics',
+    schema: z.object({})
   }
 )
