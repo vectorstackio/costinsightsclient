@@ -3,29 +3,29 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 
-type ServiceComparison = {
-  service: string
-  change: number
-}
+// type ServiceComparison = {
+//   service: string
+//   change: number
+// }
 
-type ServiceCost = {
-  service: string
-  cost: number
-}
+// type ServiceCost = {
+//   service: string
+//   cost: number
+// }
 
-type Recommendation = {
-  current: string
-  recommended: string
-}
+// type Recommendation = {
+//   current: string
+//   recommended: string
+// }
 
-interface MonthlyCostData {
-  currentMonthCost: number
-  previousMonthCost: number
-  monthOverMonthChangePercent: number
-  byService: ServiceCost[]
-  byServiceComparison: ServiceComparison[]
-  topRecommendations: Recommendation[]
-}
+// interface MonthlyCostData {
+//   currentMonthCost: number
+//   previousMonthCost: number
+//   monthOverMonthChangePercent: number
+//   byService: ServiceCost[]
+//   byServiceComparison: ServiceComparison[]
+//   topRecommendations: Recommendation[]
+// }
 
 export const getInfrastructureHealth = tool(
   async () => {
@@ -59,7 +59,7 @@ export const getMonthlyCosts = tool(
 
     const data = await res.json()
 
-    return summariseCosts(data)
+    return data
   },
   {
     name: 'getMonthlyCosts',
@@ -69,36 +69,44 @@ export const getMonthlyCosts = tool(
   }
 )
 
+export const getInfrastructureHistory = tool(
+  async (
+    input: {
+      range?: string
+    }
+  ) => {
+
+    const range = input.range ?? '24h'
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/infrastructure/history?range=${range}`)
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch infrastructure history'
+      )
+    }
+
+    return await res.json()
+
+  },
+  {
+    name: 'getInfrastructureHistory',
+
+    description:
+      'Returns historical CPU, memory and disk metrics for EC2 instances. Use this when the user asks about trends, history or changes over time.',
+
+    schema: z.object({
+      hours: z
+        .number()
+        .optional()
+        .describe(
+          'Number of hours of history to retrieve'
+        )
+    })
+  }
+)
+
 export const tools = [
   getInfrastructureHealth,
+  getInfrastructureHistory,
   getMonthlyCosts
 ]
-
-function summariseCosts(data: MonthlyCostData) {
-  return {
-    summary: {
-      currentMonthCost: data.currentMonthCost,
-      previousMonthCost: data.previousMonthCost,
-      changePercent: data.monthOverMonthChangePercent
-    },
-
-    topCostDrivers: data.byService
-      .sort((a: ServiceCost, b: ServiceCost) => b.cost - a.cost)
-      .slice(0, 5),
-
-    largestChanges: data.byServiceComparison
-      .sort((a: ServiceComparison, b: ServiceComparison) => a.change - b.change)
-      .slice(0, 5)
-      .map((item: ServiceComparison) => ({
-        service: item.service,
-        change: item.change
-      })),
-
-    recommendations: data.topRecommendations
-      .slice(0, 5)
-      .map((item: Recommendation) => ({
-        action: item.recommended,
-        resource: item.current
-      }))
-  }
-}
