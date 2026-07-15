@@ -8,7 +8,8 @@ import { getMonthlyCosts } from './costs'
 import {
   getInfrastructureHealth,
   getInfrastructureHistory,
-  getEc2Instances
+  getEc2Instances,
+  getEbsVolumes
 } from './infrastructure'
 import { createEbsSnapshot } from './actions'
 
@@ -17,5 +18,6 @@ export const tools = [
   getInfrastructureHealth,
   getInfrastructureHistory,
   getEc2Instances,
+  getEbsVolumes,
   createEbsSnapshot
 ]

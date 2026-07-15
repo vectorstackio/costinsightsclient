@@ -97,3 +97,32 @@ export const getEc2Instances = tool(
     schema: z.object({})
   }
 )
+
+export const getEbsVolumes = tool(
+  async () => {
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/volumes`
+    )
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch EBS volumes'
+      )
+    }
+
+    const data = await res.json()
+
+    return JSON.stringify(
+      data.volumes,
+      null,
+      2
+    )
+  },
+  {
+    name: 'getEbsVolumes',
+    description:
+      'Returns EBS volumes including size, type, encryption status and whether they are attached to EC2 instances',
+    schema: z.object({})
+  }
+)
