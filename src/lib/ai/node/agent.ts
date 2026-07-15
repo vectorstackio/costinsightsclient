@@ -226,7 +226,7 @@ Never return HTML.
 
 const modelWithTools = model.bindTools(tools)
 
-export async function agentNode(state: AgentState): Promise<Partial<AgentState>> {
+export const agentNode = async(state: AgentState): Promise<Partial<AgentState>> => {
   const response = await modelWithTools.invoke([
     new SystemMessage(systemPrompt),
     ...(state.messages ?? [])

@@ -15,7 +15,11 @@ export const useCopilot = () => {
   const [loading, setLoading] = useState(false)
   const [lastAnswer, setLastAnswer] = useState('')
 
-  const ask = async(question: string, conversationId: string) => {
+  const ask = async (
+    question: string,
+    conversationId: string
+  ) => {
+
     const userMessage: ChatMessage = {
       role: 'user',
       content: question
@@ -38,7 +42,10 @@ export const useCopilot = () => {
 
     setLoading(true)
 
+    let assistantContent = ''
+
     try {
+
       const response = await fetch(
         '/api/ai',
         {
@@ -54,23 +61,36 @@ export const useCopilot = () => {
         }
       )
 
-      if (!response.body) throw new Error('No response body')
+      if (!response.body) {
+        throw new Error('No response body')
+      }
+
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
-      let assistantContent = ''
 
       while (true) {
+
         const {
           done,
           value
         } = await reader.read()
 
         if (done) break
-        const chunk = decoder.decode(value, { stream: true })
+
+        const chunk = decoder.decode(
+          value,
+          {
+            stream: true
+          }
+        )
+
         const lines = chunk.split('\n').filter(Boolean)
 
         for (const line of lines) {
-          if (!line.startsWith('data:')) continue
+          if (!line.startsWith('data:')) {
+            continue
+          }
+
           const event: AgentEvent =
             JSON.parse(
               line.replace(
@@ -80,6 +100,7 @@ export const useCopilot = () => {
             )
 
           switch (event.type) {
+
           case 'status':
             setActivity(event.message)
             break
@@ -92,9 +113,11 @@ export const useCopilot = () => {
             setActivity(`${event.tool} completed`)
             break
 
+
           case 'answer':
             assistantContent += event.content
             setLastAnswer(assistantContent)
+
             setMessages([
               ...conversation,
               {
@@ -105,14 +128,16 @@ export const useCopilot = () => {
 
             break
           }
-
         }
-
       }
+
+      return assistantContent
+
     } finally {
       setLoading(false)
       setActivity('')
     }
+
   }
 
   return {
@@ -123,5 +148,4 @@ export const useCopilot = () => {
     activity,
     lastAnswer
   }
-
 }

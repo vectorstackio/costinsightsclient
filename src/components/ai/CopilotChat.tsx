@@ -51,7 +51,7 @@ export default function CopilotChat() {
     ask,
     loading,
     activity,
-    lastAnswer
+    //lastAnswer
   } = useCopilot()
 
   useEffect(() => {
@@ -129,14 +129,14 @@ export default function CopilotChat() {
     await createMessage(remoteUserMessage)
     setQuestion('')
     try {
-      await ask(userQuestion, id)
+      const answer = await ask(userQuestion, id)
 
       await createMessage({
         userId,
         conversationId: id,
         threadId: '12345',
         role: 'assistant',
-        content: lastAnswer
+        content: answer
       })
     } catch {
       setErrorMessage('Error generating conversation response')
