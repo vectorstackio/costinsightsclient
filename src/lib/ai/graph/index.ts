@@ -2,11 +2,10 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph'
 import { Annotation, messagesStateReducer } from '@langchain/langgraph'
-import { ToolNode } from '@langchain/langgraph/prebuilt'
 import { AIMessage, BaseMessage } from '@langchain/core/messages'
 
 import { agentNode } from '@/lib/ai/node/agent'
-import { tools } from '@/lib/ai/tools'
+import { toolNode } from '@/lib/ai/node/tool'
 
 const GraphState = Annotation.Root({
   question: Annotation<string>({
@@ -19,8 +18,6 @@ const GraphState = Annotation.Root({
     default: () => []
   })
 })
-
-const toolNode = new ToolNode(tools)
 
 const shouldContinue = (state: typeof GraphState.State) => {
   const lastMessage = state.messages[state.messages.length - 1]
