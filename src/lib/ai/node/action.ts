@@ -104,7 +104,7 @@ export const actionNode = async (
 
   return {
     pendingAction: {
-      tool: 'createSnapshot',
+      tool: 'createEbsSnapshot',
       args: {
         volumeId: 'vol-083d93921a58f1bd7'
       }
