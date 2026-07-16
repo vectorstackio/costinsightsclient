@@ -16,7 +16,8 @@ export interface AgentState {
   question: string
   messages?: BaseMessage[]
   answer?: string
-  intent?: 'query' | 'action' | 'unknown'
+  //intent?: 'query' | 'action' | 'unknown'
+  intent?: 'query' | 'action' | 'confirm' | 'cancel' | 'unknown'
   pendingAction?: PendingAction | null
 }
 

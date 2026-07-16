@@ -35,14 +35,30 @@ Reply **confirm** to continue or **cancel** to abort.`
   // The classifier has already decided this is an action request.
   //
 
+  const volumeMatch =
+    state.question.match(/vol-[a-z0-9]+/i)
+
+  const volumeId =
+    volumeMatch?.[0]
+
+  if (!volumeId) {
+    return {
+      messages: [
+        new AIMessage(
+          'Please specify the volume ID to snapshot.'
+        )
+      ]
+    }
+  }
+
   return {
     pendingAction: {
       tool: 'createEbsSnapshot',
       args: {
-        volumeId: 'vol-083d93921a58f1bd7'
+        volumeId
       },
       description:
-        'Create an EBS snapshot for volume vol-083d93921a58f1bd7'
+        `Create an EBS snapshot for volume ${volumeId}`
     },
 
     messages: [
@@ -50,12 +66,34 @@ Reply **confirm** to continue or **cancel** to abort.`
         `This action will create an EBS snapshot.
 
 Volume:
-vol-083d93921a58f1bd7
+${volumeId}
 
 Reply **confirm** to continue or **cancel** to abort.`
       )
     ]
   }
+
+  //   return {
+  //     pendingAction: {
+  //       tool: 'createEbsSnapshot',
+  //       args: {
+  //         volumeId: 'vol-083d93921a58f1bd7'
+  //       },
+  //       description:
+  //         'Create an EBS snapshot for volume vol-083d93921a58f1bd7'
+  //     },
+
+  //     messages: [
+  //       new AIMessage(
+  //         `This action will create an EBS snapshot.
+
+  // Volume:
+  // vol-083d93921a58f1bd7
+
+  // Reply **confirm** to continue or **cancel** to abort.`
+  //       )
+  //     ]
+  //   }
 }
 
 // import { AIMessage } from '@langchain/core/messages'

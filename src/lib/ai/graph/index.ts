@@ -1,97 +1,313 @@
 // lib/ai/graph/index.ts
 
-import { END, START, StateGraph } from '@langchain/langgraph'
-import { AIMessage/*, BaseMessage */ } from '@langchain/core/messages'
+import {
+  END,
+  START,
+  StateGraph
+} from '@langchain/langgraph'
 
-import { agentNode } from '@/lib/ai/node/agent'
-import { toolNode } from '@/lib/ai/node/tool'
-import { GraphState } from '@/lib/ai/state'
-import { classifierNode } from '@/lib/ai/node/classifier'
-import { actionNode } from '@/lib/ai/node/action'
-import { confirmationNode } from '@/lib/ai/node/confirmation'
+import {
+  AIMessage
+} from '@langchain/core/messages'
 
-const shouldContinue = (state: typeof GraphState.State) => {
-  const lastMessage = state.messages[state.messages.length - 1]
-  const message = lastMessage as AIMessage
+import {
+  agentNode
+} from '@/lib/ai/node/agent'
 
-  if (message.tool_calls?.length) {
+import {
+  toolNode
+} from '@/lib/ai/node/tool'
+
+import {
+  GraphState
+} from '@/lib/ai/state'
+
+import {
+  classifierNode
+} from '@/lib/ai/node/classifier'
+
+import {
+  actionNode
+} from '@/lib/ai/node/action'
+
+import {
+  confirmationNode
+} from '@/lib/ai/node/confirmation'
+
+import {
+  executorNode
+} from '@/lib/ai/node/executor'
+
+import {
+  cancelNode
+} from '@/lib/ai/node/cancel'
+
+
+const shouldContinue = (
+  state: typeof GraphState.State
+) => {
+
+  const lastMessage =
+    state.messages[
+      state.messages.length - 1
+    ]
+
+  const message =
+    lastMessage as AIMessage
+
+  if (
+    message.tool_calls?.length
+  ) {
     return 'tools'
   }
 
   return END
 }
 
+
 export const graph = new StateGraph(GraphState)
 
-  // Decide whether this is a query or an action
+//
+// Classify incoming request
+//
+
   .addNode(
     'classifier',
     classifierNode
   )
 
-  // Normal LLM reasoning
+//
+// Normal LLM reasoning
+//
+
   .addNode(
     'agent',
     agentNode
   )
 
-  // Determine which action should be performed
+//
+// Create pending AWS action
+//
+
   .addNode(
     'action',
     actionNode
   )
 
-  // Ask the user to confirm the action
+//
+// Ask user for approval
+//
+
   .addNode(
     'confirmation',
     confirmationNode
   )
 
-  // Read-only AWS tools
+//
+// Execute confirmed action
+//
+
+  .addNode(
+    'executor',
+    executorNode
+  )
+
+//
+// Handle cancelled actions
+//
+
+  .addNode(
+    'cancel',
+    cancelNode
+  )
+
+//
+// AWS tools
+//
+
   .addNode(
     'tools',
     toolNode
   )
 
-  // Start
+
+//
+// Start
+//
+
   .addEdge(
     START,
     'classifier'
   )
 
-  // Route based on intent
+
+//
+// Classifier routing
+//
+
   .addConditionalEdges(
     'classifier',
     state => state.intent,
     {
       query: 'agent',
-      action: 'action'
+      action: 'action',
+      confirm: 'executor',
+      cancel: 'cancel'
     }
   )
 
-  // Normal tool loop
+
+//
+// Query tool loop
+//
+
   .addConditionalEdges(
     'agent',
     shouldContinue
   )
+
 
   .addEdge(
     'tools',
     'agent'
   )
 
-  // Action flow
+
+//
+// Initial action request
+//
+
   .addEdge(
     'action',
     'confirmation'
   )
+
+
+//
+// Confirmation pauses the graph.
+// The next user message starts a new run.
+//
 
   .addEdge(
     'confirmation',
     END
   )
 
+
+//
+// Confirmed action flow
+//
+
+  .addEdge(
+    'executor',
+    'tools'
+  )
+
+
+//
+// Cancelled action flow
+//
+
+  .addEdge(
+    'cancel',
+    END
+  )
+
+
   .compile()
+
+// import { END, START, StateGraph } from '@langchain/langgraph'
+// import { AIMessage/*, BaseMessage */ } from '@langchain/core/messages'
+
+// import { agentNode } from '@/lib/ai/node/agent'
+// import { toolNode } from '@/lib/ai/node/tool'
+// import { GraphState } from '@/lib/ai/state'
+// import { classifierNode } from '@/lib/ai/node/classifier'
+// import { actionNode } from '@/lib/ai/node/action'
+// import { confirmationNode } from '@/lib/ai/node/confirmation'
+
+// const shouldContinue = (state: typeof GraphState.State) => {
+//   const lastMessage = state.messages[state.messages.length - 1]
+//   const message = lastMessage as AIMessage
+
+//   if (message.tool_calls?.length) {
+//     return 'tools'
+//   }
+
+//   return END
+// }
+
+// export const graph = new StateGraph(GraphState)
+
+//   // Decide whether this is a query or an action
+//   .addNode(
+//     'classifier',
+//     classifierNode
+//   )
+
+//   // Normal LLM reasoning
+//   .addNode(
+//     'agent',
+//     agentNode
+//   )
+
+//   // Determine which action should be performed
+//   .addNode(
+//     'action',
+//     actionNode
+//   )
+
+//   // Ask the user to confirm the action
+//   .addNode(
+//     'confirmation',
+//     confirmationNode
+//   )
+
+//   // Read-only AWS tools
+//   .addNode(
+//     'tools',
+//     toolNode
+//   )
+
+//   // Start
+//   .addEdge(
+//     START,
+//     'classifier'
+//   )
+
+//   // Route based on intent
+//   .addConditionalEdges(
+//     'classifier',
+//     state => state.intent,
+//     {
+//       query: 'agent',
+//       action: 'action'
+//     }
+//   )
+
+//   // Normal tool loop
+//   .addConditionalEdges(
+//     'agent',
+//     shouldContinue
+//   )
+
+//   .addEdge(
+//     'tools',
+//     'agent'
+//   )
+
+//   // Action flow
+//   .addEdge(
+//     'action',
+//     'confirmation'
+//   )
+
+//   .addEdge(
+//     'confirmation',
+//     END
+//   )
+
+//   .compile()
 
 // export const graph = new StateGraph(GraphState)
 
