@@ -38,13 +38,18 @@ export const GraphState = Annotation.Root({
     default: () => 'unknown'
   }),
 
-  pendingAction: Annotation<{
-    tool: string
-    args: Record<string, unknown>
-  } | null>({
+  pendingAction: Annotation<PendingAction | null>({
     reducer: (_old, value) => value,
     default: () => null
   })
+
+  // pendingAction: Annotation<{
+  //   tool: string
+  //   args: Record<string, unknown>
+  // } | null>({
+  //   reducer: (_old, value) => value,
+  //   default: () => null
+  // })
 
   // pendingAction: Annotation<PendingAction | null>({
   //   reducer: (_, y) => y,
