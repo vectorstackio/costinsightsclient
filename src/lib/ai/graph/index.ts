@@ -8,6 +8,7 @@ import { toolNode } from '@/lib/ai/node/tool'
 import { GraphState } from '@/lib/ai/state'
 import { classifierNode } from '@/lib/ai/node/classifier'
 import { actionNode } from '@/lib/ai/node/action'
+import { confirmationNode } from '@/lib/ai/node/confirmation'
 
 const shouldContinue = (state: typeof GraphState.State) => {
   const lastMessage = state.messages[state.messages.length - 1]
@@ -22,37 +23,43 @@ const shouldContinue = (state: typeof GraphState.State) => {
 
 export const graph = new StateGraph(GraphState)
 
-  // classify the request first
+  // Decide whether this is a query or an action
   .addNode(
     'classifier',
     classifierNode
   )
 
-  // normal AI reasoning node
+  // Normal LLM reasoning
   .addNode(
     'agent',
     agentNode
   )
 
-  // action handling node
+  // Determine which action should be performed
   .addNode(
     'action',
     actionNode
   )
 
-  // existing tools
+  // Ask the user to confirm the action
+  .addNode(
+    'confirmation',
+    confirmationNode
+  )
+
+  // Read-only AWS tools
   .addNode(
     'tools',
     toolNode
   )
 
-
+  // Start
   .addEdge(
     START,
     'classifier'
   )
 
-
+  // Route based on intent
   .addConditionalEdges(
     'classifier',
     state => state.intent,
@@ -62,26 +69,92 @@ export const graph = new StateGraph(GraphState)
     }
   )
 
-
+  // Normal tool loop
   .addConditionalEdges(
     'agent',
     shouldContinue
   )
-
 
   .addEdge(
     'tools',
     'agent'
   )
 
-
+  // Action flow
   .addEdge(
     'action',
+    'confirmation'
+  )
+
+  .addEdge(
+    'confirmation',
     END
   )
 
-
   .compile()
+
+// export const graph = new StateGraph(GraphState)
+
+//   // classify the request first
+//   .addNode(
+//     'classifier',
+//     classifierNode
+//   )
+
+//   // normal AI reasoning node
+//   .addNode(
+//     'agent',
+//     agentNode
+//   )
+
+//   // action handling node
+//   .addNode(
+//     'action',
+//     actionNode
+//   )
+
+//   // existing tools
+//   .addNode(
+//     'tools',
+//     toolNode
+//   )
+
+
+//   .addEdge(
+//     START,
+//     'classifier'
+//   )
+
+
+//   .addConditionalEdges(
+//     'classifier',
+//     state => state.intent,
+//     {
+//       query: 'agent',
+//       action: 'action'
+//     }
+//   )
+
+
+//   .addConditionalEdges(
+//     'agent',
+//     shouldContinue
+//   )
+
+
+//   .addEdge(
+//     'tools',
+//     'agent'
+//   )
+
+
+//   .addEdge(
+//     'action',
+//     END
+//   )
+
+
+//   .compile()
 
 // export const graph = new StateGraph(GraphState)
 //   .addNode('agent', agentNode)
