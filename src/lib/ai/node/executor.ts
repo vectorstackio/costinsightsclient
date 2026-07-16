@@ -24,6 +24,8 @@ export const executorNode = async (
   }
 
   return {
+    pendingAction: null,
+
     messages: [
       new AIMessage({
         content: '',
