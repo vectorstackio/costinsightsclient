@@ -3,6 +3,11 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 
+export type Ec2Action =
+  | 'start'
+  | 'stop'
+  | 'reboot'
+
 export const createEbsSnapshot = tool(
   async ({ volumeId }) => {
     const res = await fetch(
@@ -60,3 +65,91 @@ export const deleteEbsVolume = tool(
     })
   }
 )
+
+export const stopEc2Instance = tool(
+  async ({ instanceId }) =>
+    performEc2Action(
+      'stop',
+      instanceId
+    ),
+  {
+    name: 'stopEc2Instance',
+    description: 'Stops an EC2 instance.',
+    schema: z.object({
+      instanceId: z.string()
+    })
+  }
+)
+
+export const startEc2Instance = tool(
+  async ({ instanceId }) =>
+    performEc2Action(
+      'start',
+      instanceId
+    ),
+  {
+    name: 'startEc2Instance',
+    description: 'Starts an EC2 instance.',
+    schema: z.object({
+      instanceId: z.string()
+    })
+  }
+)
+
+export const rebootEc2Instance = tool(
+  async ({ instanceId }) =>
+    performEc2Action(
+      'reboot',
+      instanceId
+    ),
+  {
+    name: 'rebootEc2Instance',
+    description: 'Reboots an EC2 instance.',
+    schema: z.object({
+      instanceId: z.string()
+    })
+  }
+)
+
+export const performEc2Action = async (
+  action: Ec2Action,
+  instanceId: string
+) => {
+
+  const res =
+    await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json'
+        },
+
+        body: JSON.stringify({
+          action,
+          instanceId
+        })
+      }
+    )
+
+
+  if (
+    !res.ok
+  ) {
+
+    const error =
+      await res.text()
+
+    throw new Error(
+      error ||
+      `Failed to ${action} EC2 instance`
+    )
+
+  }
+
+
+  return await res.json()
+
+}

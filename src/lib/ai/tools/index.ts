@@ -9,11 +9,15 @@ import {
   getInfrastructureHealth,
   getInfrastructureHistory,
   getEc2Instances,
-  getEbsVolumes
+  getEbsVolumes,
+  getEc2Inventory
 } from './infrastructure'
 import {
   createEbsSnapshot,
-  deleteEbsVolume
+  deleteEbsVolume,
+  startEc2Instance,
+  stopEc2Instance,
+  rebootEc2Instance
 } from './actions'
 
 export const tools = [
@@ -23,5 +27,9 @@ export const tools = [
   getEc2Instances,
   getEbsVolumes,
   createEbsSnapshot,
-  deleteEbsVolume
+  deleteEbsVolume,
+  startEc2Instance,
+  stopEc2Instance,
+  rebootEc2Instance,
+  getEc2Inventory
 ]

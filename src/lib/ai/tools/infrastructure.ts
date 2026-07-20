@@ -93,7 +93,7 @@ export const getEc2Instances = tool(
   {
     name: 'getEc2Instances',
     description:
-      'Returns all currently running EC2 instances with their instance details and utilisation metrics',
+      'Returns CPU, memory and disk utilisation metrics for currently running EC2 instances only. Use this tool for performance monitoring questions, not for listing all EC2 instances or finding stopped instances.',
     schema: z.object({})
   }
 )
@@ -123,6 +123,43 @@ export const getEbsVolumes = tool(
     name: 'getEbsVolumes',
     description:
       'Returns EBS volumes including size, type, encryption status and whether they are attached to EC2 instances',
+    schema: z.object({})
+  }
+)
+
+export const getEc2Inventory = tool(
+  async () => {
+
+    const res =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2`
+      )
+
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch EC2 inventory'
+      )
+    }
+
+
+    const data =
+      await res.json()
+
+
+    return JSON.stringify(
+      data.instances,
+      null,
+      2
+    )
+
+  },
+  {
+    name: 'getEc2Inventory',
+
+    description:
+      'Returns the complete EC2 inventory including running, stopped, pending and other instance states. Use this tool when the user asks to list, find, or filter EC2 instances.',
+
     schema: z.object({})
   }
 )
