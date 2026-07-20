@@ -33,7 +33,7 @@ export const GraphState = Annotation.Root({
   }),
 
   intent: Annotation<
-    'query' | 'action' | 'unknown'
+    'query' | 'action' | 'confirm' | 'cancel' | 'unknown'
   >({
     reducer: (x, y) => y ?? x,
     default: () => 'unknown'
