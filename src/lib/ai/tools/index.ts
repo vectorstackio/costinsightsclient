@@ -11,7 +11,10 @@ import {
   getEc2Instances,
   getEbsVolumes
 } from './infrastructure'
-import { createEbsSnapshot } from './actions'
+import {
+  createEbsSnapshot,
+  deleteEbsVolume
+} from './actions'
 
 export const tools = [
   getMonthlyCosts,
@@ -19,5 +22,6 @@ export const tools = [
   getInfrastructureHistory,
   getEc2Instances,
   getEbsVolumes,
-  createEbsSnapshot
+  createEbsSnapshot,
+  deleteEbsVolume
 ]

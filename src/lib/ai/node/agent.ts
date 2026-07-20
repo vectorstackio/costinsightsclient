@@ -2,9 +2,10 @@
 
 import { SystemMessage, AIMessage } from '@langchain/core/messages'
 
-import { AgentState } from '../state'
 import { model } from '../llm'
 import { tools } from '../tools'
+
+import type { AgentState } from '@/types'
 
 const systemPrompt = `
 You are an AWS Cloud Operations Copilot.

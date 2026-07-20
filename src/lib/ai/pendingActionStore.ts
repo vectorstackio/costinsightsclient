@@ -2,15 +2,13 @@
 
 import type {
   PendingAction
-} from '@/lib/ai/state'
+} from '@/types'
 
 let pendingAction: PendingAction | null = null
-
 
 export function getPendingAction() {
   return pendingAction
 }
-
 
 export function setPendingAction(
   action: PendingAction | null

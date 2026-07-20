@@ -20,7 +20,7 @@ import type {
 
 import type {
   PendingAction
-} from '@/lib/ai/state'
+} from '@/types'
 
 
 type ClientMessage = {

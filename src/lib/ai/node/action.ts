@@ -8,15 +8,19 @@ import {
   GraphState
 } from '@/lib/ai/state'
 
+
 export const actionNode = async (
   state: typeof GraphState.State
 ) => {
+
   //
   // If we already have a pending action,
   // don't create another one.
   //
 
-  if (state.pendingAction) {
+  if (
+    state.pendingAction
+  ) {
     return {
       messages: [
         new AIMessage(
@@ -30,191 +34,107 @@ Reply **confirm** to continue or **cancel** to abort.`
     }
   }
 
+
+  const question =
+    state.question.toLowerCase()
+
+
   //
-  // First time we've seen this action.
-  // The classifier has already decided this is an action request.
+  // Extract EBS volume ID
   //
 
   const volumeMatch =
     state.question.match(/vol-[a-z0-9]+/i)
 
+
   const volumeId =
     volumeMatch?.[0]
 
-  if (!volumeId) {
+
+  if (
+    !volumeId
+  ) {
     return {
       messages: [
         new AIMessage(
-          'Please specify the volume ID to snapshot.'
+          'Please specify the EBS volume ID.'
         )
       ]
     }
   }
 
-  return {
-    pendingAction: {
-      tool: 'createEbsSnapshot',
-      args: {
-        volumeId
-      },
-      description:
-        `Create an EBS snapshot for volume ${volumeId}`
-    },
 
-    messages: [
-      new AIMessage(
-        `This action will create an EBS snapshot.
+  //
+  // Determine requested action
+  //
+
+  let tool: string
+  let description: string
+  let confirmationMessage: string
+
+
+  if (
+    question.includes('delete') ||
+    question.includes('remove')
+  ) {
+
+    tool = 'deleteEbsVolume'
+
+    description =
+      `Delete EBS volume ${volumeId}`
+
+    confirmationMessage =
+      `This action will delete the EBS volume.
 
 Volume:
 ${volumeId}
 
 Reply **confirm** to continue or **cancel** to abort.`
+
+  } else if (
+    question.includes('snapshot') ||
+    question.includes('backup')
+  ) {
+
+    tool = 'createEbsSnapshot'
+
+    description =
+      `Create an EBS snapshot for volume ${volumeId}`
+
+    confirmationMessage =
+      `This action will create an EBS snapshot.
+
+Volume:
+${volumeId}
+
+Reply **confirm** to continue or **cancel** to abort.`
+
+  } else {
+
+    return {
+      messages: [
+        new AIMessage(
+          'I can currently create EBS snapshots or delete unused EBS volumes. Please specify which action you would like to perform.'
+        )
+      ]
+    }
+
+  }
+
+
+  return {
+    pendingAction: {
+      tool,
+      args: {
+        volumeId
+      },
+      description
+    },
+
+    messages: [
+      new AIMessage(
+        confirmationMessage
       )
     ]
   }
-
-  //   return {
-  //     pendingAction: {
-  //       tool: 'createEbsSnapshot',
-  //       args: {
-  //         volumeId: 'vol-083d93921a58f1bd7'
-  //       },
-  //       description:
-  //         'Create an EBS snapshot for volume vol-083d93921a58f1bd7'
-  //     },
-
-  //     messages: [
-  //       new AIMessage(
-  //         `This action will create an EBS snapshot.
-
-  // Volume:
-  // vol-083d93921a58f1bd7
-
-  // Reply **confirm** to continue or **cancel** to abort.`
-  //       )
-  //     ]
-  //   }
 }
-
-// import { AIMessage } from '@langchain/core/messages'
-
-// import { GraphState } from '@/lib/ai/state'
-// import {
-//   createEbsSnapshot
-//   // stopInstance,
-//   // rebootInstance
-// } from '@/lib/ai/tools'
-
-// const actionTools = {
-//   createEbsSnapshot
-//   // stopInstance,
-//   // rebootInstance
-// }
-
-// export const actionNode = async (
-//   state: typeof GraphState.State
-// ) => {
-//   const question = state.question.trim().toLowerCase()
-
-//   //
-//   // User has already confirmed an action
-//   //
-
-//   if (
-//     state.pendingAction &&
-//     (
-//       question === 'confirm' ||
-//       question === 'yes'
-//     )
-//   ) {
-//     const {
-//       tool,
-//       args
-//     } = state.pendingAction
-
-//     const fn = actionTools[
-//       tool as keyof typeof actionTools
-//     ]
-
-//     if (!fn) {
-//       return {
-//         pendingAction: null,
-//         messages: [
-//           new AIMessage(
-//             `Unknown action '${tool}'.`
-//           )
-//         ]
-//       }
-//     }
-
-//     try {
-//       const result = await fn.invoke(args as never)
-
-//       return {
-//         pendingAction: null,
-//         messages: [
-//           new AIMessage(
-//             JSON.stringify(result, null, 2)
-//           )
-//         ]
-//       }
-//     } catch (err) {
-//       return {
-//         pendingAction: null,
-//         messages: [
-//           new AIMessage(
-//             err instanceof Error
-//               ? err.message
-//               : 'Action failed.'
-//           )
-//         ]
-//       }
-//     }
-//   }
-
-//   //
-//   // User cancelled
-//   //
-
-//   if (
-//     state.pendingAction &&
-//     (
-//       question === 'cancel' ||
-//       question === 'no'
-//     )
-//   ) {
-//     return {
-//       pendingAction: null,
-//       messages: [
-//         new AIMessage(
-//           'Action cancelled.'
-//         )
-//       ]
-//     }
-//   }
-
-//   //
-//   // First time we've seen this action.
-//   // The classifier has already decided this is an action request.
-//   //
-
-//   return {
-//     pendingAction: {
-//       tool: 'createEbsSnapshot',
-//       args: {
-//         volumeId: 'vol-083d93921a58f1bd7'
-//       }
-//     },
-
-//     messages: [
-//       new AIMessage(
-//         `This action will create an EBS snapshot.
-
-// Volume:
-// vol-083d93921a58f1bd7
-
-// Reply **confirm** to continue or **cancel** to abort.`
-//       )
-//     ]
-//   }
-// }
