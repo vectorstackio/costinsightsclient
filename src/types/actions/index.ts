@@ -6,10 +6,12 @@ export type ActionDefinition = {
   resource: 'volume' | 'instance'
 
   description: (
-    id: string
+    id: string,
+    size?: number
   ) => string
 
   confirmation: (
-    id: string
+    id: string,
+    size?: number
   ) => string
 }

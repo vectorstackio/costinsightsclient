@@ -15,6 +15,7 @@ import {
 import {
   createEbsSnapshot,
   deleteEbsVolume,
+  resizeEbsVolume,
   startEc2Instance,
   stopEc2Instance,
   rebootEc2Instance
@@ -28,6 +29,7 @@ export const tools = [
   getEbsVolumes,
   createEbsSnapshot,
   deleteEbsVolume,
+  resizeEbsVolume,
   startEc2Instance,
   stopEc2Instance,
   rebootEc2Instance,

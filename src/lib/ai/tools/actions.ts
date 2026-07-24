@@ -66,6 +66,46 @@ export const deleteEbsVolume = tool(
   }
 )
 
+export const resizeEbsVolume = tool(
+  async ({
+    volumeId,
+    size
+  }) => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/resize`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          volumeId,
+          size
+        })
+      }
+    )
+
+    if (!res.ok) {
+      throw new Error('Failed to resize EBS volume')
+    }
+
+    return await res.json()
+  },
+  {
+    name: 'resizeEbsVolume',
+    description:
+      'Increases the size of an EBS volume. The new size must be greater than the current size.',
+    schema: z.object({
+      volumeId: z.string().describe(
+        'The EBS volume ID'
+      ),
+      size: z.number().int().positive().describe(
+        'The new EBS volume size in GiB'
+      )
+    })
+  }
+)
+
 export const stopEc2Instance = tool(
   async ({ instanceId }) =>
     performEc2Action(
