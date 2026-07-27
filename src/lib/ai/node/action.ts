@@ -42,20 +42,84 @@ Reply **confirm** to continue or **cancel** to abort.`
   const question =
     state.question.toLowerCase()
 
+
   //
-  // Find the first matching action.
+  // Find the best matching action.
+  //
+  // Longer keyword phrases receive a higher score.
+  //
+  // For example:
+  //
+  // "expand filesystem"
+  //
+  // scores higher than:
+  //
+  // "expand"
+  //
+  // This prevents generic keywords from
+  // incorrectly winning over specific ones.
   //
 
-  const action =
-    actions.find(
-      action =>
-        action.keywords.some(
-          keyword =>
-            question.includes(
-              keyword
+  const rankedActions =
+    actions
+      .map(
+        action => {
+
+          const score =
+            action.keywords.reduce(
+              (
+                total,
+                keyword
+              ) => {
+
+                const normalisedKeyword =
+                  keyword.toLowerCase()
+
+
+                if (
+                  question.includes(
+                    normalisedKeyword
+                  )
+                ) {
+
+                  return (
+                    total +
+                    normalisedKeyword.length
+                  )
+
+                }
+
+
+                return total
+
+              },
+              0
             )
-        )
-    )
+
+
+          return {
+            action,
+            score
+          }
+
+        }
+      )
+      .filter(
+        result =>
+          result.score > 0
+      )
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          b.score -
+          a.score
+      )
+
+
+  const action =
+    rankedActions[0]?.action
 
 
   //
@@ -400,7 +464,6 @@ Reply **confirm** to continue or **cancel** to abort.`
 //   const question =
 //     state.question.toLowerCase()
 
-
 //   //
 //   // Find the first matching action.
 //   //
@@ -427,7 +490,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 //     return {
 //       messages: [
 //         new AIMessage(
-//           'I can currently create or delete EBS resources, resize EBS volumes, and start, stop or reboot EC2 instances.'
+//           'I can currently create or delete EBS resources, resize EBS volumes, expand EBS filesystems, and start, stop or reboot EC2 instances.'
 //         )
 //       ]
 //     }
@@ -435,7 +498,101 @@ Reply **confirm** to continue or **cancel** to abort.`
 
 
 //   //
-//   // Extract the resource ID.
+//   // Extract resource IDs.
+//   //
+
+//   const volumeId =
+//     state.question.match(
+//       /vol-[a-z0-9]+/i
+//     )?.[0]
+
+
+//   const instanceId =
+//     state.question.match(
+//       /i-[a-z0-9]+/i
+//     )?.[0]
+
+
+//   //
+//   // Expand EBS filesystem
+//   // requires both a volume ID
+//   // and an instance ID.
+//   //
+
+//   if (
+//     action.tool === 'expandEbsFilesystem'
+//   ) {
+
+//     if (
+//       !volumeId
+//     ) {
+//       return {
+//         messages: [
+//           new AIMessage(
+//             'Please specify the EBS volume ID.'
+//           )
+//         ]
+//       }
+//     }
+
+
+//     if (
+//       !instanceId
+//     ) {
+//       return {
+//         messages: [
+//           new AIMessage(
+//             'Please specify the EC2 instance ID.'
+//           )
+//         ]
+//       }
+//     }
+
+
+//     const args = {
+//       volumeId,
+
+//       instanceId
+//     }
+
+
+//     return {
+
+//       pendingAction: {
+
+//         tool:
+//           action.tool,
+
+//         args,
+
+//         description:
+//           action.description(
+//             volumeId,
+//             instanceId
+//           )
+
+//       },
+
+
+//       messages: [
+
+//         new AIMessage(
+//           action.confirmation(
+//             volumeId,
+//             instanceId
+//           )
+//         )
+
+//       ]
+
+//     }
+
+//   }
+
+
+//   //
+//   // Resource ID is required for all
+//   // other actions.
 //   //
 
 //   let resourceId:
@@ -447,9 +604,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 //   ) {
 
 //     resourceId =
-//       state.question.match(
-//         /vol-[a-z0-9]+/i
-//       )?.[0]
+//       volumeId
 
 //   }
 
@@ -459,9 +614,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 //   ) {
 
 //     resourceId =
-//       state.question.match(
-//         /i-[a-z0-9]+/i
-//       )?.[0]
+//       instanceId
 
 //   }
 
@@ -540,31 +693,61 @@ Reply **confirm** to continue or **cancel** to abort.`
 //       size
 //     }
 
-//   } else {
 
-//     args =
-//       action.resource === 'volume'
-//         ? {
-//           volumeId:
-//             resourceId
-//         }
-//         : {
-//           instanceId:
-//             resourceId
-//         }
+//     return {
+
+//       pendingAction: {
+
+//         tool:
+//           action.tool,
+
+//         args,
+
+//         description:
+//           action.description(
+//             resourceId,
+//             size
+//           )
+
+//       },
+
+
+//       messages: [
+
+//         new AIMessage(
+//           action.confirmation(
+//             resourceId,
+//             size
+//           )
+//         )
+
+//       ]
+
+//     }
 
 //   }
 
 
 //   //
-//   // Create the pending action.
+//   // Build arguments for standard
+//   // single-resource actions.
 //   //
 
-//   const size =
-//     action.tool === 'resizeEbsVolume'
-//       ? args.size as number
-//       : undefined
+//   args =
+//     action.resource === 'volume'
+//       ? {
+//         volumeId:
+//           resourceId
+//       }
+//       : {
+//         instanceId:
+//           resourceId
+//       }
 
+
+//   //
+//   // Create the pending action.
+//   //
 
 //   return {
 
@@ -577,8 +760,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 
 //       description:
 //         action.description(
-//           resourceId,
-//           size
+//           resourceId
 //         )
 
 //     },
@@ -588,8 +770,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 
 //       new AIMessage(
 //         action.confirmation(
-//           resourceId,
-//           size
+//           resourceId
 //         )
 //       )
 
