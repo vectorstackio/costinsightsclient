@@ -106,6 +106,73 @@ export const resizeEbsVolume = tool(
   }
 )
 
+export const expandEbsFilesystem = tool(
+  async ({
+    instanceId,
+    volumeId
+  }) => {
+
+    const res =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/expand`,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+
+          body: JSON.stringify({
+            instanceId,
+            volumeId
+          })
+        }
+      )
+
+
+    if (
+      !res.ok
+    ) {
+
+      const error =
+        await res.text()
+
+      throw new Error(
+        error ||
+        'Failed to expand EBS filesystem'
+      )
+
+    }
+
+
+    return await res.json()
+
+  },
+  {
+    name:
+      'expandEbsFilesystem',
+
+    description:
+      'Expands the partition and filesystem after an EBS volume has been increased in size.',
+
+    schema:
+      z.object({
+
+        instanceId:
+          z.string().describe(
+            'The EC2 instance ID where the EBS volume is attached'
+          ),
+
+        volumeId:
+          z.string().describe(
+            'The EBS volume ID'
+          )
+
+      })
+  }
+)
+
 export const stopEc2Instance = tool(
   async ({ instanceId }) =>
     performEc2Action(

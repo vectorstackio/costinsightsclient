@@ -7,11 +7,11 @@ export type ActionDefinition = {
 
   description: (
     id: string,
-    size?: number
+    second?: string | number
   ) => string
 
   confirmation: (
     id: string,
-    size?: number
+    second?: string | number
   ) => string
 }
