@@ -163,3 +163,40 @@ export const getEc2Inventory = tool(
     schema: z.object({})
   }
 )
+
+export const getLambdaInventory = tool(
+  async () => {
+
+    const res =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/lambda`
+      )
+
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch Lambda inventory'
+      )
+    }
+
+
+    const data =
+      await res.json()
+
+
+    return JSON.stringify(
+      data.functions,
+      null,
+      2
+    )
+
+  },
+  {
+    name: 'getLambdaInventory',
+
+    description:
+      'Returns the complete Lambda function inventory. Use this tool when the user asks to list, find, or filter Lambda functions.',
+
+    schema: z.object({})
+  }
+)
