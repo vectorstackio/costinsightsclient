@@ -200,3 +200,40 @@ export const getLambdaInventory = tool(
     schema: z.object({})
   }
 )
+
+export const getApiGatewayInventory = tool(
+  async () => {
+
+    const res =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/apigateway`
+      )
+
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch API Gateway inventory'
+      )
+    }
+
+
+    const data =
+      await res.json()
+
+
+    return JSON.stringify(
+      data,
+      null,
+      2
+    )
+
+  },
+  {
+    name: 'getApiGatewayInventory',
+
+    description:
+      'Returns the complete API Gateway inventory including REST APIs, HTTP APIs and WebSocket APIs. Use this tool when the user asks to list, find, or filter API Gateways.',
+
+    schema: z.object({})
+  }
+)

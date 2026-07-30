@@ -11,7 +11,8 @@ import {
   getEc2Instances,
   getEbsVolumes,
   getEc2Inventory,
-  getLambdaInventory
+  getLambdaInventory,
+  getApiGatewayInventory
 } from './infrastructure'
 import {
   createEbsSnapshot,
@@ -37,5 +38,6 @@ export const tools = [
   stopEc2Instance,
   rebootEc2Instance,
   getEc2Inventory,
-  getLambdaInventory
+  getLambdaInventory,
+  getApiGatewayInventory
 ]
