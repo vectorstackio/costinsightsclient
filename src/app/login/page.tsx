@@ -12,7 +12,6 @@ const LoginForm = () => {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>('')
-  const [buttonDisabled, setButtonDisabled] = useState(true)
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,7 +36,6 @@ const LoginForm = () => {
     if(e.target.name === 'password') {
       setPassword(e.target.value)
     }
-    setButtonDisabled(!(email && password))
   }
 
   return (
@@ -93,7 +91,7 @@ const LoginForm = () => {
           <button
             type="submit"
             className="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            disabled={buttonDisabled}
+            disabled={!email || !password || loading}
           >
             Sign In
           </button>
