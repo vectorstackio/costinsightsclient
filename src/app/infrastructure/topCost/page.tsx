@@ -7,6 +7,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 import { useInfrastructureTopCost } from '@/lib/hooks/useInfrastructureTopCost'
+import { formatCurrency } from '@/lib/reports'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Forbidden from '@/components/Forbidden'
 
@@ -107,7 +108,7 @@ const TopCostPage = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <MetricCard
           title='Monthly Cost'
-          value={`£${totalMonthlyCost.toFixed(0)}`}
+          value={formatCurrency(totalMonthlyCost, data.metadata?.currency ?? 'USD')}
           subtitle='Estimated EC2 spend'
           trend={{
             value: 'Stable vs last period',
@@ -117,7 +118,7 @@ const TopCostPage = () => {
         
         <MetricCard
           title='Potential Savings'
-          value={`£${totalPotentialSavings.toFixed(0)}`}
+          value={formatCurrency(totalPotentialSavings, data.metadata?.currency ?? 'USD')}
           subtitle='From underutilised instances'
           trend={{
             value: 'Down 8% after optimisation',
@@ -152,11 +153,11 @@ const TopCostPage = () => {
 
               <div className="text-right">
                 <div className="font-semibold">
-                  £{instance.monthlyCost.toFixed(0)}
+                  {formatCurrency(instance.monthlyCost, data.metadata?.currency ?? 'USD')}
                 </div>
 
                 <div className="text-xs text-slate-500">
-                  £{instance.estimatedWaste.toFixed(0)}
+                  {formatCurrency(instance.estimatedWaste, data.metadata?.currency ?? 'USD')}
                   {' '}recoverable
                 </div>
               </div>

@@ -1,11 +1,15 @@
 // components/CostHistory.tsx
 
+import { formatCurrency } from '@/lib/reports'
+
+import type { Currency } from '@/types'
+
 type TrendPoint = {
   month: string
   cost: number
 }
 
-const CostHistoryPanel = ({ trend }: { trend: TrendPoint[] }) => {
+const CostHistoryPanel = ({ trend, currency }: { trend: TrendPoint[], currency: Currency }) => {
   return (
     <div className="border rounded p-4">
       <h2 className="font-semibold mb-3">
@@ -19,7 +23,7 @@ const CostHistoryPanel = ({ trend }: { trend: TrendPoint[] }) => {
               {t.month}
             </div>
             <div className="font-bold">
-              £{t.cost.toFixed(2)}
+              {formatCurrency(t.cost, currency)}
             </div>
           </div>
         ))}

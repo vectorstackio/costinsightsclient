@@ -94,11 +94,13 @@ const InsightsPage = () => {
         currentCost={insights.data.period.currentMonthCost}
         previousCost={insights.data.period.previousMonthCost}
         changePercent={insights.data.period.monthOverMonthChangePercent}
+        currency={summary.metadata.currency}
       />
 
       <InvestigationTargets
         drivers={insights.data.drivers}
         anomalies={insights.data.anomalies}
+        currency={summary.metadata.currency}
       />
 
       <div className="border rounded p-4 bg-white">
@@ -111,12 +113,13 @@ const InsightsPage = () => {
             <RootCauseNodeView
               key={node.key}
               node={node}
+              currency={summary.metadata.currency}
             />
           ))}
         </div>
       </div>
 
-      <AnomalyExplorer anomalies={insights.data.anomalies} />
+      <AnomalyExplorer anomalies={insights.data.anomalies} currency={summary.metadata.currency} />
 
       <Recommendations topRecommendations={insights.data.recommendations} />
 

@@ -11,6 +11,10 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
+import { formatCurrency } from '@/lib/reports'
+
+import type { Currency } from '@/types'
+
 type ServiceCost = {
   service: string
   cost: number
@@ -19,9 +23,10 @@ type ServiceCost = {
 type Props = {
   data: ServiceCost[]
   onSelectService?: (service: string | null) => void
+  currency: Currency
 }
 
-const ServiceCostChart = ({ data, onSelectService }: Props) => {
+const ServiceCostChart = ({ data, onSelectService, currency }: Props) => {
   return (
     <div className="border rounded p-4">
       <h2 className="font-semibold mb-4">
@@ -46,10 +51,12 @@ const ServiceCostChart = ({ data, onSelectService }: Props) => {
           <YAxis />
 
           <Tooltip
-            formatter={(value) => [
-              `£${Number(value ?? 0).toFixed(2)}`,
-              'Cost'
-            ]}
+            formatter={(v) =>
+              formatCurrency(
+                Number(v ?? 0),
+                currency
+              )
+            }
           />
 
           <Bar

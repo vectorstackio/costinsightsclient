@@ -13,7 +13,8 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
 
-import type { Dimension } from '@/types'
+import { formatCurrency } from '@/lib/reports'
+import type { Dimension, Currency } from '@/types'
 
 /**
  * -----------------------
@@ -32,6 +33,7 @@ type PreviewState = {
 
 type Props = {
   selectedService: string | null
+  currency: Currency
 }
 
 /**
@@ -70,7 +72,7 @@ const ROOT_GROUP_BY = 'SERVICE'
  * COMPONENT
  * -----------------------
  */
-const ServiceCostPieChart = ({ selectedService }: Props) => {
+const ServiceCostPieChart = ({ selectedService, currency }: Props) => {
   const {
     drilldown,
     loadingDrilldown,
@@ -253,7 +255,7 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
                 {(preview.items ?? []).slice(0, 5).map((item) => (
                   <div key={item.key} className="flex justify-between">
                     <span className="truncate">{item.key}</span>
-                    <span>£{item.cost.toFixed(2)}</span>
+                    <span>{formatCurrency(item.cost, currency)}</span>
                   </div>
                 ))}
               </div>
@@ -298,7 +300,12 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
             </Pie>
 
             <Tooltip
-              formatter={(v) => `£${Number(v ?? 0).toFixed(2)}`}
+              formatter={(v) =>
+                formatCurrency(
+                  Number(v ?? 0),
+                  currency
+                )
+              }
             />
           </PieChart>
         </ResponsiveContainer>
@@ -321,7 +328,7 @@ const ServiceCostPieChart = ({ selectedService }: Props) => {
                 <tr key={item.key} className="border-b">
                   <td className="py-2">{item.key}</td>
                   <td className="py-2">
-                    £{item.cost.toFixed(2)}
+                    {formatCurrency(item.cost, currency)}
                   </td>
                 </tr>
               ))}

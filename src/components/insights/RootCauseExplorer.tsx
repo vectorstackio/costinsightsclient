@@ -1,12 +1,14 @@
 // components/insights/RootCauseExplorer.tsx
 
-import type { RootCauseNode } from '@/types'
+import { formatCurrency } from '@/lib/reports'
+import type { RootCauseNode, Currency } from '@/types'
 
 type Props = {
   node: RootCauseNode
+  currency: Currency
 }
 
-const RootCauseNodeView = ({ node }: Props) => {
+const RootCauseNodeView = ({ node, currency }: Props) => {
   return (
     <div className="ml-4">
       <div className="flex justify-between">
@@ -18,7 +20,7 @@ const RootCauseNodeView = ({ node }: Props) => {
         </div>
 
         <div className="font-medium">
-          £{node.currentCost.toFixed(2)}
+          {formatCurrency(node.currentCost, currency)}
         </div>
       </div>
 
@@ -26,6 +28,7 @@ const RootCauseNodeView = ({ node }: Props) => {
         <RootCauseNodeView
           key={child.key}
           node={child}
+          currency={currency}
         />
       ))}
     </div>

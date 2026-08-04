@@ -1,15 +1,22 @@
 // components/insights/ExecutiveSummary.tsx
 
+import { formatCurrency } from '@/lib/reports'
+
+import type { Currency } from '@/types'
+
+
 type Props = {
   currentCost: number
   previousCost: number
   changePercent: number
+  currency: Currency
 }
 
 const ExecutiveSummary = ({
   currentCost,
   previousCost,
-  changePercent
+  changePercent,
+  currency
 }: Props) => {
   return (
     <div className="border rounded p-4">
@@ -19,12 +26,12 @@ const ExecutiveSummary = ({
 
       <p>
         Current spend:
-        £{currentCost.toFixed(2)}
+        {formatCurrency(currentCost, currency)}
       </p>
 
       <p>
         Previous spend:
-        £{previousCost.toFixed(2)}
+        {formatCurrency(previousCost, currency)}
       </p>
 
       <p>

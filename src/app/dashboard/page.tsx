@@ -17,6 +17,7 @@ import Forbidden from '@/components/Forbidden'
 
 import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { formatCurrency } from '@/lib/reports'
 
 /**
  * -----------------------
@@ -133,12 +134,18 @@ const DashboardPage = () => {
 
           <div className="text-sm text-gray-500">Current Month</div>
           <div className="text-2xl font-bold">
-            £{summary.currentMonthCost.toFixed(2)}
+            {formatCurrency(
+              summary.currentMonthCost,
+              summary.metadata.currency
+            )}
           </div>
 
           <div className="mt-3 text-sm text-gray-500">Previous Month</div>
           <div className="text-lg text-gray-700">
-            £{summary.previousMonthCost.toFixed(2)}
+            {formatCurrency(
+              summary.previousMonthCost,
+              summary.metadata.currency
+            )}
           </div>
         </div>
 
@@ -158,7 +165,10 @@ const DashboardPage = () => {
 
           <div className="mt-3 text-sm text-gray-500">Absolute Change</div>
           <div className="text-lg font-medium">
-            £{(summary.currentMonthCost - summary.previousMonthCost).toFixed(2)}
+            {formatCurrency(
+              summary.currentMonthCost - summary.previousMonthCost,
+              summary.metadata.currency
+            )}
           </div>
 
           <div className="mt-3 text-sm text-gray-500">System Health</div>
@@ -192,7 +202,7 @@ const DashboardPage = () => {
           </div>
 
           <div className="text-sm text-gray-500">
-            +£{topDriver?.increase?.toFixed(2) ?? '0.00'}
+            +{formatCurrency(topDriver?.increase, summary.metadata.currency)}
           </div>
 
           <div className="mt-3 text-sm text-gray-500">
@@ -224,7 +234,7 @@ const DashboardPage = () => {
             Optimisation Potential
           </div>
           <div className="text-sm font-bold text-green-600">
-            £{summary.potentialSavings.toFixed(2)}
+            {formatCurrency(summary.potentialSavings, summary.metadata.currency)}
           </div>
         </div>
       </div>
@@ -232,16 +242,17 @@ const DashboardPage = () => {
       {/* -----------------------
           Charts
       ----------------------- */}
-      <CostHistoryPanel trend={summary.trend} />
+      <CostHistoryPanel trend={summary.trend} currency={summary.metadata.currency} />
 
       <div className="grid grid-cols-1 gap-6">
-        <CostTrendLineChart data={summary.trend} />
+        <CostTrendLineChart data={summary.trend} currency={summary.metadata.currency} />
 
         <ServiceCostChart
           data={filteredServices}
           onSelectService={(service) => {
             setSelectedService(service)
           }}
+          currency={summary.metadata.currency}
         />
 
         <div className="grid grid-cols-2 gap-6">
@@ -249,21 +260,26 @@ const DashboardPage = () => {
             data={summary.topCostIncreaseDrivers}
             onSelectService={(service) => {
               setSelectedService(service)
-            }} />
+            }} 
+            currency={summary.metadata.currency}
+          />
           <CostWaterfallChart
             data={summary.byServiceComparison ?? []}
             onSelectService={(service) => {
               setSelectedService(service)
-            }} />
+            }} 
+            currency={summary.metadata.currency}
+          />
         </div>
       </div>
 
       <InsightsPanel
         drivers={summary.topCostIncreaseDrivers}
         anomalies={summary.anomalies}
+        currency={summary.metadata.currency}
       />
 
-      <ServiceCostPieChart selectedService={selectedService} />
+      <ServiceCostPieChart selectedService={selectedService} currency={summary.metadata.currency} />
 
     </div>
   )

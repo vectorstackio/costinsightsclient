@@ -16,7 +16,9 @@ export const saveReportJson = async (month: string, report: unknown) => {
   )
 }
 
-export const getReportJson = async (month: string) => {
+export const getReportJson = async (
+  month: string
+) => {
   try {
     const res = await s3.send(
       new GetObjectCommand({
@@ -25,12 +27,40 @@ export const getReportJson = async (month: string) => {
       })
     )
 
-    const body = await res.Body?.transformToString()
+    const body =
+      await res.Body?.transformToString()
 
-    if (!body) return null
+    if (!body) {
+      return null
+    }
 
     return JSON.parse(body)
-  } catch (err) {
-    return {error: err, month: month}
+
+  } catch {
+    // console.error(
+    //   `Failed to get report for ${month}:`,
+    //   err
+    // )
+
+    return null
   }
 }
+
+// export const getReportJson = async (month: string) => {
+//   try {
+//     const res = await s3.send(
+//       new GetObjectCommand({
+//         Bucket: BUCKET,
+//         Key: `reports/${month}.json`
+//       })
+//     )
+
+//     const body = await res.Body?.transformToString()
+
+//     if (!body) return null
+
+//     return JSON.parse(body)
+//   } catch (err) {
+//     return {error: err, month: month}
+//   }
+// }

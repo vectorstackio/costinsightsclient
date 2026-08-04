@@ -2,6 +2,9 @@
 
 'use client'
 
+import { formatCurrency } from '@/lib/reports'
+import type { Currency } from '@/types'
+
 import type {
   CostIncreaseDriver,
   ServiceAnomaly
@@ -10,6 +13,7 @@ import type {
 type Props = {
   drivers: CostIncreaseDriver[]
   anomalies: ServiceAnomaly[]
+  currency: Currency
 }
 
 type TargetItem = {
@@ -20,7 +24,7 @@ type TargetItem = {
   severity?: 'low' | 'medium' | 'high'
 }
 
-const InvestigationTargets = ({drivers, anomalies}: Props) => {
+const InvestigationTargets = ({drivers, anomalies, currency}: Props) => {
   /**
    * -----------------------
    * Build investigation list
@@ -82,7 +86,7 @@ const InvestigationTargets = ({drivers, anomalies}: Props) => {
 
             <div className="text-right">
               <div className="font-bold">
-                £{t.impact.toFixed(2)}
+                {formatCurrency(t.impact, currency)}
               </div>
 
               {t.severity && (

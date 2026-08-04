@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 
 import type { CostReport } from '@/types'
-import { getReportByMonth } from '@/lib/reports'
+import { getReportByMonth, formatCurrency } from '@/lib/reports'
 
 /**
  * -----------------------
@@ -87,15 +87,21 @@ const ReportPage = async ({ params }: Props) => {
         <section className="grid grid-cols-3 gap-6 mb-10 break-inside-avoid">
           <MetricCard
             label="Current Cost"
-            value={`£${report.metrics.currentCost.toFixed(2)}`}
+            value={formatCurrency(
+              report.metrics.currentCost,
+              report.metadata.currency
+            )}
           />
           <MetricCard
             label="Previous Cost"
-            value={`£${report.metrics.previousCost.toFixed(2)}`}
+            value={formatCurrency(
+              report.metrics.previousCost,
+              report.metadata.currency
+            )}
           />
           <MetricCard
             label="MoM Change"
-            value={`${report.metrics.monthOverMonthChangePercent}%`}
+            value={report.metrics.monthOverMonthChangePercent + '%'}
             highlight
           />
         </section>
@@ -149,7 +155,10 @@ const ReportPage = async ({ params }: Props) => {
               >
                 <span>{d.service}</span>
                 <span className="font-medium">
-                  £{d.increase.toFixed(2)}
+                  {formatCurrency(
+                    d.increase,
+                    report.metadata.currency
+                  )}
                 </span>
               </div>
             ))}
@@ -179,7 +188,10 @@ const ReportPage = async ({ params }: Props) => {
                     {a.service}
                   </div>
                   <div className="text-sm text-gray-600">
-                    Spike: £{a.spikeAmount.toFixed(2)} (
+                    Spike: {formatCurrency(
+                      a.spikeAmount,
+                      report.metadata.currency
+                    )} (
                     {a.spikePercent}%)
                   </div>
                 </div>
@@ -197,7 +209,10 @@ const ReportPage = async ({ params }: Props) => {
           </h2>
 
           <div className="text-lg font-bold text-green-600">
-            £{report.savings.totalPotential.toFixed(2)}
+            {formatCurrency(
+              report.savings.totalPotential,
+              report.metadata.currency
+            )}
           </div>
 
           <p className="text-sm text-gray-600">

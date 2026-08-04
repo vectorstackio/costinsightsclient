@@ -1,5 +1,7 @@
 // types/infrastrucure/index.ts
 
+import type { Currency } from '@/types'
+
 export type InstanceMetrics = {
   instanceId: string
   name: string
@@ -72,6 +74,10 @@ export type InfrastructureSummary = {
 
     estimatedMonthlyWasteGBP?: number
   }
+
+  metadata: {
+    currency: Currency
+  }
 }
 
 export type InfrastructureSummaryInstance = {
@@ -114,6 +120,10 @@ export type TopCostResponse = {
   totalPotentialSavings: number
 
   instances: TopCostInstance[]
+
+  metadata: {
+    currency: Currency
+  }
 }
 
 export type TopCostInstance = {

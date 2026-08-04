@@ -2,10 +2,14 @@
 
 'use client'
 
+import { formatCurrency } from '@/lib/reports'
+
 import type { ServiceAnomaly } from '@/types/costs'
+import type { Currency } from '@/types'
 
 type Props = {
   anomalies: ServiceAnomaly[]
+  currency: Currency
 }
 
 const getSeverityStyles = (severity: ServiceAnomaly['severity']) => {
@@ -30,7 +34,7 @@ const getSeverityBadge = (severity: ServiceAnomaly['severity']) => {
   }
 }
 
-const AnomalyExplorer = ({ anomalies }: Props) => {
+const AnomalyExplorer = ({ anomalies, currency }: Props) => {
   if (!anomalies || anomalies.length === 0) {
     return (
       <div className="border rounded p-4 bg-white">
@@ -73,15 +77,14 @@ const AnomalyExplorer = ({ anomalies }: Props) => {
                   </div>
 
                   <div className="text-xs mt-2 opacity-70">
-                    Z-score: {a.zScore.toFixed(2)} | Avg: £
-                    {a.averageCost.toFixed(2)}
+                    Z-score: {a.zScore.toFixed(2)} | Avg: {formatCurrency(a.averageCost, currency)}
                   </div>
                 </div>
 
                 {/* RIGHT SIDE */}
                 <div className="text-right">
                   <div className="font-bold">
-                    £{a.currentCost.toFixed(2)}
+                    {formatCurrency(a.currentCost, currency)}
                   </div>
 
                   <div
@@ -96,7 +99,7 @@ const AnomalyExplorer = ({ anomalies }: Props) => {
 
               {/* SPIKE DETAIL BAR */}
               <div className="mt-3 text-xs text-gray-600">
-                Increase: +£{a.spikeAmount.toFixed(2)}
+                Increase: +{formatCurrency(a.spikeAmount, currency)}
               </div>
             </div>
           ))}

@@ -4,6 +4,10 @@
 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
+import { formatCurrency } from '@/lib/reports'
+
+import type { Currency } from '@/types'
+
 type TrendPoint = {
   month: string
   cost: number
@@ -11,9 +15,10 @@ type TrendPoint = {
 
 type Props = {
   data: TrendPoint[]
+  currency: Currency
 }
 
-const CostTrendLineChart = ({ data }: Props) => {
+const CostTrendLineChart = ({ data, currency }: Props) => {
   return (
     <div className="border rounded p-4 bg-white">
       <h2 className="font-semibold mb-3">6-Month Cost Trend</h2>
@@ -23,7 +28,14 @@ const CostTrendLineChart = ({ data }: Props) => {
           <LineChart data={data}>
             <XAxis dataKey="month" />
             <YAxis />
-            <Tooltip formatter={(v) => `£${Number(v).toFixed(2)}`} />
+            <Tooltip
+              formatter={(v) =>
+                formatCurrency(
+                  Number(v),
+                  currency
+                )
+              }
+            />
             <Line type="monotone" dataKey="cost" stroke="#6366f1" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>

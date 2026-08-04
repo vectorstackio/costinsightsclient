@@ -7,6 +7,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 import { useInfrastructureSummary } from '@/lib/hooks/useInfrastructureSummary'
+import { formatCurrency } from '@/lib/reports'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Forbidden from '@/components/Forbidden'
 
@@ -112,8 +113,8 @@ const MetricsSummaryPage = () => {
         <Kpi title="Avg CPU" value={`${avgCpu.toFixed(1)}%`} />
         <Kpi title="Avg Memory" value={`${avgMemory.toFixed(1)}%`} />
         <Kpi title="Waste Score" value={`${wasteScore.toFixed(1)}%`} />
-        <Kpi title="Potential Savings" value={`£${estimatedMonthlyWaste.toFixed(0)}/mo`} />
-        <Kpi title="Annual Savings" value={`£${estimatedAnnualWaste.toFixed(0)}/yr`} />
+        <Kpi title="Potential Savings" value={formatCurrency(estimatedMonthlyWaste, data?.metadata?.currency ?? 'USD')} />
+        <Kpi title="Annual Savings" value={formatCurrency(estimatedAnnualWaste, data?.metadata?.currency ?? 'USD')} />
       </div>
 
       {/* WASTE INSIGHTS */}
@@ -167,7 +168,7 @@ const MetricsSummaryPage = () => {
 
                 <div className="text-right">
                   <div className="font-medium">
-                    £{calculateWaste(i).toFixed(0)}/mo
+                    {formatCurrency(calculateWaste(i), data.metadata?.currency ?? 'USD')}/mo
                   </div>
 
                   <div className="text-xs text-slate-500">

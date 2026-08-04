@@ -1,6 +1,6 @@
 // lib/reports/index.ts
 
-import type { CostInsightsInput, CostReport } from '@/types'
+import type { CostInsightsInput, CostReport, Currency } from '@/types'
 
 /**
  * -----------------------
@@ -44,7 +44,7 @@ export const generateReportBase = (
       {
         severity: 'info',
         title: 'Total spend',
-        description: `£${insights.period.currentMonthCost}`
+        description: formatCurrency(insights.period.currentMonthCost, insights.currency)
       },
       {
         severity: 'info',
@@ -55,7 +55,7 @@ export const generateReportBase = (
         ? {
           severity: 'info',
           title: 'Top driver',
-          description: `${topDriver.service} (+£${topDriver.increase})`
+          description: `${topDriver.service} (+${formatCurrency(topDriver.increase, insights.currency)})`
         }
         : {
           severity: 'info',
@@ -140,7 +140,7 @@ Return ONLY valid JSON in this format:
 
 Rules:
 - Be factual only
-- Use £ currency
+- Use ${insights.currency} currency
 - No speculation
 - Executive-level tone
 - Keep concise
@@ -245,4 +245,17 @@ export const getReportByMonth = async (month: string) => {
   const result = await response.json()
 
   return result
+}
+
+export const formatCurrency = (
+  value: number,
+  currency: Currency
+): string => {
+  return new Intl.NumberFormat(
+    'en-GB',
+    {
+      style: 'currency',
+      currency
+    }
+  ).format(value)
 }

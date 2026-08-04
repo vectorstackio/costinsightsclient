@@ -11,14 +11,17 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
-import type { CostIncreaseDriver } from '@/types'
+import { formatCurrency } from '@/lib/reports'
+
+import type { CostIncreaseDriver, Currency } from '@/types'
 
 type Props = {
   data: CostIncreaseDriver[]
   onSelectService?: (service: string | null) => void
+  currency: Currency
 }
 
-const TopCostDriversChart = ({ data, onSelectService }: Props) => {
+const TopCostDriversChart = ({ data, onSelectService, currency }: Props) => {
   const chartData = data.map(d => ({
     service: d.service,
     increase: d.increase
@@ -33,7 +36,14 @@ const TopCostDriversChart = ({ data, onSelectService }: Props) => {
           <BarChart data={chartData}>
             <XAxis dataKey="service" />
             <YAxis />
-            <Tooltip formatter={(v) => `£${Number(v).toFixed(2)}`} />
+            <Tooltip
+              formatter={(v) =>
+                formatCurrency(
+                  Number(v),
+                  currency
+                )
+              }
+            />
             <Bar
               dataKey="increase"
               fill="#ef4444"

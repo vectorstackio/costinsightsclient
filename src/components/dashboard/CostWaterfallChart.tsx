@@ -12,14 +12,17 @@ import {
   ReferenceLine
 } from 'recharts'
 
-import type { ServiceComparison } from '@/types'
+import { formatCurrency } from '@/lib/reports'
+
+import type { ServiceComparison, Currency } from '@/types'
 
 type Props = {
   data: ServiceComparison[]
   onSelectService?: (service: string | null) => void
+  currency: Currency
 }
 
-const CostWaterfallChart = ({ data, onSelectService }: Props) => {
+const CostWaterfallChart = ({ data, onSelectService, currency }: Props) => {
   const chartData = data
     .filter(d => d.change !== 0)
     .map(d => ({
@@ -37,7 +40,14 @@ const CostWaterfallChart = ({ data, onSelectService }: Props) => {
           <BarChart data={chartData}>
             <XAxis dataKey="service" />
             <YAxis />
-            <Tooltip formatter={(v) => `£${Number(v).toFixed(2)}`} />
+            <Tooltip
+              formatter={(v) =>
+                formatCurrency(
+                  Number(v),
+                  currency
+                )
+              }
+            />
 
             <ReferenceLine y={0} stroke="#999" />
 

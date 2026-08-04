@@ -1,5 +1,9 @@
 // components/Insights.tsx
 
+import { formatCurrency } from '@/lib/reports'
+
+import type { Currency } from '@/types'
+
 export type CostIncreaseDriver = {
   service: string
   currentCost: number
@@ -22,9 +26,10 @@ export type ServiceAnomaly = {
 type Props = {
   drivers: CostIncreaseDriver[]
   anomalies: ServiceAnomaly[]
+  currency: Currency
 }
 
-const InsightsPanel = ({ drivers, anomalies }: Props) => {
+const InsightsPanel = ({ drivers, anomalies, currency }: Props) => {
   return (
     <div className="grid grid-cols-2 gap-4 mb-6">
 
@@ -46,7 +51,7 @@ const InsightsPanel = ({ drivers, anomalies }: Props) => {
             </span>
 
             <span>
-              +£{d.increase.toFixed(2)} ({d.contributionPercent}%)
+              +{formatCurrency(d.increase, currency)} ({d.contributionPercent}%)
             </span>
           </div>
         ))}
