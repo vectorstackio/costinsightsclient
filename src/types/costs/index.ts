@@ -1,5 +1,7 @@
 // types/costs/index.ts
 
+import type { Currency } from '@/types'
+
 /**
  * -----------------------
  * Types (match your Lambda)
@@ -109,4 +111,7 @@ export type SummaryResponse = {
   topCausalChains: RootCauseNode[]
   byServiceComparison: ServiceComparison[]
   topRecommendations: TopRecommendation[]
+  metadata: {
+    currency: Currency
+  }
 }

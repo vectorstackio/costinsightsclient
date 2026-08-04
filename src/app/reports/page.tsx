@@ -46,7 +46,7 @@ const ReportsPage = async () => {
               Generated
             </th>
 
-            <th className="p-3">
+            <th className="p-3 flex gap-4">
               Actions
             </th>
           </tr>

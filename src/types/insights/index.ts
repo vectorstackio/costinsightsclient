@@ -12,12 +12,19 @@ import type {
 
 export type CostInsightHealth = 'healthy' | 'warning' | 'critical'
 
+export type Currency =
+  | 'USD'
+  | 'GBP'
+  | 'EUR'
+
 export type CostInsightsInput = {
   period: {
     currentMonthCost: number
     previousMonthCost: number
     monthOverMonthChangePercent: number
   }
+
+  currency: Currency
 
   services: ServiceCost[]
   serviceComparison: ServiceComparison[]
@@ -39,6 +46,34 @@ export type CostInsightsInput = {
     recommendationCount: number
   }
 }
+
+// export type CostInsightsInput = {
+//   period: {
+//     currentMonthCost: number
+//     previousMonthCost: number
+//     monthOverMonthChangePercent: number
+//   }
+
+//   services: ServiceCost[]
+//   serviceComparison: ServiceComparison[]
+
+//   drivers: CostIncreaseDriver[]
+//   anomalies: ServiceAnomaly[]
+
+//   trends: TrendPoint[]
+
+//   recommendations: TopRecommendation[]
+
+//   rootCause: {
+//     tree: RootCauseNode[]
+//     topChains: RootCauseNode[]
+//   }
+
+//   savings: {
+//     potential: number
+//     recommendationCount: number
+//   }
+// }
 
 export type CostInsightsResult = {
   data: CostInsightsInput

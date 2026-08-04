@@ -10,6 +10,8 @@ export const mapSummaryToInsights = (summary: SummaryResponse): CostInsightsInpu
       monthOverMonthChangePercent: summary.monthOverMonthChangePercent
     },
 
+    currency: summary.metadata?.currency ?? 'USD',
+
     services: summary.byService,
     serviceComparison: summary.byServiceComparison,
 

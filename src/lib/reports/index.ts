@@ -8,7 +8,8 @@ import type { CostInsightsInput, CostReport } from '@/types'
  * -----------------------
  */
 export const generateReportBase = (
-  insights: CostInsightsInput
+  insights: CostInsightsInput,
+  month: string
 ): CostReport => {
   const topDriver = insights.drivers[0]
 
@@ -16,7 +17,7 @@ export const generateReportBase = (
     id: crypto.randomUUID(),
 
     period: {
-      month: new Date().toISOString().slice(0, 7),
+      month,
       generatedAt: new Date().toISOString()
     },
 
@@ -81,13 +82,25 @@ export const generateReportBase = (
       model: 'base-v1',
       version: '0.1',
       generatedAt: new Date().toISOString(),
-      reportingMonth: new Date().toISOString().slice(0, 7),
-      currency: 'GBP',
+      reportingMonth: month,
+      currency: insights.currency,
       source: {
         type: 'aws-cost-explorer',
         region: 'us-east-1'
       }
     }
+
+    // metadata: {
+    //   model: 'base-v1',
+    //   version: '0.1',
+    //   generatedAt: new Date().toISOString(),
+    //   reportingMonth: new Date().toISOString().slice(0, 7),
+    //   currency: 'GBP',
+    //   source: {
+    //     type: 'aws-cost-explorer',
+    //     region: 'us-east-1'
+    //   }
+    // }
   }
 }
 
@@ -176,12 +189,20 @@ ${JSON.stringify(insights, null, 2)}
  * FINAL REPORT BUILDER
  * -----------------------
  */
-
 export const buildReport = async (
-  insights: CostInsightsInput
+  insights: CostInsightsInput,
+  month: string
 ): Promise<CostReport> => {
-  const base = generateReportBase(insights)
-  const narratives = await generateNarrative(insights)
+  const base =
+    generateReportBase(
+      insights,
+      month
+    )
+
+  const narratives =
+    await generateNarrative(
+      insights
+    )
 
   return {
     ...base,
@@ -192,6 +213,22 @@ export const buildReport = async (
     }
   }
 }
+
+// export const buildReport = async (
+//   insights: CostInsightsInput
+// ): Promise<CostReport> => {
+//   const base = generateReportBase(insights)
+//   const narratives = await generateNarrative(insights)
+
+//   return {
+//     ...base,
+//     narratives,
+//     metadata: {
+//       ...base.metadata,
+//       model: 'gpt-4.1-mini'
+//     }
+//   }
+// }
 
 export const getReportByMonth = async (month: string) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/reports?month=${month}`, {

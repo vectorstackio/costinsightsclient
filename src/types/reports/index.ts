@@ -1,6 +1,6 @@
 // types/reports/index.ts
 
-import type { TopRecommendation, CostIncreaseDriver, ServiceAnomaly, RootCauseNode } from '@/types'
+import type { TopRecommendation, CostIncreaseDriver, ServiceAnomaly, RootCauseNode, Currency } from '@/types'
 
 export type ReportPeriod = {
   month: string
@@ -53,7 +53,7 @@ export type ReportMetadata = {
 
   version: string
 
-  currency: 'USD' | 'GBP' | 'EUR'
+  currency: Currency
 
   source: {
     type: 'aws-cost-explorer'

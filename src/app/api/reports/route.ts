@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
   const insights = mapSummaryToInsights(summary)
 
-  const report = await buildReport(insights)
+  const report = await buildReport(insights, month ?? new Date().toISOString().slice(0, 7))
 
   // 3. Store in S3
   if (month) {
