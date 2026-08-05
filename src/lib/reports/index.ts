@@ -1,5 +1,9 @@
 // lib/reports/index.ts
 
+import { getReportJson, saveReportJson } from '@/lib/s3/reports'
+import type { SummaryResponse } from '@/types'
+import { mapSummaryToInsights } from '@/lib/insights'
+
 import type { CostInsightsInput, CostReport, Currency } from '@/types'
 
 /**
@@ -245,6 +249,83 @@ export const getReportByMonth = async (month: string) => {
   const result = await response.json()
 
   return result
+}
+
+export const getOrCreateReport = async (
+  month: string
+): Promise<CostReport> => {
+
+  /**
+   * -----------------------
+   * Try S3 first
+   * -----------------------
+   */
+  const cached =
+    await getReportJson(month)
+
+  if (cached) {
+    return cached as CostReport
+  }
+
+  /**
+   * -----------------------
+   * Fetch summary
+   * -----------------------
+   */
+  const url = new URL(
+    `${process.env.COST_API_URL}/summary`
+  )
+
+  url.searchParams.set(
+    'month',
+    month
+  )
+
+  const response = await fetch(
+    url.toString(),
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type':
+          'application/json'
+      }
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch summary: ${response.statusText}`
+    )
+  }
+
+  const summary =
+    await response.json() as SummaryResponse
+
+  /**
+   * -----------------------
+   * Build report
+   * -----------------------
+   */
+  const insights =
+    mapSummaryToInsights(summary)
+
+  const report =
+    await buildReport(
+      insights,
+      month
+    )
+
+  /**
+   * -----------------------
+   * Save JSON
+   * -----------------------
+   */
+  await saveReportJson(
+    month,
+    report
+  )
+
+  return report
 }
 
 export const formatCurrency = (

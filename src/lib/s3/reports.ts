@@ -46,21 +46,62 @@ export const getReportJson = async (
   }
 }
 
-// export const getReportJson = async (month: string) => {
-//   try {
-//     const res = await s3.send(
-//       new GetObjectCommand({
-//         Bucket: BUCKET,
-//         Key: `reports/${month}.json`
-//       })
-//     )
+export const saveReportPdf = async (
+  key: string,
+  pdf: Uint8Array
+) => {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET!,
+      Key: key,
+      Body: pdf,
+      ContentType: 'application/pdf'
+    })
+  )
+}
 
-//     const body = await res.Body?.transformToString()
 
-//     if (!body) return null
+export const getReportPdf = async (
+  key: string
+): Promise<Uint8Array | null> => {
+  try {
+    const response =
+      await s3.send(
+        new GetObjectCommand({
+          Bucket: process.env.S3_BUCKET!,
+          Key: key
+        })
+      )
 
-//     return JSON.parse(body)
-//   } catch (err) {
-//     return {error: err, month: month}
-//   }
-// }
+    if (!response.Body) {
+      return null
+    }
+
+    return new Uint8Array(
+      await response.Body.transformToByteArray()
+    )
+
+  } catch (error: unknown) {
+
+    if (
+      error instanceof Error &&
+      error.name === 'NoSuchKey'
+    ) {
+      return null
+    }
+
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      '$metadata' in error &&
+      typeof error.$metadata === 'object' &&
+      error.$metadata !== null &&
+      'httpStatusCode' in error.$metadata &&
+      error.$metadata.httpStatusCode === 404
+    ) {
+      return null
+    }
+
+    throw error
+  }
+}
