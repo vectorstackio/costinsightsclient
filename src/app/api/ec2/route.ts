@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const res = await fetch(`${process.env.EC2_GET_INSTANCES_API_URL}`, {
+  const res = await fetch(`${process.env.EC2_GET_INSTANCES_API_URL}/instances`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

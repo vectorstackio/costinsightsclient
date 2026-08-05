@@ -237,3 +237,46 @@ export const getApiGatewayInventory = tool(
     schema: z.object({})
   }
 )
+
+export const getIdleEc2Instances = tool(
+  async () => {
+
+    const res =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/idle`
+      )
+
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch idle EC2 instances'
+      )
+    }
+
+
+    const data =
+      await res.json()
+
+    return JSON.stringify(
+      data,
+      null,
+      2
+    )
+
+
+    // return JSON.stringify(
+    //   data.instances,
+    //   null,
+    //   2
+    // )
+
+  },
+  {
+    name: 'getIdleEc2Instances',
+
+    description:
+      'Returns EC2 instances whose average CPU utilisation has been below 5% over the last 7 days. Use this tool when the user asks to find idle, underutilised, or unused EC2 instances, or asks which instances could be stopped to save money.',
+
+    schema: z.object({})
+  }
+)
