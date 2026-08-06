@@ -68,6 +68,8 @@ export const useCopilot = () => {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
 
+      let buffer = ''
+
       while (true) {
 
         const {
@@ -77,27 +79,32 @@ export const useCopilot = () => {
 
         if (done) break
 
-        const chunk = decoder.decode(
+        buffer += decoder.decode(
           value,
           {
             stream: true
           }
         )
 
-        const lines = chunk.split('\n').filter(Boolean)
+        const events = buffer.split('\n\n')
 
-        for (const line of lines) {
-          if (!line.startsWith('data:')) {
-            continue
-          }
+        // Keep incomplete SSE event for next chunk
+        buffer = events.pop() ?? ''
 
-          const event: AgentEvent =
-            JSON.parse(
-              line.replace(
-                'data: ',
-                ''
-              )
-            )
+        for (const eventString of events) {
+
+          const line = eventString
+            .split('\n')
+            .find(line => line.startsWith('data:'))
+
+          if (!line) continue
+
+          const json = line.replace(
+            'data: ',
+            ''
+          )
+
+          const event: AgentEvent = JSON.parse(json)
 
           switch (event.type) {
 
@@ -113,9 +120,9 @@ export const useCopilot = () => {
             setActivity(`${event.tool} completed`)
             break
 
-
           case 'answer':
             assistantContent += event.content
+
             setLastAnswer(assistantContent)
 
             setMessages([
@@ -130,6 +137,72 @@ export const useCopilot = () => {
           }
         }
       }
+
+      // const reader = response.body.getReader()
+      // const decoder = new TextDecoder()
+
+      // while (true) {
+
+      //   const {
+      //     done,
+      //     value
+      //   } = await reader.read()
+
+      //   if (done) break
+
+      //   const chunk = decoder.decode(
+      //     value,
+      //     {
+      //       stream: true
+      //     }
+      //   )
+
+      //   const lines = chunk.split('\n').filter(Boolean)
+
+      //   for (const line of lines) {
+      //     if (!line.startsWith('data:')) {
+      //       continue
+      //     }
+
+      //     const event: AgentEvent =
+      //       JSON.parse(
+      //         line.replace(
+      //           'data: ',
+      //           ''
+      //         )
+      //       )
+
+      //     switch (event.type) {
+
+      //     case 'status':
+      //       setActivity(event.message)
+      //       break
+
+      //     case 'tool_start':
+      //       setActivity(`Running ${event.tool}...`)
+      //       break
+
+      //     case 'tool_end':
+      //       setActivity(`${event.tool} completed`)
+      //       break
+
+
+      //     case 'answer':
+      //       assistantContent += event.content
+      //       setLastAnswer(assistantContent)
+
+      //       setMessages([
+      //         ...conversation,
+      //         {
+      //           role: 'assistant',
+      //           content: assistantContent
+      //         }
+      //       ])
+
+      //       break
+      //     }
+      //   }
+      // }
 
       return assistantContent
 
