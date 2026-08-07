@@ -66,6 +66,46 @@ export const deleteEbsVolume = tool(
   }
 )
 
+export const releaseElasticIp = tool(
+  async ({ allocationId }) => {
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/release`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          allocationId
+        })
+      }
+    )
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to release Elastic IP'
+      )
+    }
+
+    return await res.json()
+  },
+  {
+    name: 'releaseElasticIp',
+
+    description:
+      'Releases an unused Elastic IP address. Only use this action when the user has explicitly requested that an Elastic IP should be released.',
+
+    schema: z.object({
+      allocationId:
+        z.string()
+          .describe(
+            'The Elastic IP allocation ID'
+          )
+    })
+  }
+)
+
 export const resizeEbsVolume = tool(
   async ({
     volumeId,

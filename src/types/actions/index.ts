@@ -3,7 +3,7 @@
 export type ActionDefinition = {
   keywords: string[]
   tool: string
-  resource: 'volume' | 'instance'
+  resource: 'volume' | 'instance' | 'elasticIp'
 
   description: (
     id: string,
