@@ -3,7 +3,9 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 
-import type { EC2Instance } from '@/types/infrastructure'
+import { calculateEbsCost } from '@/lib/costs'
+
+import type { EC2Instance, EBSVolume } from '@/types'
 
 export const getInfrastructureHealth = tool(
   async () => {
@@ -113,8 +115,15 @@ export const getEbsVolumes = tool(
 
     const data = await res.json()
 
+    const volumesWithCosts =
+      data.volumes.map((volume: EBSVolume) => ({
+        ...volume,
+        estimatedMonthlyCost:
+          calculateEbsCost(volume)
+      }))
+
     return JSON.stringify(
-      data.volumes,
+      volumesWithCosts,
       null,
       2
     )
@@ -122,7 +131,7 @@ export const getEbsVolumes = tool(
   {
     name: 'getEbsVolumes',
     description:
-      'Returns EBS volumes including size, type, encryption status and whether they are attached to EC2 instances',
+      'Returns all EBS volumes, including their state, size, type, creation date, encryption status and attached EC2 instances. Use this tool when the user asks about EBS volumes, unattached or unused volumes, orphaned storage, or opportunities to reduce EBS storage costs. Volumes whose state is "available" are not attached to any EC2 instance and may be candidates for deletion.',
     schema: z.object({})
   }
 )
@@ -262,13 +271,6 @@ export const getIdleEc2Instances = tool(
       null,
       2
     )
-
-
-    // return JSON.stringify(
-    //   data.instances,
-    //   null,
-    //   2
-    // )
 
   },
   {
