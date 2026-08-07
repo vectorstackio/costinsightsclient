@@ -299,13 +299,20 @@ export const getElasticIps = tool(
     const data = await res.json()
 
     const elasticIpsWithCosts =
-      data.elasticIps.map((elasticIp: ElasticIp) => ({
-        ...elasticIp,
-        estimatedMonthlyCost:
+      data.elasticIps.map((elasticIp: ElasticIp) => {
+
+        const monthlyCost =
           elasticIp.associated
             ? 0
             : calculateElasticIpCost()
-      }))
+
+        return {
+          ...elasticIp,
+          estimatedMonthlyCost: monthlyCost,
+          estimatedAnnualCost:
+            Number((monthlyCost * 12).toFixed(2))
+        }
+      })
 
     return JSON.stringify(
       elasticIpsWithCosts,
@@ -317,7 +324,7 @@ export const getElasticIps = tool(
     name: 'getElasticIps',
 
     description:
-      'Returns all Elastic IP addresses, including their public IP, allocation ID, association status and related AWS resources. Use this tool when the user asks about Elastic IPs, unused public IP addresses, idle networking resources, or opportunities to reduce AWS networking costs. Elastic IPs that are not associated with any AWS resource are potential candidates for release.',
+      'Returns all Elastic IP addresses, including their public IP, allocation ID, association status and related AWS resources. Use this tool when the user asks about unused Elastic IPs, idle public IP addresses, or opportunities to reduce AWS networking costs. Only Elastic IPs with associated=false are unused and potential candidates for release. When analysing unused Elastic IPs, calculate potential monthly savings from the estimatedMonthlyCost field.',
 
     schema: z.object({})
   }

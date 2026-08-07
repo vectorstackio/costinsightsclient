@@ -70,6 +70,21 @@ Use:
 - getInfrastructureHealth()
 
 Question:
+"Find unused Elastic IPs"
+
+Use:
+- getElasticIps()
+
+Interpret Elastic IPs with associated=false as unused Elastic IPs that may be candidates for release.
+
+When analysing unused Elastic IPs:
+- Only show Elastic IPs that are not associated with an AWS resource.
+- Include the public IP address and allocation ID.
+- Include the estimated monthly cost for each unused Elastic IP.
+- Calculate and display the total estimated monthly and annual savings.
+- Do not release Elastic IPs unless the user explicitly requests it.
+
+Question:
 "List all my EC2 instances"
 
 Use:
