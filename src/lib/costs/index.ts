@@ -21,3 +21,10 @@ export const calculateEbsCost = (volume: EBSVolume): number | undefined => {
 
   return Number((volume.size * price).toFixed(2))
 }
+
+export const calculateElasticIpCost = () => {
+  const hourlyCost = 0.005
+  const hoursPerMonth = 730
+
+  return Number((hourlyCost * hoursPerMonth).toFixed(2))
+}

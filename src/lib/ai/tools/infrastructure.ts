@@ -3,9 +3,9 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 
-import { calculateEbsCost } from '@/lib/costs'
+import { calculateEbsCost, calculateElasticIpCost } from '@/lib/costs'
 
-import type { EC2Instance, EBSVolume } from '@/types'
+import type { EC2Instance, EBSVolume, ElasticIp } from '@/types'
 
 export const getInfrastructureHealth = tool(
   async () => {
@@ -278,6 +278,46 @@ export const getIdleEc2Instances = tool(
 
     description:
       'Returns EC2 instances whose average CPU utilisation has been below 5% over the last 7 days. Use this tool when the user asks to find idle, underutilised, or unused EC2 instances, or asks which instances could be stopped to save money.',
+
+    schema: z.object({})
+  }
+)
+
+export const getElasticIps = tool(
+  async () => {
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
+    )
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to fetch Elastic IPs'
+      )
+    }
+
+    const data = await res.json()
+
+    const elasticIpsWithCosts =
+      data.elasticIps.map((elasticIp: ElasticIp) => ({
+        ...elasticIp,
+        estimatedMonthlyCost:
+          elasticIp.associated
+            ? 0
+            : calculateElasticIpCost()
+      }))
+
+    return JSON.stringify(
+      elasticIpsWithCosts,
+      null,
+      2
+    )
+  },
+  {
+    name: 'getElasticIps',
+
+    description:
+      'Returns all Elastic IP addresses, including their public IP, allocation ID, association status and related AWS resources. Use this tool when the user asks about Elastic IPs, unused public IP addresses, idle networking resources, or opportunities to reduce AWS networking costs. Elastic IPs that are not associated with any AWS resource are potential candidates for release.',
 
     schema: z.object({})
   }
