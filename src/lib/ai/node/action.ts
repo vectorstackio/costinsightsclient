@@ -280,78 +280,77 @@ Reply **confirm** to continue or **cancel** to abort.`
     }
 
 
-    let resolvedAllocationId =
-      allocationId
+    const res =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
+      )
 
 
-    const resolvedPublicIp =
-      publicIp
+    if (
+      !res.ok
+    ) {
+      return {
+        messages: [
+          new AIMessage(
+            'I was unable to retrieve the Elastic IP information.'
+          )
+        ]
+      }
+    }
+
+
+    const data =
+      await res.json()
+
+
+    const elasticIp =
+      data.elasticIps?.find(
+        (ip: {
+          publicIp: string
+          allocationId: string
+          associated: boolean
+          associatedInstanceId?: string
+        }) =>
+          allocationId
+            ? ip.allocationId === allocationId
+            : ip.publicIp === publicIp
+      )
+
+
+    if (
+      !elasticIp
+    ) {
+      return {
+        messages: [
+          new AIMessage(
+            `I could not find Elastic IP ${publicIp ?? allocationId} in your AWS account.`
+          )
+        ]
+      }
+    }
 
 
     //
-    // If the user supplied a public IP,
-    // resolve it to an allocation ID.
+    // Don't allow association of an EIP
+    // that is already associated.
     //
 
     if (
-      !resolvedAllocationId &&
-      resolvedPublicIp
+      elasticIp.associated
     ) {
-
-      const res =
-        await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
-        )
-
-
-      if (
-        !res.ok
-      ) {
-        return {
-          messages: [
-            new AIMessage(
-              'I was unable to retrieve the Elastic IP information.'
-            )
-          ]
-        }
+      return {
+        messages: [
+          new AIMessage(
+            `Elastic IP ${elasticIp.publicIp} is already associated with EC2 instance ${elasticIp.associatedInstanceId ?? 'another resource'}. I will not reassign it.`
+          )
+        ]
       }
-
-
-      const data =
-        await res.json()
-
-
-      const elasticIp =
-        data.elasticIps?.find(
-          (ip: {
-            publicIp: string
-            allocationId: string
-          }) =>
-            ip.publicIp === resolvedPublicIp
-        )
-
-
-      if (
-        !elasticIp
-      ) {
-        return {
-          messages: [
-            new AIMessage(
-              `I could not find Elastic IP ${resolvedPublicIp} in your AWS account.`
-            )
-          ]
-        }
-      }
-
-
-      resolvedAllocationId =
-        elasticIp.allocationId
     }
 
 
     const args = {
       allocationId:
-        resolvedAllocationId,
+        elasticIp.allocationId,
 
       instanceId
     }
@@ -368,8 +367,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 
         description:
           action.description(
-            resolvedPublicIp ??
-            resolvedAllocationId!,
+            elasticIp.publicIp,
             instanceId
           )
 
@@ -380,8 +378,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 
         new AIMessage(
           action.confirmation(
-            resolvedPublicIp ??
-            resolvedAllocationId!,
+            elasticIp.publicIp,
             instanceId
           )
         )
@@ -391,83 +388,6 @@ Reply **confirm** to continue or **cancel** to abort.`
     }
 
   }
-
-
-  // //
-  // // Associate Elastic IP
-  // // requires both an allocation ID
-  // // and an instance ID.
-  // //
-
-  // if (
-  //   action.tool === 'associateElasticIp'
-  // ) {
-
-  //   if (
-  //     !allocationId
-  //   ) {
-  //     return {
-  //       messages: [
-  //         new AIMessage(
-  //           'Please specify the Elastic IP allocation ID.'
-  //         )
-  //       ]
-  //     }
-  //   }
-
-
-  //   if (
-  //     !instanceId
-  //   ) {
-  //     return {
-  //       messages: [
-  //         new AIMessage(
-  //           'Please specify the EC2 instance ID.'
-  //         )
-  //       ]
-  //     }
-  //   }
-
-
-  //   const args = {
-  //     allocationId,
-
-  //     instanceId
-  //   }
-
-
-  //   return {
-
-  //     pendingAction: {
-
-  //       tool:
-  //         action.tool,
-
-  //       args,
-
-  //       description:
-  //         action.description(
-  //           allocationId,
-  //           instanceId
-  //         )
-
-  //     },
-
-
-  //     messages: [
-
-  //       new AIMessage(
-  //         action.confirmation(
-  //           allocationId,
-  //           instanceId
-  //         )
-  //       )
-
-  //     ]
-
-  //   }
-
-  // }
 
 
   //
