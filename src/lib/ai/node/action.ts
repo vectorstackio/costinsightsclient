@@ -280,6 +280,10 @@ Reply **confirm** to continue or **cancel** to abort.`
     }
 
 
+    //
+    // Get the current Elastic IP inventory.
+    //
+
     const res =
       await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
@@ -303,18 +307,35 @@ Reply **confirm** to continue or **cancel** to abort.`
       await res.json()
 
 
+    //
+    // Find the requested Elastic IP.
+    //
+
     const elasticIp =
       data.elasticIps?.find(
         (ip: {
           publicIp: string
           allocationId: string
           associated: boolean
-          associatedInstanceId?: string
+          instanceId?: string
         }) =>
           allocationId
             ? ip.allocationId === allocationId
             : ip.publicIp === publicIp
       )
+
+    // const elasticIp =
+    //   data.elasticIps?.find(
+    //     (ip: {
+    //       publicIp: string
+    //       allocationId: string
+    //       associated: boolean
+    //       associatedInstanceId?: string
+    //     }) =>
+    //       allocationId
+    //         ? ip.allocationId === allocationId
+    //         : ip.publicIp === publicIp
+    //   )
 
 
     if (
@@ -331,8 +352,8 @@ Reply **confirm** to continue or **cancel** to abort.`
 
 
     //
-    // Don't allow association of an EIP
-    // that is already associated.
+    // Check whether the requested Elastic IP
+    // is already associated with an instance.
     //
 
     if (
@@ -341,12 +362,58 @@ Reply **confirm** to continue or **cancel** to abort.`
       return {
         messages: [
           new AIMessage(
-            `Elastic IP ${elasticIp.publicIp} is already associated with EC2 instance ${elasticIp.associatedInstanceId ?? 'another resource'}. I will not reassign it.`
+            `Elastic IP ${elasticIp.publicIp} is already associated with EC2 instance ${elasticIp.instanceId ?? 'another resource'}. I will not reassign it.`
           )
         ]
       }
     }
 
+
+    //
+    // Check whether the target instance already
+    // has an Elastic IP.
+    //
+
+    // const instanceElasticIp =
+    //   data.elasticIps?.find(
+    //     (ip: {
+    //       publicIp: string
+    //       allocationId: string
+    //       associated: boolean
+    //       associatedInstanceId?: string
+    //     }) =>
+    //       ip.associatedInstanceId === instanceId
+    //   )
+
+    const instanceElasticIp =
+      data.elasticIps?.find(
+        (ip: {
+          publicIp: string
+          allocationId: string
+          associated: boolean
+          instanceId?: string
+        }) =>
+          ip.associated === true &&
+          ip.instanceId === instanceId
+      )
+
+
+    if (
+      instanceElasticIp
+    ) {
+      return {
+        messages: [
+          new AIMessage(
+            `EC2 instance ${instanceId} already has Elastic IP ${instanceElasticIp.publicIp} associated with it. I will not replace the existing Elastic IP. `
+          )
+        ]
+      }
+    }
+
+
+    //
+    // Create the pending action.
+    //
 
     const args = {
       allocationId:
@@ -388,6 +455,146 @@ Reply **confirm** to continue or **cancel** to abort.`
     }
 
   }
+
+  // if (
+  //   action.tool === 'associateElasticIp'
+  // ) {
+
+  //   if (
+  //     !allocationId &&
+  //     !publicIp
+  //   ) {
+  //     return {
+  //       messages: [
+  //         new AIMessage(
+  //           'Please specify the Elastic IP allocation ID or public IP address.'
+  //         )
+  //       ]
+  //     }
+  //   }
+
+
+  //   if (
+  //     !instanceId
+  //   ) {
+  //     return {
+  //       messages: [
+  //         new AIMessage(
+  //           'Please specify the EC2 instance ID.'
+  //         )
+  //       ]
+  //     }
+  //   }
+
+
+  //   const res =
+  //     await fetch(
+  //       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
+  //     )
+
+
+  //   if (
+  //     !res.ok
+  //   ) {
+  //     return {
+  //       messages: [
+  //         new AIMessage(
+  //           'I was unable to retrieve the Elastic IP information.'
+  //         )
+  //       ]
+  //     }
+  //   }
+
+
+  //   const data =
+  //     await res.json()
+
+
+  //   const elasticIp =
+  //     data.elasticIps?.find(
+  //       (ip: {
+  //         publicIp: string
+  //         allocationId: string
+  //         associated: boolean
+  //         associatedInstanceId?: string
+  //       }) =>
+  //         allocationId
+  //           ? ip.allocationId === allocationId
+  //           : ip.publicIp === publicIp
+  //     )
+
+
+  //   if (
+  //     !elasticIp
+  //   ) {
+  //     return {
+  //       messages: [
+  //         new AIMessage(
+  //           `I could not find Elastic IP ${publicIp ?? allocationId} in your AWS account.`
+  //         )
+  //       ]
+  //     }
+  //   }
+
+
+  //   //
+  //   // Don't allow association of an EIP
+  //   // that is already associated.
+  //   //
+
+  //   if (
+  //     elasticIp.associated
+  //   ) {
+  //     return {
+  //       messages: [
+  //         new AIMessage(
+  //           `Elastic IP ${elasticIp.publicIp} is already associated with EC2 instance ${elasticIp.associatedInstanceId ?? 'another resource'}. I will not reassign it.`
+  //         )
+  //       ]
+  //     }
+  //   }
+
+
+  //   const args = {
+  //     allocationId:
+  //       elasticIp.allocationId,
+
+  //     instanceId
+  //   }
+
+
+  //   return {
+
+  //     pendingAction: {
+
+  //       tool:
+  //         action.tool,
+
+  //       args,
+
+  //       description:
+  //         action.description(
+  //           elasticIp.publicIp,
+  //           instanceId
+  //         )
+
+  //     },
+
+
+  //     messages: [
+
+  //       new AIMessage(
+  //         action.confirmation(
+  //           elasticIp.publicIp,
+  //           instanceId
+  //         )
+  //       )
+
+  //     ]
+
+  //   }
+
+  // }
 
 
   //
