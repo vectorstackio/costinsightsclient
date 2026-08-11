@@ -160,6 +160,11 @@ Reply **confirm** to continue or **cancel** to abort.`
       /eipalloc-[a-z0-9]+/i
     )?.[0]
 
+  const publicIp =
+    state.question.match(
+      /\b(?:\d{1,3}\.){3}\d{1,3}\b/
+    )?.[0]
+
 
   //
   // Expand EBS filesystem
@@ -236,6 +241,233 @@ Reply **confirm** to continue or **cancel** to abort.`
     }
 
   }
+
+
+  //
+  // Associate Elastic IP
+  // requires an allocation ID or public IP,
+  // plus an instance ID.
+  //
+
+  if (
+    action.tool === 'associateElasticIp'
+  ) {
+
+    if (
+      !allocationId &&
+      !publicIp
+    ) {
+      return {
+        messages: [
+          new AIMessage(
+            'Please specify the Elastic IP allocation ID or public IP address.'
+          )
+        ]
+      }
+    }
+
+
+    if (
+      !instanceId
+    ) {
+      return {
+        messages: [
+          new AIMessage(
+            'Please specify the EC2 instance ID.'
+          )
+        ]
+      }
+    }
+
+
+    let resolvedAllocationId =
+      allocationId
+
+
+    const resolvedPublicIp =
+      publicIp
+
+
+    //
+    // If the user supplied a public IP,
+    // resolve it to an allocation ID.
+    //
+
+    if (
+      !resolvedAllocationId &&
+      resolvedPublicIp
+    ) {
+
+      const res =
+        await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
+        )
+
+
+      if (
+        !res.ok
+      ) {
+        return {
+          messages: [
+            new AIMessage(
+              'I was unable to retrieve the Elastic IP information.'
+            )
+          ]
+        }
+      }
+
+
+      const data =
+        await res.json()
+
+
+      const elasticIp =
+        data.elasticIps?.find(
+          (ip: {
+            publicIp: string
+            allocationId: string
+          }) =>
+            ip.publicIp === resolvedPublicIp
+        )
+
+
+      if (
+        !elasticIp
+      ) {
+        return {
+          messages: [
+            new AIMessage(
+              `I could not find Elastic IP ${resolvedPublicIp} in your AWS account.`
+            )
+          ]
+        }
+      }
+
+
+      resolvedAllocationId =
+        elasticIp.allocationId
+    }
+
+
+    const args = {
+      allocationId:
+        resolvedAllocationId,
+
+      instanceId
+    }
+
+
+    return {
+
+      pendingAction: {
+
+        tool:
+          action.tool,
+
+        args,
+
+        description:
+          action.description(
+            resolvedPublicIp ??
+            resolvedAllocationId!,
+            instanceId
+          )
+
+      },
+
+
+      messages: [
+
+        new AIMessage(
+          action.confirmation(
+            resolvedPublicIp ??
+            resolvedAllocationId!,
+            instanceId
+          )
+        )
+
+      ]
+
+    }
+
+  }
+
+
+  // //
+  // // Associate Elastic IP
+  // // requires both an allocation ID
+  // // and an instance ID.
+  // //
+
+  // if (
+  //   action.tool === 'associateElasticIp'
+  // ) {
+
+  //   if (
+  //     !allocationId
+  //   ) {
+  //     return {
+  //       messages: [
+  //         new AIMessage(
+  //           'Please specify the Elastic IP allocation ID.'
+  //         )
+  //       ]
+  //     }
+  //   }
+
+
+  //   if (
+  //     !instanceId
+  //   ) {
+  //     return {
+  //       messages: [
+  //         new AIMessage(
+  //           'Please specify the EC2 instance ID.'
+  //         )
+  //       ]
+  //     }
+  //   }
+
+
+  //   const args = {
+  //     allocationId,
+
+  //     instanceId
+  //   }
+
+
+  //   return {
+
+  //     pendingAction: {
+
+  //       tool:
+  //         action.tool,
+
+  //       args,
+
+  //       description:
+  //         action.description(
+  //           allocationId,
+  //           instanceId
+  //         )
+
+  //     },
+
+
+  //     messages: [
+
+  //       new AIMessage(
+  //         action.confirmation(
+  //           allocationId,
+  //           instanceId
+  //         )
+  //       )
+
+  //     ]
+
+  //   }
+
+  // }
 
 
   //

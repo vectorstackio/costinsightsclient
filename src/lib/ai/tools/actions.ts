@@ -106,6 +106,89 @@ export const releaseElasticIp = tool(
   }
 )
 
+export const associateElasticIp = tool(
+  async ({
+    allocationId,
+    instanceId
+  }) => {
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/associate`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          allocationId,
+          instanceId
+        })
+      }
+    )
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to associate Elastic IP'
+      )
+    }
+
+    return await res.json()
+  },
+  {
+    name: 'associateElasticIp',
+
+    description:
+      'Associates an existing Elastic IP address with an EC2 instance. Only use this action when the user has explicitly requested that an Elastic IP should be associated with an instance.',
+
+    schema: z.object({
+
+      allocationId:
+        z.string()
+          .describe(
+            'The Elastic IP allocation ID'
+          ),
+
+      instanceId:
+        z.string()
+          .describe(
+            'The EC2 instance ID'
+          )
+
+    })
+  }
+)
+
+export const allocateElasticIp = tool(
+  async () => {
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/allocate`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    if (!res.ok) {
+      throw new Error(
+        'Failed to allocate Elastic IP'
+      )
+    }
+
+    return await res.json()
+  },
+  {
+    name: 'allocateElasticIp',
+
+    description:
+      'Allocates a new Elastic IP address in the VPC. Only use this action when the user has explicitly requested that a new Elastic IP should be allocated.',
+
+    schema: z.object({})
+  }
+)
+
 export const resizeEbsVolume = tool(
   async ({
     volumeId,
