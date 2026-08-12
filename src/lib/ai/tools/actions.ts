@@ -189,6 +189,249 @@ export const allocateElasticIp = tool(
   }
 )
 
+export const assignElasticIp = tool(
+  async ({ instanceId }) => {
+
+    //
+    // Get the current Elastic IP inventory
+    //
+
+    const inventoryRes =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
+      )
+
+    if (!inventoryRes.ok) {
+      throw new Error(
+        'Failed to retrieve Elastic IPs'
+      )
+    }
+
+    const data =
+      await inventoryRes.json()
+
+    const elasticIps =
+      data.elasticIps ?? []
+
+
+    //
+    // Check whether the target instance
+    // already has an Elastic IP.
+    //
+
+    const existingInstanceIp =
+      elasticIps.find(
+        (ip: {
+          associated: boolean
+          instanceId?: string
+          publicIp?: string
+        }) =>
+          ip.associated === true &&
+          ip.instanceId === instanceId
+      )
+
+
+    if (existingInstanceIp) {
+      return {
+        success: false,
+        message:
+          `EC2 instance ${instanceId} already has Elastic IP ${existingInstanceIp.publicIp}. No changes were made.`,
+        instanceId,
+        publicIp:
+          existingInstanceIp.publicIp
+      }
+    }
+
+
+    //
+    // Find an unused Elastic IP.
+    //
+
+    const spareElasticIp =
+      elasticIps.find(
+        (ip: {
+          associated: boolean
+          allocationId?: string
+          publicIp?: string
+        }) =>
+          ip.associated === false &&
+          Boolean(ip.allocationId)
+      )
+
+
+    //
+    // Use an existing spare Elastic IP
+    // if one is available.
+    //
+
+    if (spareElasticIp) {
+
+      const associateRes =
+        await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/associate`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'application/json'
+            },
+            body: JSON.stringify({
+              allocationId:
+                spareElasticIp.allocationId,
+
+              instanceId
+            })
+          }
+        )
+
+
+      if (!associateRes.ok) {
+        throw new Error(
+          'Failed to associate existing Elastic IP'
+        )
+      }
+
+
+      const result =
+        await associateRes.json()
+
+
+      return {
+        success: true,
+
+        action:
+          'associated-existing',
+
+        instanceId,
+
+        publicIp:
+          spareElasticIp.publicIp,
+
+        allocationId:
+          spareElasticIp.allocationId,
+
+        result
+      }
+    }
+
+
+    //
+    // No spare Elastic IP exists.
+    //
+    // Allocate a new one.
+    //
+
+    const allocateRes =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/allocate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json'
+          }
+        }
+      )
+
+
+    if (!allocateRes.ok) {
+      throw new Error(
+        'Failed to allocate Elastic IP'
+      )
+    }
+
+
+    const allocated =
+      await allocateRes.json()
+
+
+    //
+    // The allocation Lambda should return
+    // the allocation ID.
+    //
+
+    const allocationId =
+      allocated.allocationId
+
+
+    const publicIp =
+      allocated.publicIp
+
+
+    if (!allocationId) {
+      throw new Error(
+        'Elastic IP was allocated but no allocation ID was returned'
+      )
+    }
+
+
+    //
+    // Associate the newly allocated EIP
+    // with the target instance.
+    //
+
+    const associateRes =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/associate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+          body: JSON.stringify({
+            allocationId,
+
+            instanceId
+          })
+        }
+      )
+
+
+    if (!associateRes.ok) {
+      throw new Error(
+        'Elastic IP was allocated but could not be associated with the EC2 instance'
+      )
+    }
+
+
+    const result =
+      await associateRes.json()
+
+
+    return {
+      success: true,
+
+      action:
+        'allocated-and-associated',
+
+      instanceId,
+
+      publicIp,
+
+      allocationId,
+
+      result
+    }
+  },
+  {
+    name:
+      'assignElasticIp',
+
+    description:
+      'Assigns an Elastic IP to an EC2 instance. If the instance already has an Elastic IP, no action is taken. If an unused Elastic IP is available, it is associated with the instance. If no unused Elastic IP is available, a new Elastic IP is allocated and then associated with the instance. Only use this action when the user has explicitly requested that an Elastic IP be assigned to an instance.',
+
+    schema:
+      z.object({
+        instanceId:
+          z.string()
+            .describe(
+              'The EC2 instance ID that should receive an Elastic IP'
+            )
+      })
+  }
+)
+
 export const resizeEbsVolume = tool(
   async ({
     volumeId,
