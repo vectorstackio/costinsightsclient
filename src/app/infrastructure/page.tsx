@@ -49,17 +49,9 @@ const InfrastructurePage = () => {
     )
   }
 
-  const avgCpu =
-    data.reduce((sum, i) => sum + (i.cpuUsedPercent ?? 0), 0) /
-    data.length
-
-  const avgMemory =
-    data.reduce((sum, i) => sum + (i.memoryUsedPercent ?? 0), 0) /
-    data.length
-
-  const avgDisk =
-    data.reduce((sum, i) => sum + (i.diskUsedPercent ?? 0), 0) /
-    data.length
+  const avgCpu = averageAvailable(data.map(i => i.cpuUsedPercent))
+  const avgMemory = averageAvailable(data.map(i => i.memoryUsedPercent))
+  const avgDisk = averageAvailable(data.map(i => i.diskUsedPercent))
 
   const fleetHealth = data.reduce(
     (acc, instance) => {
@@ -68,7 +60,7 @@ const InfrastructurePage = () => {
       acc[status]++
       return acc
     },
-    { healthy: 0, warning: 0, critical: 0 }
+    { healthy: 0, warning: 0, critical: 0, unavailable: 0 }
   )
 
   // const idleInstances = data.filter(
@@ -151,6 +143,12 @@ const InfrastructurePage = () => {
             value={fleetHealth.critical}
             colour="bg-red-500"
           />
+
+          <HealthBlock
+            label="Unavailable"
+            value={fleetHealth.unavailable}
+            colour="bg-slate-400"
+          />
         </div>
       </div>
 
@@ -164,17 +162,17 @@ const InfrastructurePage = () => {
 
         <MetricCard
           title="Average CPU"
-          value={`${avgCpu.toFixed(1)}%`}
+          value={formatMetric(avgCpu)}
         />
 
         <MetricCard
           title="Average Memory"
-          value={`${avgMemory.toFixed(1)}%`}
+          value={formatMetric(avgMemory)}
         />
 
         <MetricCard
           title="Average Disk"
-          value={`${avgDisk.toFixed(1)}%`}
+          value={formatMetric(avgDisk)}
         />
 
       </div>
@@ -224,19 +222,16 @@ const InfrastructurePage = () => {
 
             <tbody>
               {data.map(instance => {
-                const cpu = instance.cpuUsedPercent ?? 0
-                const memory = instance.memoryUsedPercent ?? 0
-                const isRightsize = cpu < 5 && memory < 30
-                const disk = instance.diskUsedPercent ?? 0
+                const cpu = instance.cpuUsedPercent
+                const memory = instance.memoryUsedPercent
+                const disk = instance.diskUsedPercent
+                const isRightsize =
+                  hasMetric(cpu) &&
+                  hasMetric(memory) &&
+                  cpu < 5 &&
+                  memory < 30
 
-                const status =
-                  cpu > 80 || memory > 90 || disk > 90
-                    ? 'critical'
-                    : cpu > 50 ||
-                      memory > 75 ||
-                      disk > 75
-                      ? 'warning'
-                      : 'healthy'
+                const status = getStatus(instance)
 
                 return (
                   <tr
@@ -345,8 +340,12 @@ const MetricCard = ({
 const UsageBar = ({
   value
 }: {
-  value: number
+  value: number | null
 }) => {
+  if (!hasMetric(value)) {
+    return <span className="text-sm text-slate-500">Unavailable</span>
+  }
+
   return (
     <div className="flex items-center justify-end gap-3">
       {/* Label */}
@@ -370,7 +369,7 @@ const UsageBar = ({
 const StatusBadge = ({
   status
 }: {
-  status: 'healthy' | 'warning' | 'critical'
+  status: 'healthy' | 'warning' | 'critical' | 'unavailable'
 }) => {
   const styles = {
     healthy:
@@ -378,7 +377,9 @@ const StatusBadge = ({
     warning:
       'bg-amber-100 text-amber-700 border-amber-200',
     critical:
-      'bg-red-100 text-red-700 border-red-200'
+      'bg-red-100 text-red-700 border-red-200',
+    unavailable:
+      'bg-slate-100 text-slate-600 border-slate-200'
   }
 
   return (
@@ -454,19 +455,48 @@ const getBarColour = (value: number) => {
 }
 
 const getStatus = (instance: InstanceMetrics) => {
-  const cpu = instance.cpuUsedPercent ?? 0
-  const memory = instance.memoryUsedPercent ?? 0
-  const disk = instance.diskUsedPercent ?? 0
+  const cpu = instance.cpuUsedPercent
+  const memory = instance.memoryUsedPercent
+  const disk = instance.diskUsedPercent
 
-  if (cpu > 80 || memory > 90 || disk > 90) {
+  if (
+    (hasMetric(cpu) && cpu > 80) ||
+    (hasMetric(memory) && memory > 90) ||
+    (hasMetric(disk) && disk > 90)
+  ) {
     return 'critical'
   }
 
-  if (cpu > 50 || memory > 75 || disk > 75) {
+  if (
+    (hasMetric(cpu) && cpu > 50) ||
+    (hasMetric(memory) && memory > 75) ||
+    (hasMetric(disk) && disk > 75)
+  ) {
     return 'warning'
+  }
+
+  if (!hasMetric(cpu) || !hasMetric(memory) || !hasMetric(disk)) {
+    return 'unavailable'
   }
 
   return 'healthy'
 }
+
+const hasMetric = (value: number | null): value is number =>
+  value !== null && Number.isFinite(value)
+
+const averageAvailable = (values: Array<number | null>) => {
+  const availableValues = values.filter(hasMetric)
+
+  if (!availableValues.length) {
+    return null
+  }
+
+  return availableValues.reduce((sum, value) => sum + value, 0) /
+    availableValues.length
+}
+
+const formatMetric = (value: number | null) =>
+  hasMetric(value) ? `${value.toFixed(1)}%` : 'Unavailable'
 
 export default InfrastructurePage

@@ -140,8 +140,9 @@ const InstanceHistoryCard = ({
   const memoryValues = instance.memory.map(p => p.value)
   const diskValues = instance.disk.map(p => p.value)
 
-  const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
-  const max = (arr: number[]) => arr.length ? Math.max(...arr) : 0
+  const avg = (arr: number[]) =>
+    arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null
+  const max = (arr: number[]) => arr.length ? Math.max(...arr) : null
 
   const avgCpu = avg(cpuValues)
   const avgMemory = avg(memoryValues)
@@ -149,41 +150,72 @@ const InstanceHistoryCard = ({
 
   const peakCpu = max(cpuValues)
 
-  const isUnderutilised = avgCpu < 10 && avgMemory < 40
+  const isUnderutilised =
+    hasMetric(avgCpu) &&
+    hasMetric(avgMemory) &&
+    avgCpu < 10 &&
+    avgMemory < 40
 
-  const isOverloaded = avgCpu > 80 || avgMemory > 85 || avgDisk > 90
+  const isOverloaded =
+    (hasMetric(avgCpu) && avgCpu > 80) ||
+    (hasMetric(avgMemory) && avgMemory > 85) ||
+    (hasMetric(avgDisk) && avgDisk > 90)
 
   const status =
     isOverloaded
       ? 'critical'
-      : isUnderutilised
-        ? 'underutilised'
-        : 'healthy'
+      : !hasMetric(avgCpu) || !hasMetric(avgMemory) || !hasMetric(avgDisk)
+        ? 'unavailable'
+        : isUnderutilised
+          ? 'underutilised'
+          : 'healthy'
 
   const tone =
     status === 'critical'
       ? 'critical'
       : status === 'underutilised'
         ? 'underutilised'
-        : 'healthy'
+        : status === 'unavailable'
+          ? 'unavailable'
+          : 'healthy'
 
-  let confidence = 0
+  let confidence: number | null = null
   let recommendation: 'downsize' | 'keep' | 'investigate' = 'keep'
-  let reason = 'Usage looks balanced'
+  let reason = 'Insufficient metric data for a recommendation'
 
-  if (avgCpu < 10 && avgMemory < 40 && peakCpu < 25) {
+  if (
+    hasMetric(avgCpu) &&
+    hasMetric(avgMemory) &&
+    hasMetric(peakCpu) &&
+    avgCpu < 10 &&
+    avgMemory < 40 &&
+    peakCpu < 25
+  ) {
     recommendation = 'downsize'
     confidence = 80 + (10 - avgCpu) * 1.2 + (40 - avgMemory) * 0.5
     reason = 'Consistently low CPU and memory utilisation'
   }
 
-  if (avgCpu > 75 || avgMemory > 80) {
+  if (
+    (hasMetric(avgCpu) && avgCpu > 75) ||
+    (hasMetric(avgMemory) && avgMemory > 80)
+  ) {
     recommendation = 'investigate'
     confidence = 70
     reason = 'Sustained high utilisation detected'
   }
 
-  confidence = Math.min(99, Math.max(10, confidence))
+  if (confidence !== null) {
+    confidence = Math.min(99, Math.max(10, confidence))
+  } else if (
+    hasMetric(avgCpu) &&
+    hasMetric(avgMemory) &&
+    hasMetric(avgDisk) &&
+    hasMetric(peakCpu)
+  ) {
+    confidence = 10
+    reason = 'Usage looks balanced'
+  }
 
   const downgradeMap: Record<string, string> = {
     'm6a.large': 't3.medium',
@@ -225,10 +257,10 @@ const InstanceHistoryCard = ({
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-5">
-        <SummaryTile label="Avg CPU" value={`${avgCpu.toFixed(1)}%`} />
-        <SummaryTile label="Avg Memory" value={`${avgMemory.toFixed(1)}%`} />
-        <SummaryTile label="Avg Disk" value={`${avgDisk.toFixed(1)}%`} />
-        <SummaryTile label="Peak CPU" value={`${peakCpu.toFixed(1)}%`} />
+        <SummaryTile label="Avg CPU" value={formatMetric(avgCpu)} />
+        <SummaryTile label="Avg Memory" value={formatMetric(avgMemory)} />
+        <SummaryTile label="Avg Disk" value={formatMetric(avgDisk)} />
+        <SummaryTile label="Peak CPU" value={formatMetric(peakCpu)} />
 
         <SummaryTile
           label="Recommendation"
@@ -245,13 +277,13 @@ const InstanceHistoryCard = ({
           <div className="mt-2">
             <div className="flex items-center justify-between text-xs text-slate-500">
               <span>Confidence</span>
-              <span>{confidence.toFixed(0)}%</span>
+              <span>{formatConfidence(confidence)}</span>
             </div>
 
             <div className="mt-1 h-2 w-full rounded-full bg-slate-100">
               <div
                 className="h-2 rounded-full bg-blue-500"
-                style={{ width: `${confidence}%` }}
+                style={{ width: `${confidence ?? 0}%` }}
               />
             </div>
 
@@ -386,14 +418,15 @@ const SummaryTile = ({
 }: {
   label: string
   value: string
-  tone?: 'neutral' | 'healthy' | 'critical' | 'underutilised'
+  tone?: 'neutral' | 'healthy' | 'critical' | 'underutilised' | 'unavailable'
   children?: React.ReactNode
 }) => {
   const tones = {
     neutral: 'text-slate-600',
     healthy: 'text-green-600',
     critical: 'text-red-600',
-    underutilised: 'text-amber-600'
+    underutilised: 'text-amber-600',
+    unavailable: 'text-slate-500'
   }
 
   return (
@@ -406,5 +439,14 @@ const SummaryTile = ({
     </div>
   )
 }
+
+const hasMetric = (value: number | null): value is number =>
+  value !== null && Number.isFinite(value)
+
+const formatMetric = (value: number | null) =>
+  hasMetric(value) ? `${value.toFixed(1)}%` : 'Unavailable'
+
+const formatConfidence = (value: number | null) =>
+  hasMetric(value) ? `${value.toFixed(0)}%` : 'Unavailable'
 
 export default MetricsHistoryPage

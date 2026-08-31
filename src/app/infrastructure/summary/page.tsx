@@ -11,7 +11,7 @@ import { formatCurrency } from '@/lib/reports'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Forbidden from '@/components/Forbidden'
 
-import type { InfrastructureSummaryInstance } from '@/types'
+import type { Currency, InfrastructureSummaryInstance } from '@/types'
 
 const MetricsSummaryPage = () => {
   const [forbidden, setForbidden] = useState(false)
@@ -37,18 +37,23 @@ const MetricsSummaryPage = () => {
 
   const { instances } = data
 
-  const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
-
   const underutilised = instances.filter(i =>
-    (i.cpuUsedPercent ?? 0) < 10 &&
-    (i.memoryUsedPercent ?? 0) < 40
+    hasMetric(i.cpuUsedPercent) &&
+    hasMetric(i.memoryUsedPercent) &&
+    i.cpuUsedPercent < 10 &&
+    i.memoryUsedPercent < 40
   )
 
-  const avgCpu = avg(instances.map(i => i.cpuUsedPercent ?? 0))
-  const avgMemory = avg(instances.map(i => i.memoryUsedPercent ?? 0))
-  //const avgDisk = avg(instances.map(i => i.diskUsedPercent ?? 0))
+  const avgCpu = averageAvailable(instances.map(i => i.cpuUsedPercent))
+  const avgMemory = averageAvailable(instances.map(i => i.memoryUsedPercent))
 
-  const wasteScore = (underutilised.length / instances.length) * 100
+  const assessedInstances = instances.filter(i =>
+    hasMetric(i.cpuUsedPercent) && hasMetric(i.memoryUsedPercent)
+  )
+
+  const wasteScore = assessedInstances.length
+    ? (underutilised.length / assessedInstances.length) * 100
+    : null
 
   const INSTANCE_MONTHLY_COSTS: Record<string, number> = {
     't3.medium': 30,
@@ -61,8 +66,12 @@ const MetricsSummaryPage = () => {
   }
 
   const calculateWaste = (instance: InfrastructureSummaryInstance) => {
-    const cpu = instance.cpuUsedPercent ?? 0
-    const memory = instance.memoryUsedPercent ?? 0
+    const cpu = instance.cpuUsedPercent
+    const memory = instance.memoryUsedPercent
+
+    if (!hasMetric(cpu) || !hasMetric(memory)) {
+      return null
+    }
 
     const monthlyCost = INSTANCE_MONTHLY_COSTS[instance.instanceType] ?? 0
 
@@ -82,7 +91,7 @@ const MetricsSummaryPage = () => {
   }
 
   const estimatedMonthlyWaste = instances.reduce(
-    (sum, instance) => sum + calculateWaste(instance),
+    (sum, instance) => sum + (calculateWaste(instance) ?? 0),
     0
   )
 
@@ -110,9 +119,9 @@ const MetricsSummaryPage = () => {
       {/* KPI GRID */}
       <div className="grid gap-4 md:grid-cols-4">
         <Kpi title="Instances" value={instances.length} />
-        <Kpi title="Avg CPU" value={`${avgCpu.toFixed(1)}%`} />
-        <Kpi title="Avg Memory" value={`${avgMemory.toFixed(1)}%`} />
-        <Kpi title="Waste Score" value={`${wasteScore.toFixed(1)}%`} />
+        <Kpi title="Avg CPU" value={formatMetric(avgCpu)} />
+        <Kpi title="Avg Memory" value={formatMetric(avgMemory)} />
+        <Kpi title="Waste Score" value={formatMetric(wasteScore)} />
         <Kpi title="Potential Savings" value={formatCurrency(estimatedMonthlyWaste, data?.metadata?.currency ?? 'USD')} />
         <Kpi title="Annual Savings" value={formatCurrency(estimatedAnnualWaste, data?.metadata?.currency ?? 'USD')} />
       </div>
@@ -150,7 +159,8 @@ const MetricsSummaryPage = () => {
           {[...instances]
             .sort(
               (a, b) =>
-                (a.cpuUsedPercent ?? 0) - (b.cpuUsedPercent ?? 0)
+                (a.cpuUsedPercent ?? Number.POSITIVE_INFINITY) -
+                (b.cpuUsedPercent ?? Number.POSITIVE_INFINITY)
             )
             .slice(0, 5)
             .map(i => (
@@ -163,16 +173,16 @@ const MetricsSummaryPage = () => {
                 </div>
 
                 <div className="text-right text-slate-600">
-                  {i.cpuUsedPercent?.toFixed(1)}% CPU
+                  {formatMetric(i.cpuUsedPercent)} CPU
                 </div>
 
                 <div className="text-right">
                   <div className="font-medium">
-                    {formatCurrency(calculateWaste(i), data.metadata?.currency ?? 'USD')}/mo
+                    {formatSavings(calculateWaste(i), data.metadata?.currency ?? 'USD')}
                   </div>
 
                   <div className="text-xs text-slate-500">
-                    {i.cpuUsedPercent?.toFixed(1)}% CPU
+                    {formatMetric(i.cpuUsedPercent)} CPU
                   </div>
                 </div>
               </div>
@@ -214,6 +224,26 @@ const InsightCard = ({
     </div>
   )
 }
+
+const hasMetric = (value: number | null): value is number =>
+  value !== null && Number.isFinite(value)
+
+const averageAvailable = (values: Array<number | null>) => {
+  const availableValues = values.filter(hasMetric)
+
+  if (!availableValues.length) {
+    return null
+  }
+
+  return availableValues.reduce((sum, value) => sum + value, 0) /
+    availableValues.length
+}
+
+const formatMetric = (value: number | null) =>
+  hasMetric(value) ? `${value.toFixed(1)}%` : 'Unavailable'
+
+const formatSavings = (value: number | null, currency: Currency) =>
+  hasMetric(value) ? `${formatCurrency(value, currency)}/mo` : 'Unavailable'
 
 const SummarySkeleton = () => {
   return (

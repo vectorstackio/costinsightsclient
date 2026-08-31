@@ -11,7 +11,7 @@ import { formatCurrency } from '@/lib/reports'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Forbidden from '@/components/Forbidden'
 
-import type { TopCostInstance } from '@/types'
+import type { Currency, TopCostInstance } from '@/types'
 
 const TopCostPage = () => {
   const [forbidden, setForbidden] = useState(false)
@@ -46,8 +46,12 @@ const TopCostPage = () => {
   }, 0)
 
   const calculateWaste = (i: TopCostInstance) => {
-    const cpu = i.cpuUsedPercent ?? 0
-    const memory = i.memoryUsedPercent ?? 0
+    const cpu = i.cpuUsedPercent
+    const memory = i.memoryUsedPercent
+
+    if (!hasMetric(cpu) || !hasMetric(memory)) {
+      return null
+    }
 
     const cost = INSTANCE_COSTS[i.instanceType] ?? 0
 
@@ -58,22 +62,24 @@ const TopCostPage = () => {
   }
 
   const totalPotentialSavings = data.instances.reduce(
-    (sum, i) => sum + calculateWaste(i),
+    (sum, i) => sum + (calculateWaste(i) ?? 0),
     0
   )
 
   const enrichedInstances = data.instances.map(i => {
     const monthlyCost = INSTANCE_COSTS[i.instanceType] ?? 0
 
-    const cpu = i.cpuUsedPercent ?? 0
-    const memory = i.memoryUsedPercent ?? 0
+    const cpu = i.cpuUsedPercent
+    const memory = i.memoryUsedPercent
 
-    let estimatedWaste = 0
+    let estimatedWaste: number | null = null
 
-    if (cpu < 10 && memory < 40) {
+    if (hasMetric(cpu) && hasMetric(memory) && cpu < 10 && memory < 40) {
       estimatedWaste = monthlyCost * 0.5
-    } else if (cpu < 20 && memory < 50) {
+    } else if (hasMetric(cpu) && hasMetric(memory) && cpu < 20 && memory < 50) {
       estimatedWaste = monthlyCost * 0.25
+    } else if (hasMetric(cpu) && hasMetric(memory)) {
+      estimatedWaste = 0
     }
 
     return {
@@ -157,8 +163,7 @@ const TopCostPage = () => {
                 </div>
 
                 <div className="text-xs text-slate-500">
-                  {formatCurrency(instance.estimatedWaste, data.metadata?.currency ?? 'USD')}
-                  {' '}recoverable
+                  {formatSavings(instance.estimatedWaste, data.metadata?.currency ?? 'USD')}
                 </div>
               </div>
             </div>
@@ -223,6 +228,12 @@ export const MetricCard = ({
   )
 }
 
+const hasMetric = (value: number | null): value is number =>
+  value !== null && Number.isFinite(value)
+
+const formatSavings = (value: number | null, currency: Currency) =>
+  hasMetric(value) ? `${formatCurrency(value, currency)} recoverable` : 'Unavailable'
+
 const TopCostSkeleton = () => {
   return (
     <div className="space-y-6 p-6 animate-pulse">
@@ -255,4 +266,3 @@ const TopCostSkeleton = () => {
 }
 
 export default TopCostPage
-
