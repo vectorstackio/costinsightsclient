@@ -6,16 +6,6 @@ const nextConfig: NextConfig = {
     'aws.develop.thebrilliantclub.org'
   ],
   reactCompiler: true,
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/logout',
-        permanent: true,
-        basePath: false
-      }
-    ]
-  },
 }
 
 export default nextConfig

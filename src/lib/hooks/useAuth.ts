@@ -21,14 +21,17 @@ export const useAuth = (callback: (forbidden: boolean) => void) => {
   useEffect(() => {
     const doCheck = async () => {
       const token = sessionStorage.getItem(AUTH_TOKEN_NAME)
-      if(!token) {
+
+      if (!token) {
         callback(true)
         return
       }
+
       const allow = await checkToken(token)
-      if(!allow) callback(true)
-      return
+
+      callback(!allow)
     }
+
     doCheck()
-  }, [])
+  }, [callback])
 }
