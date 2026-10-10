@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 
 import { NextResponse } from 'next/server'
 
-export const PW_SALT = '04aDe1350%x750900eb5753C7119a60d_67'
+import { PW_SALT } from '@/lib/config'
 
 // To handle a POST request
 export async function POST(req: Request) {

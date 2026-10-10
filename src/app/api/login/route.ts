@@ -4,23 +4,8 @@ import jwt from 'jsonwebtoken'
 
 import { NextResponse } from 'next/server'
 
-const USERS:Record<string, string> = {
-  'michaelgarthwaite@gmail.com': 'Password_112',
-  'sophie.callin@thebrilliantclub.org': 'Password_112',
-  'apoorwa.saxena@thebrilliantclub.org': 'Password_112',
-  'leanne@thebrilliantclub.org': 'Password_112',
-  'nikki.labrum@thebrilliantclub.org': 'Password_112',
-}
-
-const USER_IDS:Record<string, string> = {
-  'michaelgarthwaite@gmail.com': '0052E000002tBFrQAM',
-  'sophie.callin@thebrilliantclub.org': '0052E000002tB7cQAE',
-  'apoorwa.saxena@thebrilliantclub.org': '0052E000002tB7oQAE',
-  'leanne@thebrilliantclub.org': '0052E000002tB7vQAE',
-  'nikki.labrum@thebrilliantclub.org': '0052E000002tB8BQAW',
-}
-
-import { PW_SALT } from '@/app/api/auth/route'
+import { USERS, USER_IDS } from '@/lib/config'
+import { PW_SALT } from '@/lib/config'
 
 const ERROR_MSG = 'Invalid email or password'
 
