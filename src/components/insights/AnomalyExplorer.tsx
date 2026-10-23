@@ -55,54 +55,55 @@ const AnomalyExplorer = ({ anomalies, currency }: Props) => {
       </h2>
 
       <div className="space-y-3">
-        {anomalies
-          .sort((a, b) => b.zScore - a.zScore)
-          .map((a, idx) => (
-            <div
-              key={`${a.service}-${idx}`}
-              className={`p-4 border rounded ${getSeverityStyles(
-                a.severity
-              )}`}
-            >
-              <div className="flex justify-between items-start">
-                {/* LEFT SIDE */}
-                <div>
-                  <div className="font-medium">
-                    {a.service}
-                  </div>
-
-                  <div className="text-sm mt-1 opacity-80">
-                    Spike detected: {a.spikePercent.toFixed(1)}%
-                    above average
-                  </div>
-
-                  <div className="text-xs mt-2 opacity-70">
-                    Z-score: {a.zScore.toFixed(2)} | Avg: {formatCurrency(a.averageCost, currency)}
-                  </div>
+        {anomalies.map((a, idx) => (
+          <div
+            key={`${a.service}-${idx}`}
+            className={`p-4 border rounded ${getSeverityStyles(
+              a.severity
+            )}`}
+          >
+            <div className="flex justify-between items-start">
+              {/* LEFT SIDE */}
+              <div>
+                <div className="font-medium">
+                  {a.service}
                 </div>
 
-                {/* RIGHT SIDE */}
-                <div className="text-right">
-                  <div className="font-bold">
-                    {formatCurrency(a.currentCost, currency)}
-                  </div>
+                <div className="text-sm mt-1 opacity-80">
+                  {a.spikePercent !== undefined
+                    ? <>Spike detected: {a.spikePercent.toFixed(1)}% above average</>
+                    : 'Spike percentage unavailable (zero historical mean)'}
+                </div>
 
-                  <div
-                    className={`text-xs font-semibold mt-1 ${getSeverityBadge(
-                      a.severity
-                    )}`}
-                  >
-                    {a.severity.toUpperCase()}
-                  </div>
+                <div className="text-xs mt-2 opacity-70">
+                  {a.zScore !== undefined
+                    ? <>Z-score: {a.zScore.toFixed(2)}</>
+                    : 'Z-score unavailable (constant baseline)'} | Avg: {formatCurrency(a.averageCost, currency)}
                 </div>
               </div>
 
-              {/* SPIKE DETAIL BAR */}
-              <div className="mt-3 text-xs text-gray-600">
-                Increase: +{formatCurrency(a.spikeAmount, currency)}
+              {/* RIGHT SIDE */}
+              <div className="text-right">
+                <div className="font-bold">
+                  {formatCurrency(a.currentCost, currency)}
+                </div>
+
+                <div
+                  className={`text-xs font-semibold mt-1 ${getSeverityBadge(
+                    a.severity
+                  )}`}
+                >
+                  {a.severity.toUpperCase()}
+                </div>
               </div>
             </div>
-          ))}
+
+            {/* SPIKE DETAIL BAR */}
+            <div className="mt-3 text-xs text-gray-600">
+              Increase: +{formatCurrency(a.spikeAmount, currency)}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

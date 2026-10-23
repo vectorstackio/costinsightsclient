@@ -40,6 +40,7 @@ export function useCostExplorerController() {
 
   const [summary, setSummary] = useState<SummaryResponse | null>(null)
   const [drilldown, setDrilldown] = useState<DrilldownResponse | null>(null)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
   const [loadingSummary, setLoadingSummary] = useState(false)
   const [loadingDrilldown, setLoadingDrilldown] = useState(false)
 
@@ -62,10 +63,15 @@ export function useCostExplorerController() {
    */
   const fetchSummary = useCallback(async () => {
     setLoadingSummary(true)
+    setSummaryError(null)
     try {
       const res = await fetch('/api/costs')
+      if (!res.ok) throw new Error('Unable to load cost summary. Please try again later.')
       const json = await res.json()
       setSummary(json)
+    } catch {
+      setSummary(null)
+      setSummaryError('Unable to load cost summary. Please try again later.')
     } finally {
       setLoadingSummary(false)
     }
@@ -212,6 +218,7 @@ export function useCostExplorerController() {
 
     // loading states
     loadingSummary,
+    summaryError,
     loadingDrilldown,
 
     // state

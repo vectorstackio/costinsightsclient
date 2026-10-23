@@ -31,9 +31,9 @@ const MetricCard = ({
 }
 
 type Props = {
-  params: {
+  params: Promise<{
     month: string
-  }
+  }>
 }
 
 const ReportPage = async ({ params }: Props) => {
@@ -191,8 +191,7 @@ const ReportPage = async ({ params }: Props) => {
                     Spike: {formatCurrency(
                       a.spikeAmount,
                       report.metadata.currency
-                    )} (
-                    {a.spikePercent}%)
+                    )}{a.spikePercent !== undefined && <> ({a.spikePercent}%)</>}
                   </div>
                 </div>
               ))}

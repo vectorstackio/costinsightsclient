@@ -40,6 +40,7 @@ const DashboardPage = () => {
   const {
     summary,
     loadingSummary,
+    summaryError,
   } = useCostExplorerController()
 
   const [selectedService, setSelectedService] = useState<string | null>(null)
@@ -60,6 +61,10 @@ const DashboardPage = () => {
    * Loading state
    * -----------------------
    */
+  if (summaryError) {
+    return <div role="alert" className="p-6 text-red-700">{summaryError}</div>
+  }
+
   if (loadingSummary || !summary) {
     return (
       <div className="p-6 space-y-6">

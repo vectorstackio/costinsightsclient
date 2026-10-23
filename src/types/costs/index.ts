@@ -65,8 +65,8 @@ export type ServiceAnomaly = {
   currentCost: number
   averageCost: number
   spikeAmount: number
-  spikePercent: number
-  zScore: number
+  spikePercent?: number
+  zScore?: number
   severity: 'low' | 'medium' | 'high'
 }
 

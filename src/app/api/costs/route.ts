@@ -9,6 +9,13 @@ export async function GET() {
       }
     })
 
+    if (!res.ok) {
+      return Response.json(
+        { error: 'Unable to load cost summary' },
+        { status: res.status }
+      )
+    }
+
     const data = await res.json()
 
     return Response.json(data)

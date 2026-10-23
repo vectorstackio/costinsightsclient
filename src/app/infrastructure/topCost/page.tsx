@@ -194,7 +194,7 @@ type MetricCardProps = {
   }
 }
 
-export const MetricCard = ({
+const MetricCard = ({
   title,
   value,
   subtitle,

@@ -44,7 +44,9 @@ const InvestigationTargets = ({drivers, anomalies, currency}: Props) => {
       title: 'Cost Anomaly',
       service: a.service,
       impact: a.spikeAmount,
-      reason: `${a.zScore.toFixed(2)} standard deviations above baseline`,
+      reason: a.zScore !== undefined
+        ? `${a.zScore.toFixed(2)} standard deviations above baseline`
+        : 'Spending increased above a constant baseline',
       severity: a.severity
     }))
   ]

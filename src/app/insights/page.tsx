@@ -30,7 +30,7 @@ const SkeletonCard = () => (
 
 const InsightsPage = () => {
   const [forbidden, setForbidden] = useState(false)
-  const { summary, loadingSummary } = useCostExplorerController()
+  const { summary, loadingSummary, summaryError } = useCostExplorerController()
   const insights = useCostInsights(summary)
   const currentMonthLabel = new Date().toLocaleString('en-GB', {
     month: 'long',
@@ -41,6 +41,10 @@ const InsightsPage = () => {
 
   if (forbidden) {
     return <Forbidden />
+  }
+
+  if (summaryError) {
+    return <div role="alert" className="p-6 text-red-700">{summaryError}</div>
   }
 
   if (loadingSummary || !summary || !insights) {

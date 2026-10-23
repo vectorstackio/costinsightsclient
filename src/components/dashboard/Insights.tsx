@@ -2,26 +2,7 @@
 
 import { formatCurrency } from '@/lib/reports'
 
-import type { Currency } from '@/types'
-
-export type CostIncreaseDriver = {
-  service: string
-  currentCost: number
-  previousCost: number
-  increase: number
-  contributionPercent: number
-  isNewService: boolean
-}
-
-export type ServiceAnomaly = {
-  service: string
-  currentCost: number
-  averageCost: number
-  spikeAmount: number
-  spikePercent: number
-  zScore: number
-  severity: 'low' | 'medium' | 'high'
-}
+import type { Currency, CostIncreaseDriver, ServiceAnomaly } from '@/types'
 
 type Props = {
   drivers: CostIncreaseDriver[]
@@ -83,7 +64,8 @@ const InsightsPanel = ({ drivers, anomalies, currency }: Props) => {
               </div>
 
               <div className="text-xs text-gray-500">
-                Spike: +{a.spikePercent}% (z={a.zScore})
+                {a.spikePercent !== undefined ? <>Spike: {a.spikePercent}%</> : 'Spike percentage unavailable'}
+                {a.zScore !== undefined && <> (z={a.zScore})</>}
               </div>
             </div>
           ))
