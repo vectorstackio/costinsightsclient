@@ -1,6 +1,7 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/costs/route.ts
 
-export async function GET() {
+async function handleGET(_request: Request) {
   try {
     const res = await fetch(`${process.env.COST_API_URL}/summary`, {
       method: 'GET',
@@ -23,3 +24,4 @@ export async function GET() {
     return Response.json({ err }, { status: 500 })
   }
 }
+export const GET = withAuth(handleGET)

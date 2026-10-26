@@ -1,3 +1,4 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/reports/generate/route.ts
 
 import { getOrCreateReport } from '@/lib/reports'
@@ -5,7 +6,7 @@ import { getReportPdf, saveReportPdf } from '@/lib/s3/reports'
 import { generatePdf } from '@/lib/reports/pdf'
 import { getPreviousMonthYYYYMM } from '@/lib/date'
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const month = searchParams.get('month') ?? getPreviousMonthYYYYMM()
@@ -32,3 +33,4 @@ export async function GET(request: Request) {
   }
   
 }
+export const GET = withAuth(handleGET)

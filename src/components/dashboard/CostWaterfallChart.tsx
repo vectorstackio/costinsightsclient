@@ -12,7 +12,7 @@ import {
   ReferenceLine
 } from 'recharts'
 
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 
 import type { ServiceComparison, Currency } from '@/types'
 

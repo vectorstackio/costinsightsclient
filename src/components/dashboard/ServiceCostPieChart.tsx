@@ -13,7 +13,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
 
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 import type { Dimension, Currency } from '@/types'
 
 /**

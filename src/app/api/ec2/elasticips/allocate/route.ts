@@ -1,6 +1,7 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/ec2/elasticips/allocate/route.ts
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const body = await req.json()
 
   const res = await fetch(`${process.env.EC2_ALLOCATE_ELASTIC_IP_API_URL}`, {
@@ -15,3 +16,4 @@ export async function POST(req: Request) {
 
   return Response.json(data)
 }
+export const POST = withAuth(handlePOST)

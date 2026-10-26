@@ -1,3 +1,5 @@
+import 'server-only'
+import { requireSession } from '@/lib/auth/server'
 // lib/s3/uploadPdf.ts
 
 import { PutObjectCommand } from '@aws-sdk/client-s3'
@@ -7,6 +9,7 @@ export const uploadPdfToS3 = async (
   buffer: Uint8Array,
   key: string
 ) => {
+  await requireSession()
   await s3.send(
     new PutObjectCommand({
       Bucket: process.env.S3_BUCKET!,

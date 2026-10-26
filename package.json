@@ -10,7 +10,7 @@
     "codelint": "npm run lint src/ && tsc --noEmit",
     "prepare": "husky",
     "postinstall": "puppeteer browsers install chrome",
-    "test": "node --test --test-isolation=none tests/*.test.js"
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1069.0",

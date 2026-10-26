@@ -1,3 +1,4 @@
+import { internalFetch } from '@/lib/auth/server'
 // lib/ai/tools/actions.ts
 
 import { tool } from '@langchain/core/tools'
@@ -10,7 +11,7 @@ export type Ec2Action =
 
 export const createEbsSnapshot = tool(
   async ({ volumeId }) => {
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/snapshot`,
       {
         method: 'POST',
@@ -39,7 +40,7 @@ export const createEbsSnapshot = tool(
 
 export const deleteEbsVolume = tool(
   async ({ volumeId }) => {
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/delete`,
       {
         method: 'POST',
@@ -69,7 +70,7 @@ export const deleteEbsVolume = tool(
 export const releaseElasticIp = tool(
   async ({ allocationId }) => {
 
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/release`,
       {
         method: 'POST',
@@ -112,7 +113,7 @@ export const associateElasticIp = tool(
     instanceId
   }) => {
 
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/associate`,
       {
         method: 'POST',
@@ -161,7 +162,7 @@ export const associateElasticIp = tool(
 export const allocateElasticIp = tool(
   async () => {
 
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/allocate`,
       {
         method: 'POST',
@@ -197,7 +198,7 @@ export const assignElasticIp = tool(
     //
 
     const inventoryRes =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
       )
 
@@ -267,7 +268,7 @@ export const assignElasticIp = tool(
     if (spareElasticIp) {
 
       const associateRes =
-        await fetch(
+        await internalFetch(
           `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/associate`,
           {
             method: 'POST',
@@ -322,7 +323,7 @@ export const assignElasticIp = tool(
     //
 
     const allocateRes =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/allocate`,
         {
           method: 'POST',
@@ -371,7 +372,7 @@ export const assignElasticIp = tool(
     //
 
     const associateRes =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips/associate`,
         {
           method: 'POST',
@@ -437,7 +438,7 @@ export const resizeEbsVolume = tool(
     volumeId,
     size
   }) => {
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/resize`,
       {
         method: 'POST',
@@ -479,7 +480,7 @@ export const expandEbsFilesystem = tool(
   }) => {
 
     const res =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/expand`,
         {
           method: 'POST',
@@ -590,7 +591,7 @@ export const performEc2Action = async (
 ) => {
 
   const res =
-    await fetch(
+    await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2`,
       {
         method: 'POST',

@@ -7,7 +7,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 import { useInfrastructureTopCost } from '@/lib/hooks/useInfrastructureTopCost'
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Forbidden from '@/components/Forbidden'
 

@@ -4,7 +4,7 @@
 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 
 import type { Currency } from '@/types'
 

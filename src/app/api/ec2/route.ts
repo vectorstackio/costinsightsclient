@@ -1,6 +1,7 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/ec2/route.ts
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const body = await req.json()
 
   const res = await fetch(`${process.env.EC2_MANAGE_INSTANCES_API_URL}`, {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
   return Response.json(data)
 }
 
-export async function GET() {
+async function handleGET(_request: Request) {
   const res = await fetch(`${process.env.EC2_GET_INSTANCES_API_URL}/instances`, {
     method: 'GET',
     headers: {
@@ -28,3 +29,5 @@ export async function GET() {
 
   return Response.json(data)
 }
+export const POST = withAuth(handlePOST)
+export const GET = withAuth(handleGET)

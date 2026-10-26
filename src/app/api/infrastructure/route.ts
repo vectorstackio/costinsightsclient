@@ -1,6 +1,7 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/infrastructure/route.ts
 
-export async function GET() {
+async function handleGET(_request: Request) {
   const res = await fetch(`${process.env.METRICS_API_URL}`, {
     method: 'GET',
     headers: {
@@ -12,3 +13,4 @@ export async function GET() {
 
   return Response.json(data)
 }
+export const GET = withAuth(handleGET)

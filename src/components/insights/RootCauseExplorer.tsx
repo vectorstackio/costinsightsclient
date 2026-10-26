@@ -1,6 +1,6 @@
 // components/insights/RootCauseExplorer.tsx
 
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 import type { RootCauseNode, Currency } from '@/types'
 
 type Props = {

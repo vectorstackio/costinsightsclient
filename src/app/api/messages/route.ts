@@ -1,3 +1,4 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/messages/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -9,7 +10,7 @@ const headers = {
   'Access-Control-Max-Age': '86400',
 }
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const userId = searchParams.get('userId')
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
     const limit = 200
     const response =
       await fetch(
-        `${process.env.MESSAGE_API_URL}/db/awsCopilotMessages?userId=${userId}&conversationId=${conversationId}&limit=${limit}&tspAuthToken=${process.env.API_AUTH_TOKEN}`
+        `${process.env.MESSAGE_API_URL}/db/awsCopilotMessages?userId=${encodeURIComponent(userId)}&conversationId=${encodeURIComponent(conversationId)}&limit=${limit}&tspAuthToken=${process.env.API_AUTH_TOKEN}`
       )
 
     if (!response.body) {
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
 
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
 
   try {
     const body = await req.json()
@@ -102,3 +103,5 @@ export async function POST(req: NextRequest) {
 
   
 }
+export const GET = withAuth(handleGET, { userOwned: true })
+export const POST = withAuth(handlePOST, { userOwned: true })

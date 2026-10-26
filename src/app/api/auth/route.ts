@@ -1,37 +1,28 @@
-// app/api/auth/route.ts
-
-import jwt from 'jsonwebtoken'
-
 import { NextResponse } from 'next/server'
+import { sameOrigin, SESSION_COOKIE, verifyToken } from '@/lib/auth/server'
 
-import { PW_SALT } from '@/lib/config'
-
-// To handle a POST request
+// Establish a browser session using the JWT returned by the unchanged login route.
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
   try {
-    const submitValues = await req.json()
-    const { token } = submitValues
-    if(!token) throw new Error('No token provided')
-
-    const decoded = jwt.verify(token, PW_SALT)
-
-    if (typeof decoded === 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token payload' },
-        { status: 403 }
-      )
-    }
-
-    return NextResponse.json(
-      { success: true, token },
-      { status: 200 }
-    )
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      //console.error(err.message)
-      return NextResponse.json({ success: false, error: err.message }, { status: 401 })
-    } else {
-      return NextResponse.json({ success: false, error: 'Unknown error' }, { status: 401 })
-    }
+    const { token } = await req.json()
+    verifyToken(token)
+    const response = NextResponse.json({ success: true, token }, { headers: { 'Cache-Control': 'no-store' } })
+    response.cookies.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' || new URL(req.url).protocol === 'https:',
+      sameSite: 'strict',
+      path: '/',
+    })
+    return response
+  } catch {
+    return NextResponse.json({ success: false, error: 'Invalid or expired token' }, { status: 401 })
   }
+}
+
+export async function DELETE(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+  const response = NextResponse.json({ success: true })
+  response.cookies.set(SESSION_COOKIE, '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/', maxAge: 0 })
+  return response
 }

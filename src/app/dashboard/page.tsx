@@ -17,7 +17,7 @@ import Forbidden from '@/components/Forbidden'
 
 import { useCostExplorerController } from '@/lib/hooks/useCostExplorerController'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 
 /**
  * -----------------------

@@ -1,6 +1,7 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/infrastructure/history/route.ts
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const { searchParams } = new URL(request.url)
 
   const range = searchParams.get('range') ?? '24h'
@@ -16,3 +17,5 @@ export async function GET(request: Request) {
   return Response.json(data)
 }
 
+
+export const GET = withAuth(handleGET)

@@ -1,3 +1,4 @@
+import { internalFetch } from '@/lib/auth/server'
 // lib/ai/node/action.ts
 
 import {
@@ -279,7 +280,7 @@ Reply **confirm** to continue or **cancel** to abort.`
     //
 
     const res =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
       )
 
@@ -469,7 +470,7 @@ Reply **confirm** to continue or **cancel** to abort.`
     //
 
     const res =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
       )
 
@@ -1120,7 +1121,7 @@ Reply **confirm** to continue or **cancel** to abort.`
 //     //
 
 //     const res =
-//       await fetch(
+//       await internalFetch(
 //         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
 //       )
 

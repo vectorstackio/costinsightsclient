@@ -16,6 +16,13 @@ export const login = async (email: string, password: string) => {
     const data = await res.json()
 
     if(data.success) {
+      const session = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: data.token }),
+        credentials: 'same-origin'
+      })
+      if (!session.ok) return { success: false, error: 'Unable to establish session' }
       sessionStorage.setItem(AUTH_TOKEN_NAME, data.token)
       sessionStorage.setItem(USER_ID_NAME, data.userId)
       return { success: true}

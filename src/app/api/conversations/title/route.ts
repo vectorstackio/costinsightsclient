@@ -1,10 +1,11 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/conversations/title/route.ts
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 
 import { model } from '@/lib/ai/llm'
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
 
   const { question } = await req.json()
 
@@ -32,3 +33,5 @@ Rules:
 
 }
 
+
+export const POST = withAuth(handlePOST)

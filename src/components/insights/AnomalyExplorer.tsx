@@ -2,7 +2,7 @@
 
 'use client'
 
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 
 import type { ServiceAnomaly } from '@/types/costs'
 import type { Currency } from '@/types'

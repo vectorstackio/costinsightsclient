@@ -1,8 +1,9 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/reports/route.ts
 
 import { getOrCreateReport } from '@/lib/reports'
 
-export async function GET(
+async function handleGET(
   request: Request
 ) {
   const { searchParams } =
@@ -76,3 +77,4 @@ export async function GET(
 
 //   return Response.json(report)
 // }
+export const GET = withAuth(handleGET)

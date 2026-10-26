@@ -1,3 +1,4 @@
+import { internalFetch } from '@/lib/auth/server'
 // lib/ai/tools/costs.ts
 
 import { tool } from '@langchain/core/tools'
@@ -5,7 +6,7 @@ import { z } from 'zod'
 
 export const getMonthlyCosts = tool(
   async () => {
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/costs`
     )
 

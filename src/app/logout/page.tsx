@@ -19,7 +19,8 @@ const Logout = () => {
   const router = useRouter()
 
   useEffect(() => {
-    const logoutUser = () => {
+    const logoutUser = async () => {
+      await fetch('/api/auth', { method: 'DELETE' })
       window.lastPageLoad = null
       deleteCookie(AUTH_TOKEN_NAME)
       sessionStorage.removeItem(AUTH_TOKEN_NAME)
@@ -29,10 +30,10 @@ const Logout = () => {
 
     const doLogout = async () => {
       try {
-        logoutUser()
+        await logoutUser()
       } catch (err) {
         if (err instanceof Error) {
-          logoutUser()
+          await logoutUser()
         }
         logoutUser()
       }

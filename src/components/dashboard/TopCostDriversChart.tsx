@@ -11,7 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 
 import type { CostIncreaseDriver, Currency } from '@/types'
 

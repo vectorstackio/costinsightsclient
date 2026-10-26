@@ -1,3 +1,4 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/ai/route.ts
 
 import {
@@ -26,7 +27,7 @@ type ClientMessage = {
 }
 
 
-export async function POST(
+async function handlePOST(
   req: Request
 ) {
 
@@ -55,7 +56,7 @@ export async function POST(
         question,
         messages: history,
         pendingAction:
-          getPendingAction()
+          await getPendingAction()
       },
       {
         version: 'v2'
@@ -272,7 +273,7 @@ export async function POST(
           finalState
         ) {
 
-          setPendingAction(
+          await setPendingAction(
             finalState.pendingAction ??
             null
           )
@@ -848,3 +849,4 @@ export async function POST(
 //     }
 //   })
 // }
+export const POST = withAuth(handlePOST)

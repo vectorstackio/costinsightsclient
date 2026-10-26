@@ -1,3 +1,4 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/reports/[month]/pdf/route.ts
 
 import { generatePdf } from '@/lib/reports/pdf'
@@ -10,7 +11,7 @@ import { getOrCreateReport } from '@/lib/reports'
 
 export const runtime = 'nodejs'
 
-export async function GET(
+async function handleGET(
   request: Request,
   context: { params: Promise<{ month: string }> }
 ) {
@@ -75,3 +76,4 @@ export async function GET(
     }
   )
 }
+export const GET = withAuth(handleGET)

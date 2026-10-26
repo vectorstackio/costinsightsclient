@@ -1,3 +1,4 @@
+import 'server-only'
 // lib/s3/client.ts
 
 import { S3Client } from '@aws-sdk/client-s3'

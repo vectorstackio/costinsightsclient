@@ -1,10 +1,14 @@
+import 'server-only'
+import { internalFetch, requireSession } from '@/lib/auth/server'
+import { formatCurrency } from './format'
+export { formatCurrency } from './format'
 // lib/reports/index.ts
 
 import { getReportJson, saveReportJson } from '@/lib/s3/reports'
 import type { SummaryResponse } from '@/types'
 import { mapSummaryToInsights } from '@/lib/insights'
 
-import type { CostInsightsInput, CostReport, Currency } from '@/types'
+import type { CostInsightsInput, CostReport } from '@/types'
 
 /**
  * -----------------------
@@ -129,6 +133,7 @@ export type NarrativeOutput = {
 export const generateNarrative = async (
   insights: CostInsightsInput
 ): Promise<NarrativeOutput> => {
+  await requireSession()
   const prompt = `
 You are a senior FinOps analyst.
 
@@ -197,6 +202,7 @@ export const buildReport = async (
   insights: CostInsightsInput,
   month: string
 ): Promise<CostReport> => {
+  await requireSession()
   const base =
     generateReportBase(
       insights,
@@ -235,7 +241,7 @@ export const buildReport = async (
 // }
 
 export const getReportByMonth = async (month: string) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/reports?month=${month}`, {
+  const response = await internalFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/reports?month=${encodeURIComponent(month)}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -254,6 +260,7 @@ export const getReportByMonth = async (month: string) => {
 export const getOrCreateReport = async (
   month: string
 ): Promise<CostReport> => {
+  await requireSession()
 
   /**
    * -----------------------
@@ -326,17 +333,4 @@ export const getOrCreateReport = async (
   )
 
   return report
-}
-
-export const formatCurrency = (
-  value: number,
-  currency: Currency
-): string => {
-  return new Intl.NumberFormat(
-    'en-GB',
-    {
-      style: 'currency',
-      currency
-    }
-  ).format(value)
 }

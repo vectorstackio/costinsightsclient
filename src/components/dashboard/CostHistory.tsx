@@ -1,6 +1,6 @@
 // components/CostHistory.tsx
 
-import { formatCurrency } from '@/lib/reports'
+import { formatCurrency } from '@/lib/reports/format'
 
 import type { Currency } from '@/types'
 

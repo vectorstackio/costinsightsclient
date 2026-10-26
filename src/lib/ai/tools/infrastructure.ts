@@ -1,3 +1,4 @@
+import { internalFetch } from '@/lib/auth/server'
 // lib/ai/tools/infrastructure.ts
 
 import { tool } from '@langchain/core/tools'
@@ -9,7 +10,7 @@ import type { EC2Instance, EBSVolume, ElasticIp } from '@/types'
 
 export const getInfrastructureHealth = tool(
   async () => {
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/infrastructure`
     )
 
@@ -35,7 +36,7 @@ export const getInfrastructureHistory = tool(
   ) => {
 
     const range = input.range ?? '24h'
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/infrastructure/history?range=${range}`)
+    const res = await internalFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/infrastructure/history?range=${range}`)
 
     if (!res.ok) {
       throw new Error(
@@ -66,7 +67,7 @@ export const getInfrastructureHistory = tool(
 export const getEc2Instances = tool(
   async () => {
 
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/infrastructure`
     )
 
@@ -103,7 +104,7 @@ export const getEc2Instances = tool(
 export const getEbsVolumes = tool(
   async () => {
 
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ebs/volumes`
     )
 
@@ -140,7 +141,7 @@ export const getEc2Inventory = tool(
   async () => {
 
     const res =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2`
       )
 
@@ -177,7 +178,7 @@ export const getLambdaInventory = tool(
   async () => {
 
     const res =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/lambda`
       )
 
@@ -214,7 +215,7 @@ export const getApiGatewayInventory = tool(
   async () => {
 
     const res =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/apigateway`
       )
 
@@ -251,7 +252,7 @@ export const getIdleEc2Instances = tool(
   async () => {
 
     const res =
-      await fetch(
+      await internalFetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/idle`
       )
 
@@ -286,7 +287,7 @@ export const getIdleEc2Instances = tool(
 export const getElasticIps = tool(
   async () => {
 
-    const res = await fetch(
+    const res = await internalFetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/ec2/elasticips`
     )
 

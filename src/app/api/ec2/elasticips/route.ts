@@ -1,6 +1,7 @@
+import { withAuth } from '@/lib/auth/server'
 // app/api/ec2/elasticips/route.ts
 
-export async function GET() {
+async function handleGET(_request: Request) {
 
   const res = await fetch(
     `${process.env.EC2_GET_ELASTIC_IPS_API_URL}`,
@@ -16,3 +17,4 @@ export async function GET() {
 
   return Response.json(data)
 }
+export const GET = withAuth(handleGET)
