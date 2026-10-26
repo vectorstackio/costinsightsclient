@@ -1,0 +1,37 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+const { test } = require('node:test')
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { execFileSync } = require('node:child_process')
+
+test('synthetic preparation creates placeholders and refuses to replace private inputs', async () => {
+  const { prepare } = await import('../scripts/ci/prepare.mjs')
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ci-fixture-'))
+  try {
+    fs.mkdirSync(path.join(root, 'src'), { recursive: true })
+    fs.writeFileSync(path.join(root, 'src/service.ts'), 'process.env.COST_API_URL')
+    prepare(root)
+    const config = fs.readFileSync(path.join(root, 'src/lib/config/index.ts'), 'utf8')
+    const env = fs.readFileSync(path.join(root, '.env.local'), 'utf8')
+    assert.match(config, /ci@example\.invalid/)
+    assert.match(env, /NEXT_PUBLIC_BASE_URL=https:\/\/aws\.develop\.thebrilliantclub\.org/)
+    assert.match(env, /COST_API_URL=https:\/\/services\.invalid/)
+    assert.throws(() => prepare(root), /clean checkout/)
+    assert.equal(fs.readFileSync(path.join(root, 'src/lib/config/index.ts'), 'utf8'), config)
+    fs.rmSync(path.join(root, 'src/lib/config/index.ts'))
+    assert.throws(() => prepare(root), /clean checkout/)
+    assert.ok(!fs.existsSync(path.join(root, 'src/lib/config/index.ts')))
+  } finally { fs.rmSync(root, { recursive: true, force: true }) }
+})
+
+test('build guard rejects production, AWS, OpenAI and loopback HTTP before network access', () => {
+  execFileSync(process.execPath, ['--require', path.resolve('scripts/ci/build-network.js'), '-e', `
+    const assert = require('node:assert/strict')
+    for (const target of ['https://aws.develop.thebrilliantclub.org/api/reports/generate', 'https://s3.amazonaws.com', 'https://api.openai.com', 'http://127.0.0.1:3024', 'https://fonts.googleapis.com.attacker.invalid']) {
+      assert.throws(() => fetch(target), /non-font/)
+      assert.throws(() => require(target.startsWith('http:') ? 'node:http' : 'node:https').get(target), /non-font/)
+    }
+  `])
+})
