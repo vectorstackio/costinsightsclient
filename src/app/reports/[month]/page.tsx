@@ -52,7 +52,7 @@ const ReportPage = async ({ params }: Props) => {
 
   return (
     <>
-      <div className="bg-white min-h-screen p-10 text-gray-900 print:p-6 print:bg-white">
+      <div data-cost-report-month={report.period.month} className="bg-white min-h-screen p-10 text-gray-900 print:p-6 print:bg-white">
         {/* -----------------------
             HEADER
         ----------------------- */}

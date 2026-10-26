@@ -33,4 +33,4 @@ async function handleGET(request: Request) {
   }
   
 }
-export const GET = withAuth(handleGET)
+export const GET = withAuth(handleGET, { stateChanging: true })

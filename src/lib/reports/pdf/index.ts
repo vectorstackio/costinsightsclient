@@ -5,6 +5,12 @@ import { requireSession } from '@/lib/auth/server'
 
 export const generatePdf = async (month: string): Promise<ArrayBuffer> => {
   const session = await requireSession()
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error('Invalid report month')
+  const base = new URL(process.env.NEXT_PUBLIC_BASE_URL!)
+  if (!['https:', 'http:'].includes(base.protocol) || base.username || base.password) {
+    throw new Error('Invalid application URL')
+  }
+  const target = new URL(`/reports/${month}`, base)
   const puppeteer = await import('puppeteer')
 
   const browser = await puppeteer.default.launch({
@@ -15,22 +21,37 @@ export const generatePdf = async (month: string): Promise<ArrayBuffer> => {
   try {
     const page = await browser.newPage()
 
-    // Scope the token to same-origin requests, including the server-rendered report.
-    const base = new URL(process.env.NEXT_PUBLIC_BASE_URL!)
+    // Only the expected main document needs the JWT. Static/external assets
+    // receive no credentials, including credentials inherited through redirects.
+    let requestFailed = false
     await page.setRequestInterception(true)
     page.on('request', request => {
-      const values = { ...request.headers() }
-      delete values.authorization
-      if (new URL(request.url()).origin === base.origin) values.authorization = 'Bearer ' + session.token
-      void request.continue({ headers: values })
+      const values = Object.fromEntries(Object.entries(request.headers()).filter(
+        ([name]) => !['authorization', 'cookie', 'proxy-authorization'].includes(name.toLowerCase())
+      ))
+      const mainDocument = request.isNavigationRequest() && request.frame() === page.mainFrame()
+      if (mainDocument && (request.url() !== target.href || request.redirectChain().length > 0)) {
+        requestFailed = true
+        void request.abort('blockedbyclient').catch(() => { requestFailed = true })
+        return
+      }
+      if (mainDocument) values.authorization = 'Bearer ' + session.token
+      void request.continue({ headers: values }).catch(() => { requestFailed = true })
     })
 
     const response = await page.goto(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/reports/${month}`,
-      { waitUntil: 'networkidle0' }
+      target.href,
+      { waitUntil: 'networkidle0', timeout: 30_000 }
     )
 
-    if (!response?.ok()) throw new Error('Unable to load authenticated report')
+    if (requestFailed || !response?.ok() || response.url() !== target.href ||
+        page.url() !== target.href || response.request().redirectChain().length > 0 ||
+        !/^text\/html(?:;|$)/i.test(response.headers()['content-type'] ?? '')) {
+      throw new Error('Unable to load authenticated report')
+    }
+    const renderedMonth = await page.$eval('[data-cost-report-month]', element =>
+      element.getAttribute('data-cost-report-month'))
+    if (requestFailed || page.url() !== target.href || renderedMonth !== month) throw new Error('Unexpected report page')
 
     const pdf = await page.pdf({
       format: 'A4',

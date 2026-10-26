@@ -1,14 +1,14 @@
 # Authentication changes
 
-All 31 sensitive HTTP handlers require a verified, unexpired HS256 JWT belonging to a user in the existing USERS and USER_IDS configuration. Tokens may be supplied as Bearer authorization or through the browser session cookie. Missing/invalid/expired tokens return 401. Cross-user or cross-origin requests return 403. Configured users retain the existing shared AWS account privileges; there was no role system.
+All 31 sensitive HTTP handlers require a verified, unexpired HS256 JWT belonging to a user in the existing USERS and USER_IDS configuration. Tokens may be supplied as Bearer authorization or through the browser session cookie. Missing/invalid/expired tokens return 401. Cross-user requests and rejected cookie-origin checks return 403; verified Bearer requests do not require browser-origin metadata. Configured users retain the existing shared AWS account privileges; there was no role system.
 
-Messages/conversations require the verified user ID; conversation updates check stored ownership before writing. Ownership rules are attached explicitly to handlers, including encoded-path requests. Internal AI calls forward the caller JWT through request-scoped AsyncLocalStorage, with no bypass token. S3 and report helpers independently require sessions, protecting the server-rendered report pages. PDF rendering attaches JWTs only to application-origin requests and removes inherited Authorization headers from external requests. AI pending actions are isolated per user.
+Messages/conversations require the verified user ID; conversation updates check stored ownership before writing. Ownership rules are attached explicitly to handlers, including encoded-path requests. Internal AI calls forward the caller JWT through request-scoped AsyncLocalStorage, with no bypass token. S3 and report helpers independently require sessions, protecting the server-rendered report pages. PDF rendering attaches JWTs only to the exact expected main report document. It strips credentials from assets/iframes, rejects redirects and navigation failures, and verifies the HTML report marker and month before printing. AI pending actions are isolated per user.
 
 Browser sessions use HttpOnly, SameSite=Strict cookies, Secure in production. Login establishes the cookie before navigation, existing browser auth checks refresh it, and logout clears it. Original sessionStorage behavior remains for compatibility. The login handler, JWT secret, credential values and one-year lifetime are unchanged.
 
 ## Validation
 
-- 136 authentication tests, 19 compatibility tests and 1 client credential-boundary test pass (156 total). npm test runs the three files in isolated processes.
+- 136 authentication tests, 41 focused hardening tests, 19 compatibility tests and 1 client credential-boundary test pass (197 total). npm test runs the four files in isolated processes.
 - npm run lint and TypeScript checks pass.
 - Standard npm run build (Turbopack) passes with real Google Fonts downloaded using authorized network access. TypeScript and all 42 static-page generation steps completed. No additional external service access was required; no production application endpoints were invoked.
 - src/lib/config/index.ts is ignored, untracked and absent from all available Git history; this is not a shallow checkout. Only the server authentication module and login route import it. It now has a server-only guard.
@@ -16,7 +16,7 @@ Browser sessions use HttpOnly, SameSite=Strict cookies, Secure in production. Lo
 
 ## Configuration and remaining concerns
 
-- Production requires HTTPS. Set the existing NEXT_PUBLIC_BASE_URL to the trusted application origin and preserve Authorization, Origin and Fetch Metadata headers through the reverse proxy.
+- Production requires HTTPS. Set the existing NEXT_PUBLIC_BASE_URL to the public HTTPS application origin (not the HTTP Nginx upstream address) and preserve Authorization, Origin and Fetch Metadata headers through the reverse proxy. Production cookie validation fails closed if this URL is missing, invalid or not HTTPS. Host and X-Forwarded-* headers cannot override the configured trusted origin.
 - Preserve the ignored server configuration, including its new server-only import, when copying it between environments. No credential migration is required.
 - Automated report callers must now provide a valid user Bearer JWT. Users can establish the browser cookie by logging in or through the existing auth check.
 - Existing one-year JWTs remain valid; logout does not revoke stolen JWTs. Tokens remain in sessionStorage. No rate limiting or finer AWS roles were introduced; configured users retain AWS mutation privileges.
@@ -92,3 +92,13 @@ Browser sessions use HttpOnly, SameSite=Strict cookies, Secure in production. Lo
 | `tests/authentication.test.js` | Mocked route, JWT, ownership, internal call, AI, PDF and S3 security tests. |
 | `tests/cost-compatibility.test.js` | Retain existing compatibility tests with an isolated auth mock. |
 | `tests/credential-boundary.test.js` | Check client dependency graphs cannot reach credentials or server-only modules. |
+
+## Focused authentication hardening
+
+- All configured users retain their existing AWS write privileges. No roles, credentials, storage changes, signing changes or lifetime changes were introduced. The local configuration contains five entries; all were retained as requested after clarification. Four synthetic configured-user fixtures exercise the unchanged login route, one-year HS256 token, session establishment and mocked AWS writes.
+- Cookie-authenticated unsafe methods require an exact configured Origin or, when Origin is absent, browser Sec-Fetch-Site: same-origin. Opaque/mismatched origins and cross-site/same-site metadata are rejected before execution. Explicit GET report generation receives the same protection, independent of path encoding. Verified Bearer callers remain supported, including integrations without browser headers.
+- Session creation and logout use the same protections, with a verified Bearer alternative. POST /api/auth now returns only { success: true }; inspected login/useAuth consumers do not read its token field, and regression tests exercise both consumers. The original login response still includes its JWT.
+- PDF generation validates the month before browser launch; only the exact report main-frame document receives a token. Redirects, wrong final URLs, HTTP/non-HTML failures, missing/wrong report markers and interception failures prevent printing. Navigation is bounded to 30 seconds and the browser is closed on failure.
+- Changed in this hardening pass: src/lib/auth/server.ts; src/app/api/auth/route.ts; src/app/api/reports/generate/route.ts; src/app/reports/[month]/page.tsx; src/lib/reports/pdf/index.ts; tests/authentication.test.js; new tests/auth-hardening.test.js; this document. Conversation ownership checks were not refactored.
+- Remaining deployment risks: the canonical HTTPS URL must match the browser origin exactly; header-stripping proxies may cause legitimate cookie writes to fail closed. PDF URLs must serve the canonical report directly without login, scheme, host or trailing-slash redirects. Puppeteer still uses the existing --no-sandbox flags. Existing cached PDFs are not regenerated by this change. Long-lived sessionStorage tokens and lack of JWT revocation remain unchanged.
+- Final validation: lint, TypeScript, all four test suites (197 tests), and the standard production build with real Google Fonts passed. No production application endpoints were invoked, no AWS resources were modified, and nothing was deployed or pushed.

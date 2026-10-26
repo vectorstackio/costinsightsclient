@@ -36,25 +36,43 @@ export async function requireSession(): Promise<Session> {
   return session ? verifyToken(session.token) : sessionFromHeaders(new Headers(await headers()))
 }
 
-export function sameOrigin(request: Request): boolean {
+export function sameOrigin(request: Request, requireEvidence = true): boolean {
   const origin = request.headers.get('origin')
   const site = request.headers.get('sec-fetch-site')
-  return site !== 'cross-site' && site !== 'same-site' &&
-    (!origin || origin === new URL(request.url).origin)
+  if (site && !['same-origin', 'none'].includes(site)) return false
+  // Use the configured public origin across HTTPS termination. Never derive trust
+  // from caller-controlled Host/X-Forwarded-* headers. Production fails closed
+  // if the public application URL is missing or misconfigured.
+  try {
+    const configured = process.env.NEXT_PUBLIC_BASE_URL
+    if (!configured && process.env.NODE_ENV === 'production') return false
+    const expected = new URL(configured || request.url)
+    if (!['https:', 'http:'].includes(expected.protocol) || expected.username || expected.password) return false
+    if (process.env.NODE_ENV === 'production' && expected.protocol !== 'https:') return false
+    if (origin !== null) return origin === expected.origin
+    return !requireEvidence || site === 'same-origin'
+  } catch {
+    return false
+  }
 }
 
 // All configured users currently have access to the shared AWS account.
 // User-owned conversation data receives additional ownership checks below.
 export function withAuth<R extends Request, A extends unknown[]>(
   handler: (request: R, ...args: A) => Promise<Response>,
-  options: { userOwned?: boolean; updateConversation?: boolean } = {}
+  options: { userOwned?: boolean; updateConversation?: boolean; stateChanging?: boolean } = {}
 ) {
   return async (request: R, ...args: A): Promise<Response> => {
     let session: Session
     try { session = sessionFromHeaders(request.headers) } catch {
       return Response.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
-    if (!sameOrigin(request)) return forbidden()
+    // Explicit, verified Bearer credentials are not ambient browser cookies.
+    // Preserve API/server callers even when browser origin metadata is absent.
+    if (!request.headers.has('authorization')) {
+      const safeRead = ['GET', 'HEAD', 'OPTIONS'].includes(request.method) && !options.stateChanging
+      if (!sameOrigin(request, !safeRead)) return forbidden()
+    }
     return context.run(session, async () => {
       const url = new URL(request.url)
       if (options.userOwned) {

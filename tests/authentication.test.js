@@ -138,14 +138,18 @@ test('pending AI actions are isolated by verified user', async () => {
 })
 test('browser session uses HttpOnly SameSite cookie and supports logout', async () => {
   const route = require('../src/app/api/auth/route.ts')
-  const response = await route.POST(request('/api/auth', 'POST', null, { token: sign() }))
+  const sessionRequest = request('/api/auth', 'POST', null, { token: sign() })
+  sessionRequest.headers.set('origin', 'https://app.test')
+  const response = await route.POST(sessionRequest)
   assert.equal(response.status, 200)
   const cookie = response.headers.get('set-cookie')
   assert.match(cookie, /HttpOnly/i)
   assert.match(cookie, /SameSite=strict/i)
   assert.match(cookie, /Secure/i)
   assert.equal(auth.sessionFromHeaders(new Headers({ cookie: cookie.split(';')[0] })).userId, 'alice')
-  assert.match((await route.DELETE(request('/api/auth', 'DELETE'))).headers.get('set-cookie'), /Max-Age=0/i)
+  const logout = request('/api/auth', 'DELETE')
+  logout.headers.set('origin', 'https://app.test')
+  assert.match((await route.DELETE(logout)).headers.get('set-cookie'), /Max-Age=0/i)
 })
 
 test('direct report generation rejects missing sessions before AWS, S3, AI or browser launch', async () => {
@@ -180,7 +184,12 @@ test('PDF generation forwards JWT only to the application origin and closes its 
   let intercept
   let closed = false
   let launched = false
+  const frame = {}
+  const target = 'https://app.test/reports/2026-09'
   const page = {
+    mainFrame: () => frame,
+    url: () => target,
+    $eval: async () => '2026-09',
     setRequestInterception: async () => {},
     on: (_event, callback) => { intercept = callback },
     goto: async () => {
@@ -189,11 +198,14 @@ test('PDF generation forwards JWT only to the application origin and closes its 
         intercept({
           headers: () => ({ authorization: 'Bearer inherited' }),
           url: () => origin + '/reports/2026-09',
+          isNavigationRequest: () => origin === 'https://app.test',
+          frame: () => frame,
+          redirectChain: () => [],
           continue: async options => { forwarded = options.headers.authorization }
         })
         assert.equal(forwarded, origin === 'https://app.test' ? 'Bearer ' + token : undefined)
       }
-      return { ok: () => true }
+      return { ok: () => true, url: () => target, headers: () => ({ 'content-type': 'text/html' }), request: () => ({ redirectChain: () => [] }) }
     },
     pdf: async () => new Uint8Array([1, 2, 3])
   }
