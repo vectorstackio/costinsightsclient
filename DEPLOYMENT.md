@@ -7,7 +7,7 @@ or executable deployment runbook. Do not run them as part of CI or deployment.
 
 ## Continuous integration
 
-.github/workflows/ci.yml runs on pushes to main and pull requests targeting main.
+.github/workflows/ci.yml runs on pushes to master and develop, and pull requests targeting master.
 It uses a GitHub-hosted Ubuntu runner and Node.js 22.23.4, installs locked dependencies,
 and runs lint, TypeScript, tests and a production-mode Next.js build. New runs cancel
 older CI runs for the same branch or pull request. CI has read-only repository permission,
@@ -29,7 +29,7 @@ then run the workflow commands. Production credentials must never be copied into
 GitHub Free supports private-repository Actions within its included usage allowance.
 Use standard hosted runners and monitor Actions usage; no paid runner is required.
 
-## Protecting main
+## Protecting master
 
 GitHub Free does NOT provide protected branches for private repositories. CI works,
 but mandatory checks/reviews require GitHub Pro (personal repository) or GitHub Team
@@ -37,7 +37,7 @@ but mandatory checks/reviews require GitHub Pro (personal repository) or GitHub 
 pull requests voluntarily; this is not equivalent to enforced protection.
 
 Once the plan supports it and CI has run once: Settings → Branches → Add branch
-protection rule → main. Require a pull request and at least one approval; require status
+protection rule → master. Require a pull request and at least one approval; require status
 checks and select the unique `CI checks` check; require the branch to be up to date;
 disable force pushes/deletion and bypasses where available. No GitHub settings are
 changed by this implementation.
@@ -48,7 +48,12 @@ References:
 
 ## Stage 2 proposal — not implemented
 
-After successful main CI, transfer only the checked commit's source over verified,
+Future automatic deployment must run only after successful CI for a push to master,
+deploying that exact successful commit. Develop and pull request runs must never
+automatically deploy to EC2. Enforce both the push event and master branch in the
+future deployment job, independently of the broader CI triggers.
+
+Transfer only the checked commit's source over verified,
 restricted SSH (or existing scoped SSM). Build a fresh release on Development2 as the
 unprivileged application account, using its existing ignored configuration. Preserve
 users, JWT secret, AWS settings and ReportJob credential. Set the public HTTPS base URL
