@@ -1,5 +1,5 @@
 import 'server-only'
-import { requireSession } from '@/lib/auth/server'
+import { requireReportAccess } from '@/lib/reports/auth'
 // lib/s3/reports.ts
 
 import { s3 } from './client'
@@ -8,7 +8,7 @@ import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 const BUCKET = process.env.S3_BUCKET!
 
 export const saveReportJson = async (month: string, report: unknown) => {
-  await requireSession()
+  await requireReportAccess(month)
   await s3.send(
     new PutObjectCommand({
       Bucket: BUCKET,
@@ -22,7 +22,7 @@ export const saveReportJson = async (month: string, report: unknown) => {
 export const getReportJson = async (
   month: string
 ) => {
-  await requireSession()
+  await requireReportAccess(month)
   try {
     const res = await s3.send(
       new GetObjectCommand({
@@ -54,7 +54,7 @@ export const saveReportPdf = async (
   key: string,
   pdf: Uint8Array
 ) => {
-  await requireSession()
+  await requireReportAccess(pdfMonth(key))
   await s3.send(
     new PutObjectCommand({
       Bucket: process.env.S3_BUCKET!,
@@ -69,7 +69,7 @@ export const saveReportPdf = async (
 export const getReportPdf = async (
   key: string
 ): Promise<Uint8Array | null> => {
-  await requireSession()
+  await requireReportAccess(pdfMonth(key))
   try {
     const response =
       await s3.send(
@@ -110,4 +110,9 @@ export const getReportPdf = async (
 
     throw error
   }
+}
+
+function pdfMonth(key: string): string {
+  const month = /^reports\/aws-cost-(\d{4}-\d{2})\.pdf$/.exec(key)?.[1] ?? ''
+  return key === `reports/aws-cost-${month}.pdf` ? month : ''
 }

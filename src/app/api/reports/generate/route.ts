@@ -1,4 +1,4 @@
-import { withAuth } from '@/lib/auth/server'
+import { withReportAuth } from '@/lib/reports/auth'
 // app/api/reports/generate/route.ts
 
 import { getOrCreateReport } from '@/lib/reports'
@@ -33,4 +33,4 @@ async function handleGET(request: Request) {
   }
   
 }
-export const GET = withAuth(handleGET, { stateChanging: true })
+export const GET = withReportAuth(handleGET, '/api/reports/generate')

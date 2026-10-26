@@ -1,5 +1,5 @@
 import 'server-only'
-import { internalFetch, requireSession } from '@/lib/auth/server'
+import { fetchReportData, requireReportAccess } from '@/lib/reports/auth'
 import { formatCurrency } from './format'
 export { formatCurrency } from './format'
 // lib/reports/index.ts
@@ -131,9 +131,10 @@ export type NarrativeOutput = {
  * We force JSON output from the model to avoid parsing fragile text.
  */
 export const generateNarrative = async (
-  insights: CostInsightsInput
+  insights: CostInsightsInput,
+  month: string
 ): Promise<NarrativeOutput> => {
-  await requireSession()
+  await requireReportAccess(month)
   const prompt = `
 You are a senior FinOps analyst.
 
@@ -202,7 +203,7 @@ export const buildReport = async (
   insights: CostInsightsInput,
   month: string
 ): Promise<CostReport> => {
-  await requireSession()
+  await requireReportAccess(month)
   const base =
     generateReportBase(
       insights,
@@ -211,7 +212,8 @@ export const buildReport = async (
 
   const narratives =
     await generateNarrative(
-      insights
+      insights,
+      month
     )
 
   return {
@@ -241,12 +243,7 @@ export const buildReport = async (
 // }
 
 export const getReportByMonth = async (month: string) => {
-  const response = await internalFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/reports?month=${encodeURIComponent(month)}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
+  const response = await fetchReportData(month)
 
   if (!response.ok) {
     throw new Error(`Failed to fetch summary: ${response.statusText}`)
@@ -260,7 +257,7 @@ export const getReportByMonth = async (month: string) => {
 export const getOrCreateReport = async (
   month: string
 ): Promise<CostReport> => {
-  await requireSession()
+  await requireReportAccess(month)
 
   /**
    * -----------------------

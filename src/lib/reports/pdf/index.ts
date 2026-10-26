@@ -1,15 +1,12 @@
 import 'server-only'
-import { requireSession } from '@/lib/auth/server'
+import { reportApplicationUrl, requireReportAccess } from '@/lib/reports/auth'
 
 // lib/reports/pdf/index.ts
 
 export const generatePdf = async (month: string): Promise<ArrayBuffer> => {
-  const session = await requireSession()
+  const access = await requireReportAccess(month)
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error('Invalid report month')
-  const base = new URL(process.env.NEXT_PUBLIC_BASE_URL!)
-  if (!['https:', 'http:'].includes(base.protocol) || base.username || base.password) {
-    throw new Error('Invalid application URL')
-  }
+  const base = reportApplicationUrl(access.authorization)
   const target = new URL(`/reports/${month}`, base)
   const puppeteer = await import('puppeteer')
 
@@ -35,7 +32,7 @@ export const generatePdf = async (month: string): Promise<ArrayBuffer> => {
         void request.abort('blockedbyclient').catch(() => { requestFailed = true })
         return
       }
-      if (mainDocument) values.authorization = 'Bearer ' + session.token
+      if (mainDocument) values.authorization = access.authorization
       void request.continue({ headers: values }).catch(() => { requestFailed = true })
     })
 

@@ -1,3 +1,4 @@
+import { withReportPageAccess } from '@/lib/reports/auth'
 // app/reports/\[month\]/page.tsx
 
 import { notFound } from 'next/navigation'
@@ -44,7 +45,7 @@ const ReportPage = async ({ params }: Props) => {
    * Fetch report
    * -----------------------
    */
-  const report: CostReport | null = await getReportByMonth(month)
+  const report: CostReport | null = await withReportPageAccess(month, () => getReportByMonth(month))
 
   if (!report) {
     notFound()
