@@ -1,0 +1,54 @@
+name: Manual deployment
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: costinsightsclient-production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/master' && github.repository == 'vectorstackio/costinsightsclient'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Require successful push CI for this master commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          gh api "repos/vectorstackio/costinsightsclient/actions/workflows/ci.yml/runs?branch=master&event=push&head_sha=$COMMIT&per_page=100" > "$RUNNER_TEMP/ci-runs.json"
+          python3 scripts/deployment/ci-gate.py "$RUNNER_TEMP/ci-runs.json" "$COMMIT"
+      - name: Transfer checked source through restricted SSH command
+        env:
+          DEPLOY_KEY: ${{ secrets.COSTINSIGHTS_DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.COSTINSIGHTS_DEPLOY_KNOWN_HOSTS }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DEPLOY_KEY" && test -n "$KNOWN_HOSTS"
+          trap 'rm -f "$RUNNER_TEMP/deploy-key" "$RUNNER_TEMP/deploy-known-hosts" "$RUNNER_TEMP/source.tar"' EXIT
+          printf '%s\n' "$DEPLOY_KEY" > "$RUNNER_TEMP/deploy-key"
+          printf '%s\n' "$KNOWN_HOSTS" > "$RUNNER_TEMP/deploy-known-hosts"
+          unset DEPLOY_KEY KNOWN_HOSTS
+          git archive --format=tar "$COMMIT" > "$RUNNER_TEMP/source.tar"
+          DIGEST=$(sha256sum "$RUNNER_TEMP/source.tar" | cut -d ' ' -f 1)
+          ssh -F /dev/null -T -i "$RUNNER_TEMP/deploy-key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o IdentityAgent=none \
+            -o StrictHostKeyChecking=yes -o UpdateHostKeys=no \
+            -o UserKnownHostsFile="$RUNNER_TEMP/deploy-known-hosts" \
+            -o GlobalKnownHostsFile=/dev/null -o ClearAllForwardings=yes \
+            -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 \
+            ubuntu@18.168.192.118 "deploy $COMMIT $DIGEST" < "$RUNNER_TEMP/source.tar"
