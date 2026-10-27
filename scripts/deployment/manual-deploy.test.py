@@ -24,6 +24,10 @@ def load(name, filename):
 d = load('manual_deploy', 'manual-deploy.py')
 gate = load('ci_gate', 'ci-gate.py')
 SHA = 'a' * 40
+APPROVED_CRON_FORMS = (
+    '0 4 1 * * curl http://localhost:3024/api/reports/generate',
+    '0 4 1 * * wget -O - http://localhost:3024/api/reports/generate',
+)
 
 
 def archive(name='package-lock.json', link=False):
@@ -187,15 +191,51 @@ class DeploymentTests(unittest.TestCase):
 
     def test_cron_migration_preserves_unrelated_entries_and_is_repeatable(self):
         unrelated = '# private unrelated settings\n5 3 * * * /unrelated\n'
-        original = unrelated + d.LEGACY_CRON + '\n'
-        with self.migration_fixture(original) as (state, read, install, base):
-            digest = hashlib.sha256(original.encode()).hexdigest()
-            d.migrate_scheduler(digest, read, install)
-            self.assertEqual(state['text'], unrelated)
-            self.assertEqual((base / 'cron').read_text(), d.CRON_TEXT)
-            self.assertEqual((base / 'backups' / (digest + '.crontab')).read_text(), original)
-            d.migrate_scheduler(hashlib.sha256(unrelated.encode()).hexdigest(), read, install)
-            self.assertEqual(state['writes'], [unrelated])
+        for command in APPROVED_CRON_FORMS:
+            original = unrelated + command + '\n'
+            with self.subTest(command=command), self.migration_fixture(original) as (state, read, install, base):
+                self.assertEqual(d.cron_plan(original), (unrelated, 1))
+                digest = hashlib.sha256(original.encode()).hexdigest()
+                d.migrate_scheduler(digest, read, install)
+                self.assertEqual(state['text'], unrelated)
+                self.assertEqual((base / 'cron').read_text(), d.CRON_TEXT)
+                self.assertEqual((base / 'backups' / (digest + '.crontab')).read_text(), original)
+                d.migrate_scheduler(hashlib.sha256(unrelated.encode()).hexdigest(), read, install)
+                self.assertEqual(state['writes'], [unrelated])
+
+    def test_cron_rejects_duplicate_and_mixed_approved_jobs(self):
+        for first in APPROVED_CRON_FORMS:
+            for second in APPROVED_CRON_FORMS:
+                original = first + '\n' + second + '\n'
+                with self.subTest(first=first, second=second), self.migration_fixture(original) as (state, read, install, base):
+                    with self.assertRaises(ValueError):
+                        d.migrate_scheduler(hashlib.sha256(original.encode()).hexdigest(), read, install)
+                    self.assertEqual(state['text'], original)
+                    self.assertEqual(state['writes'], [])
+                    self.assertFalse((base / 'cron').exists())
+
+    def test_cron_rejects_altered_urls_arguments_and_shell_commands(self):
+        for command in APPROVED_CRON_FORMS:
+            variants = [
+                command.replace('http:', 'https:'),
+                command.replace('localhost', '127.0.0.1'),
+                command.replace(':3024', ':3025'),
+                command + '?month=2026-01',
+                command + ' --quiet',
+                command + ' > /dev/null',
+                command + '; /unrelated',
+                command + ' && /unrelated',
+                command.replace('0 4 1', '0 5 1'),
+                command.replace('wget -O -', 'wget -qO-') if 'wget' in command else command.replace('curl ', '/usr/bin/curl '),
+            ]
+            for variant in variants:
+                original = '# preserve\n5 3 * * * /unrelated\n' + variant + '\n'
+                with self.subTest(variant=variant), self.migration_fixture(original) as (state, read, install, base):
+                    with self.assertRaises(ValueError):
+                        d.migrate_scheduler(hashlib.sha256(original.encode()).hexdigest(), read, install)
+                    self.assertEqual(state['text'], original)
+                    self.assertEqual(state['writes'], [])
+                    self.assertFalse((base / 'cron').exists())
 
     def test_cron_unknown_changes_duplicates_and_stale_digest_never_overwritten(self):
         for text in [d.LEGACY_CRON + '\n' + d.LEGACY_CRON + '\n',
@@ -213,18 +253,21 @@ class DeploymentTests(unittest.TestCase):
             self.assertEqual(state['writes'], [])
 
     def test_cron_interruption_after_removal_recovers_without_duplicate_job(self):
-        original = '5 3 * * * /unrelated\n' + d.LEGACY_CRON + '\n'
-        with self.migration_fixture(original) as (state, read, install, base):
-            def interrupted(value):
-                install(value)
-                raise KeyboardInterrupt()
-            with self.assertRaises(KeyboardInterrupt):
-                d.migrate_scheduler(hashlib.sha256(original.encode()).hexdigest(), read, interrupted)
-            self.assertFalse((base / 'cron').exists())
-            self.assertNotIn('/api/reports/generate', state['text'])
-            d.migrate_scheduler(hashlib.sha256(state['text'].encode()).hexdigest(), read, install)
-            self.assertEqual((base / 'cron').read_text(), d.CRON_TEXT)
-            self.assertEqual(len(state['writes']), 1)
+        for command in APPROVED_CRON_FORMS:
+            original = '5 3 * * * /unrelated\n' + command + '\n'
+            with self.subTest(command=command), self.migration_fixture(original) as (state, read, install, base):
+                def interrupted(value):
+                    install(value)
+                    raise KeyboardInterrupt()
+                with self.assertRaises(KeyboardInterrupt):
+                    d.migrate_scheduler(hashlib.sha256(original.encode()).hexdigest(), read, interrupted)
+                self.assertFalse((base / 'cron').exists())
+                self.assertEqual(state['text'], '5 3 * * * /unrelated\n')
+                d.migrate_scheduler(hashlib.sha256(state['text'].encode()).hexdigest(), read, install)
+                self.assertEqual((base / 'cron').read_text(), d.CRON_TEXT)
+                self.assertEqual(len(state['writes']), 1)
+                d.migrate_scheduler(hashlib.sha256(state['text'].encode()).hexdigest(), read, install)
+                self.assertEqual(len(state['writes']), 1)
 
     def test_cron_concurrent_edit_is_preserved(self):
         original = d.LEGACY_CRON + '\n'

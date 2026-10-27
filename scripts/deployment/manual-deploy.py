@@ -40,6 +40,10 @@ INSTALLED = '/usr/local/libexec/costinsights-deploy.py'
 CRONTAB = '/usr/bin/crontab'
 ROOT_BACKUPS = Path('/var/backups/costinsightsclient-scheduler')
 LEGACY_CRON = '0 4 1 * * curl http://localhost:3024/api/reports/generate'
+LEGACY_CRONS = (
+    LEGACY_CRON,
+    '0 4 1 * * wget -O - http://localhost:3024/api/reports/generate',
+)
 
 
 def private(path, directory=False):
@@ -151,15 +155,15 @@ def preflight(disk_free, memory_available):
 
 
 def cron_plan(text):
-    """Remove only the exact assessed job; never rewrite unrelated lines."""
+    """Remove one explicitly approved legacy job; never rewrite unrelated lines."""
     lines = text.splitlines(keepends=True)
-    legacy = [line for line in lines if line.strip() == LEGACY_CRON]
+    legacy = [line for line in lines if line.strip() in LEGACY_CRONS]
     suspicious = [line for line in lines if not line.lstrip().startswith('#')
                   and any(word in line for word in ('/api/reports/generate', 'costinsights-report-job', 'costinsightsclient-report'))
-                  and line.strip() != LEGACY_CRON]
+                  and line.strip() not in LEGACY_CRONS]
     if len(legacy) > 1 or suspicious:
         raise ValueError('Unexpected scheduled report entries require manual review')
-    return ''.join(line for line in lines if line.strip() != LEGACY_CRON), len(legacy)
+    return ''.join(line for line in lines if line.strip() not in LEGACY_CRONS), len(legacy)
 
 
 def root_cron():

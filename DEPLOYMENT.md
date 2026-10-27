@@ -170,9 +170,13 @@ atomic compare-and-swap API. Do not invoke report generation to test setup.
    sudo /usr/bin/python3 -I -B /usr/local/libexec/costinsights-deploy.py --scheduler-status
    ```
 
-   Record root_sha256. The assessed legacy root entry must be exactly:
-   `0 4 1 * * curl http://localhost:3024/api/reports/generate`.
-   Unexpected variants, duplicate jobs or other report references require manual review;
+   Record root_sha256. The confirmed production legacy root entry is:
+   `0 4 1 * * wget -O - http://localhost:3024/api/reports/generate`.
+   Migration accepts only that exact form or the previously approved exact form
+   `0 4 1 * * curl http://localhost:3024/api/reports/generate`, retaining the existing
+   tolerance for leading/trailing line whitespace. Both forms count together: duplicate
+   wget jobs, duplicate curl jobs and mixed wget/curl jobs are rejected. Altered URLs,
+   extra arguments, shell commands and other report variants require manual review;
    never weaken the check merely to proceed. Other user crontabs/external schedulers are
    outside the helper's discovery scope and must be confirmed absent by the operator.
 3. Confirm the host cron timezone is Europe/London. The helper requires /etc/localtime to
