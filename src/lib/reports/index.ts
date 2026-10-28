@@ -169,7 +169,6 @@ ${JSON.stringify(insights, null, 2)}
       },
       body: JSON.stringify({
         model: 'gpt-5-mini',
-        temperature: 0.3,
         response_format: { type: 'json_object' },
         messages: [
           {
