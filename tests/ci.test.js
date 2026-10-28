@@ -35,3 +35,28 @@ test('build guard rejects production, AWS, OpenAI and loopback HTTP before netwo
     }
   `])
 })
+
+test('synthetic preparation recognises digits and preserves private-input restrictions', async () => {
+  const { prepare } = await import('../scripts/ci/prepare.mjs')
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ci-digits-fixture-'))
+  const names = ['EC2_GET_ELASTIC_IPS_API_URL', 'EC2_RELEASE_ELASTIC_IP_API_URL',
+    'EC2_ASSOCIATE_ELASTIC_IP_API_URL', 'EC2_ALLOCATE_ELASTIC_IP_API_URL', 'SERVICE_V2_API_URL']
+  try {
+    fs.mkdirSync(path.join(root, 'src/nested'), { recursive: true })
+    fs.writeFileSync(path.join(root, 'src/nested/service.ts'), [
+      ...names.map(name => `process.env.${name}`),
+      'process.env.2INVALID_API_URL', 'process.env.EC2_API_URL_SUFFIX'
+    ].join('\n'))
+    prepare(root)
+    const filename = path.join(root, '.env.local')
+    const text = fs.readFileSync(filename, 'utf8')
+    const env = Object.fromEntries(text.trim().split('\n').map(line => line.split('=')))
+    for (const name of names) assert.equal(env[name], 'https://services.invalid')
+    assert.equal(Object.hasOwn(env, '2INVALID_API_URL'), false)
+    assert.equal(Object.hasOwn(env, 'EC2_API_URL'), false)
+    assert.equal(env.AWS_EC2_METADATA_DISABLED, 'true')
+    assert.equal(fs.statSync(filename).mode & 0o777, 0o600)
+    assert.throws(() => prepare(root), /clean checkout/)
+    assert.equal(fs.readFileSync(filename, 'utf8'), text)
+  } finally { fs.rmSync(root, { recursive: true, force: true }) }
+})

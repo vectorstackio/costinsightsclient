@@ -1,9 +1,10 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import { withAuth } from '@/lib/auth/server'
 // app/api/costs/route.ts
 
 async function handleGET(_request: Request) {
   try {
-    const res = await fetch(`${process.env.COST_API_URL}/summary`, {
+    const res = await apiGatewayFetch(`${process.env.COST_API_URL}/summary`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'

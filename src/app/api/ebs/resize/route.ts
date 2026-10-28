@@ -1,10 +1,11 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import { withAuth } from '@/lib/auth/server'
 // app/api/ebs/resize/route.ts
 
 async function handlePOST(req: Request) {
   const body = await req.json()
 
-  const res = await fetch(`${process.env.EBS_RESIZE_API_URL}`, {
+  const res = await apiGatewayFetch(`${process.env.EBS_RESIZE_API_URL}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

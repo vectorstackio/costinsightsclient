@@ -41,6 +41,7 @@ for (const extension of ['.ts', '.tsx']) {
   }).outputText, filename)
 }
 const mocks = {
+  '@/lib/aws/api-gateway': { apiGatewayFetch: (...args) => global.fetch(...args) },
   'server-only': {},
   '@/lib/config': configuration,
   'next/headers': { headers: async () => new Headers(incomingHeaders.getStore() ?? {}) },

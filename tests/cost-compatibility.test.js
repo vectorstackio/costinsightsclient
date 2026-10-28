@@ -18,7 +18,7 @@ for (const extension of ['.ts', '.tsx']) {
   }
 }
 const originalLoad = Module._load
-let mocks = { '@/lib/reports/auth': { withReportPageAccess: (_month, operation) => operation() }, '@/lib/auth/server': { withAuth: handler => handler } }
+let mocks = { '@/lib/aws/api-gateway': { apiGatewayFetch: (...args) => global.fetch(...args) }, 'server-only': {}, '@/lib/reports/auth': { withReportPageAccess: (_month, operation) => operation() }, '@/lib/auth/server': { withAuth: handler => handler } }
 Module._load = function (request, parent, isMain) {
   if (Object.hasOwn(mocks, request)) return mocks[request]
   if (request.startsWith('@/')) request = path.resolve('src', request.slice(2))

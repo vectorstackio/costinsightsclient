@@ -32,7 +32,7 @@ export const REPORT_JOB_TOKEN = 'ci-only-placeholder-report-job-token-00000000'
       const filename = path.join(directory, entry.name)
       if (entry.isDirectory()) visit(filename)
       else if (/\.tsx?$/.test(entry.name) && filename !== configuration) {
-        for (const match of fs.readFileSync(filename, 'utf8').matchAll(/process\.env\.([A-Z_]+_API_URL)/g)) env[match[1]] = 'https://services.invalid'
+        for (const match of fs.readFileSync(filename, 'utf8').matchAll(/process\.env\.([A-Z_][A-Z0-9_]*_API_URL)\b/g)) env[match[1]] = 'https://services.invalid'
       }
     }
   }

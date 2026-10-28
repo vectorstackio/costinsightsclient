@@ -1,8 +1,9 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import { withAuth } from '@/lib/auth/server'
 // app/api/lambda/route.ts
 
 async function handleGET(_request: Request) {
-  const res = await fetch(`${process.env.LAMBDA_GET_FUNCTIONS_API_URL}`, {
+  const res = await apiGatewayFetch(`${process.env.LAMBDA_GET_FUNCTIONS_API_URL}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

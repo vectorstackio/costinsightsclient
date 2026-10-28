@@ -1,0 +1,1159 @@
+{
+  "account": "625490134717",
+  "region": "eu-west-2",
+  "verifiedOn": "2026-10-28",
+  "apis": [
+    {
+      "id": "ac04q3lq02",
+      "routes": [
+        {
+          "id": "576q4oq",
+          "route": "POST /allocate",
+          "auth": "NONE",
+          "target": "integrations/g702bg1"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "d3odym"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "d3odym"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "g702bg1",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:allocateElasticIp",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:allocateElasticIp",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "9dae75f4-4d41-58cc-9fdd-a482f27bc642",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:allocateElasticIp",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:ac04q3lq02/*/*/allocate"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "0pgjhei4hj",
+      "routes": [
+        {
+          "id": "xv9l4k9",
+          "route": "POST /associate",
+          "auth": "NONE",
+          "target": "integrations/mf7kcfl"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "9o845y"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "9o845y"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "mf7kcfl",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:associateElasticIp",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:associateElasticIp",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "9900fa22-4b30-5342-8edf-1e24e339e961",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:associateElasticIp",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:0pgjhei4hj/*/*/associate"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "k46c9hivf4",
+      "routes": [
+        {
+          "id": "ky2ytik",
+          "route": "GET /metrics/history",
+          "auth": "NONE",
+          "target": "integrations/2uil1s2"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "s3tc8m"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "s3tc8m"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "2uil1s2",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:cloudwatchMetricsHistory",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:cloudwatchMetricsHistory",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "447b0511-439e-50d3-81e1-73128c8625da",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:cloudwatchMetricsHistory",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:k46c9hivf4/*/*/metrics/history"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "xjrtmr3nw1",
+      "routes": [
+        {
+          "id": "5nw65xl",
+          "route": "GET /metrics",
+          "auth": "NONE",
+          "target": "integrations/cpi3nps"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "c5oh9r"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "c5oh9r"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "cpi3nps",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:cloudwatchMetrics",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:cloudwatchMetrics",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "75c3e49a-25ad-5155-bdf7-1df22e709106",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:cloudwatchMetrics",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:sdpml5wci3/*/*/metrics"
+                  }
+                }
+              },
+              {
+                "Sid": "4c47fb51-5ffb-5f51-93ba-1a1717afc83e",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:cloudwatchMetrics",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:xjrtmr3nw1/*/*/metrics"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "milf80yd66",
+      "routes": [
+        {
+          "id": "2vm46ks",
+          "route": "GET /data",
+          "auth": "NONE",
+          "target": "integrations/aorhoor"
+        },
+        {
+          "id": "a77lfuo",
+          "route": "GET /costs",
+          "auth": "NONE",
+          "target": "integrations/aorhoor"
+        },
+        {
+          "id": "w6eqisn",
+          "route": "POST /costs/query",
+          "auth": "NONE",
+          "target": "integrations/aorhoor"
+        },
+        {
+          "id": "zh0hdri",
+          "route": "GET /costs/summary",
+          "auth": "NONE",
+          "target": "integrations/aorhoor"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "iwjeve"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "iwjeve"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "aorhoor",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "costInsights-live-default-GET-data",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/$default/GET/data"
+                  }
+                }
+              },
+              {
+                "Sid": "costInsights-live-default-GET-costs",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/$default/GET/costs"
+                  }
+                }
+              },
+              {
+                "Sid": "costInsights-live-default-POST-costs-query",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/$default/POST/costs/query"
+                  }
+                }
+              },
+              {
+                "Sid": "costInsights-live-default-GET-costs-summary",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/$default/GET/costs/summary"
+                  }
+                }
+              },
+              {
+                "Sid": "costInsights-live-dev-GET-data",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/dev/GET/data"
+                  }
+                }
+              },
+              {
+                "Sid": "costInsights-live-dev-GET-costs",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/dev/GET/costs"
+                  }
+                }
+              },
+              {
+                "Sid": "costInsights-live-dev-POST-costs-query",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/dev/POST/costs/query"
+                  }
+                }
+              },
+              {
+                "Sid": "costInsights-live-dev-GET-costs-summary",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:costInsights:live",
+                "Condition": {
+                  "StringEquals": {
+                    "AWS:SourceAccount": "625490134717"
+                  },
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/dev/GET/costs/summary"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "2g8a5kp7ma",
+      "routes": [
+        {
+          "id": "ikkea5h",
+          "route": "POST /snapshot/create",
+          "auth": "NONE",
+          "target": "integrations/xfj7u3o"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "50a1bl"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "50a1bl"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "xfj7u3o",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:createSnapshot",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:createSnapshot",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "83cd3722-4849-50e1-b616-6b671f467818",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:createSnapshot",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:2g8a5kp7ma/*/*/snapshot/create"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "otvqmst167",
+      "routes": [
+        {
+          "id": "4b8ysqo",
+          "route": "POST /volume",
+          "auth": "NONE",
+          "target": "integrations/mc8d5yk"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "ae0m7g"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "ae0m7g"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "mc8d5yk",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:deleteEbsVolume",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:deleteEbsVolume",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "d4fc2cae-8561-5e79-9664-476d3e242508",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:deleteEbsVolume",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:otvqmst167/*/*/volume"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "j4ozdfaq1b",
+      "routes": [
+        {
+          "id": "dxbv3c7",
+          "route": "POST /resize",
+          "auth": "NONE",
+          "target": "integrations/c2unctu"
+        },
+        {
+          "id": "f5ri386",
+          "route": "POST /expand",
+          "auth": "NONE",
+          "target": "integrations/c2unctu"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "wwzdne"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "wwzdne"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "c2unctu",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:expandEbsFilesystem",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:expandEbsFilesystem",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "10e3ac1a-7877-5341-abf4-3a194fd3d83d",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:expandEbsFilesystem",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:j4ozdfaq1b/*/*/resize"
+                  }
+                }
+              },
+              {
+                "Sid": "6aba7a88-f88b-51e0-bd38-5615526cdb73",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:expandEbsFilesystem",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:j4ozdfaq1b/*/*/expand"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ubdryd06n7",
+      "routes": [
+        {
+          "id": "fejfwz7",
+          "route": "GET /instances",
+          "auth": "NONE",
+          "target": "integrations/bjnq68a"
+        },
+        {
+          "id": "iz1our9",
+          "route": "GET /idle",
+          "auth": "NONE",
+          "target": "integrations/bjnq68a"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "uh0qey"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "uh0qey"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "bjnq68a",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:getAllEC2Instances",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:getAllEC2Instances",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "db9153e7-2eda-5de5-a989-a868aa61d88f",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getAllEC2Instances",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:ubdryd06n7/*/*/instances"
+                  }
+                }
+              },
+              {
+                "Sid": "a2e51fbd-ac25-53ea-8dd3-97d5db5126fe",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getAllEC2Instances",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:ubdryd06n7/*/*/idle"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "d6utwa7414",
+      "routes": [
+        {
+          "id": "e7ib27k",
+          "route": "GET /gateways",
+          "auth": "NONE",
+          "target": "integrations/gmpqkqk"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "ci7g9o"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "ci7g9o"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "gmpqkqk",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:getApiGateways",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:getApiGateways",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "b47071e8-cc0d-5e72-9887-99349625d47e",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getApiGateways",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:d6utwa7414/*/*/gateways"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "6n25n5f7gl",
+      "routes": [
+        {
+          "id": "z1foakr",
+          "route": "GET /volumes",
+          "auth": "NONE",
+          "target": "integrations/9xzplfs"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "qe6rwx"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "qe6rwx"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "9xzplfs",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:getEbsVolumes",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:getEbsVolumes",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "ab69eaba-8748-5171-8a79-459f9a4d1cac",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getEbsVolumes",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:6n25n5f7gl/*/*/volumes"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "p6p323otkc",
+      "routes": [
+        {
+          "id": "1xf8e54",
+          "route": "GET /ips",
+          "auth": "NONE",
+          "target": "integrations/dfy1nfe"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "63e92n"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "dfy1nfe",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "e3d66de2-4c01-5d1c-a292-226d42b276fd",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:p6p323otkc/*/*/ips"
+                  }
+                }
+              },
+              {
+                "Sid": "30275b97-56bd-517a-a939-fdf8e246fe09",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:pauqkkti3h/*/*/ips"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pauqkkti3h",
+      "routes": [
+        {
+          "id": "r3f6b7e",
+          "route": "GET /ips",
+          "auth": "NONE",
+          "target": "integrations/t9pj33m"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "7r8q43"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "7r8q43"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "t9pj33m",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "e3d66de2-4c01-5d1c-a292-226d42b276fd",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:p6p323otkc/*/*/ips"
+                  }
+                }
+              },
+              {
+                "Sid": "30275b97-56bd-517a-a939-fdf8e246fe09",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getElasticIPs",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:pauqkkti3h/*/*/ips"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "8poqpy53hb",
+      "routes": [
+        {
+          "id": "djhmfkb",
+          "route": "GET /functions",
+          "auth": "NONE",
+          "target": "integrations/0yktzun"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "a69hni"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "a69hni"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "0yktzun",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:getLambdaFunctions",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:getLambdaFunctions",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "94a32233-384d-5b2a-9f21-c5589002060d",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:getLambdaFunctions",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:8poqpy53hb/*/*/functions"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ghlahh3is7",
+      "routes": [
+        {
+          "id": "cvbw1gp",
+          "route": "POST /instances",
+          "auth": "NONE",
+          "target": "integrations/0k6iw5j"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "iz2f9c"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "iz2f9c"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "0k6iw5j",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:manageEC2Instances",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:manageEC2Instances",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "ad59d718-5c0e-57ad-90dc-fa3a0c42fd3c",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:manageEC2Instances",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:ghlahh3is7/*/*/instances"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "qyymy9lfmj",
+      "routes": [
+        {
+          "id": "70asiu1",
+          "route": "POST /ip",
+          "auth": "NONE",
+          "target": "integrations/297pym3"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "qsgp78"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "qsgp78"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "297pym3",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:releaseElasticIPAddress",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:releaseElasticIPAddress",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "10fcba5a-45a4-5604-9698-78859ecfd8f5",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:releaseElasticIPAddress",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:qyymy9lfmj/*/*/ip"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "4ghkg4pl80",
+      "routes": [
+        {
+          "id": "nc0g18h",
+          "route": "POST /resize",
+          "auth": "NONE",
+          "target": "integrations/dr76mw5"
+        }
+      ],
+      "stages": [
+        {
+          "name": "$default",
+          "autoDeploy": true,
+          "deployment": "7o4umx"
+        },
+        {
+          "name": "dev",
+          "autoDeploy": true,
+          "deployment": "7o4umx"
+        }
+      ],
+      "integrations": [
+        {
+          "id": "dr76mw5",
+          "uri": "arn:aws:lambda:eu-west-2:625490134717:function:resizeEBSVolume",
+          "payload": "2.0"
+        }
+      ],
+      "permissions": [
+        {
+          "lambda": "arn:aws:lambda:eu-west-2:625490134717:function:resizeEBSVolume",
+          "policy": {
+            "Version": "2012-10-17",
+            "Id": "default",
+            "Statement": [
+              {
+                "Sid": "c6531345-4c83-57cb-b7ff-a0d87d98db9b",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "apigateway.amazonaws.com"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Resource": "arn:aws:lambda:eu-west-2:625490134717:function:resizeEBSVolume",
+                "Condition": {
+                  "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:execute-api:eu-west-2:625490134717:4ghkg4pl80/*/*/resize"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

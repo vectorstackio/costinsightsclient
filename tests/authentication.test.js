@@ -15,6 +15,7 @@ for (const extension of ['.ts', '.tsx']) {
 }
 let serviceCalls = 0
 const mocks = {
+  '@/lib/aws/api-gateway': { apiGatewayFetch: (...args) => global.fetch(...args) },
   'server-only': {},
   '@/lib/config': { PW_SALT: secret, USERS: { 'alice@test': 'unused', 'bob@test': 'unused' }, USER_IDS: { 'alice@test': 'alice', 'bob@test': 'bob' } },
   'next/headers': { headers: async () => new Headers() },

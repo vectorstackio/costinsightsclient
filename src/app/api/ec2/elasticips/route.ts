@@ -1,9 +1,10 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import { withAuth } from '@/lib/auth/server'
 // app/api/ec2/elasticips/route.ts
 
 async function handleGET(_request: Request) {
 
-  const res = await fetch(
+  const res = await apiGatewayFetch(
     `${process.env.EC2_GET_ELASTIC_IPS_API_URL}`,
     {
       method: 'GET',

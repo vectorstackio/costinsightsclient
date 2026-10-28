@@ -1,0 +1,114 @@
+# REVIEW ONLY: satisfy README.md rollout gates first.
+# Historical snapshot: refresh the current release, all 18 mappings and route IDs first.
+# Four Elastic IP settings/listing success are user-reported; SigV4 readiness is unverified.
+# HTTP changes affect ALL auto-deploy stages immediately. Compare live inventory first.
+
+# ac04q3lq02 POST /allocate
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ac04q3lq02' --route-id '576q4oq' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ac04q3lq02' --route-id '576q4oq' --authorization-type 'NONE'
+
+# 0pgjhei4hj POST /associate
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '0pgjhei4hj' --route-id 'xv9l4k9' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '0pgjhei4hj' --route-id 'xv9l4k9' --authorization-type 'NONE'
+
+# k46c9hivf4 GET /metrics/history
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'k46c9hivf4' --route-id 'ky2ytik' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'k46c9hivf4' --route-id 'ky2ytik' --authorization-type 'NONE'
+
+# xjrtmr3nw1 GET /metrics
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'xjrtmr3nw1' --route-id '5nw65xl' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'xjrtmr3nw1' --route-id '5nw65xl' --authorization-type 'NONE'
+
+# milf80yd66 GET /data
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id '2vm46ks' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id '2vm46ks' --authorization-type 'NONE'
+
+# milf80yd66 GET /costs
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id 'a77lfuo' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id 'a77lfuo' --authorization-type 'NONE'
+
+# milf80yd66 POST /costs/query
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id 'w6eqisn' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id 'w6eqisn' --authorization-type 'NONE'
+
+# milf80yd66 GET /costs/summary
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id 'zh0hdri' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'milf80yd66' --route-id 'zh0hdri' --authorization-type 'NONE'
+
+# 2g8a5kp7ma POST /snapshot/create
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '2g8a5kp7ma' --route-id 'ikkea5h' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '2g8a5kp7ma' --route-id 'ikkea5h' --authorization-type 'NONE'
+
+# otvqmst167 POST /volume
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'otvqmst167' --route-id '4b8ysqo' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'otvqmst167' --route-id '4b8ysqo' --authorization-type 'NONE'
+
+# j4ozdfaq1b POST /resize
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'j4ozdfaq1b' --route-id 'dxbv3c7' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'j4ozdfaq1b' --route-id 'dxbv3c7' --authorization-type 'NONE'
+
+# j4ozdfaq1b POST /expand
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'j4ozdfaq1b' --route-id 'f5ri386' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'j4ozdfaq1b' --route-id 'f5ri386' --authorization-type 'NONE'
+
+# ubdryd06n7 GET /instances
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ubdryd06n7' --route-id 'fejfwz7' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ubdryd06n7' --route-id 'fejfwz7' --authorization-type 'NONE'
+
+# ubdryd06n7 GET /idle
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ubdryd06n7' --route-id 'iz1our9' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ubdryd06n7' --route-id 'iz1our9' --authorization-type 'NONE'
+
+# d6utwa7414 GET /gateways
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'd6utwa7414' --route-id 'e7ib27k' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'd6utwa7414' --route-id 'e7ib27k' --authorization-type 'NONE'
+
+# 6n25n5f7gl GET /volumes
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '6n25n5f7gl' --route-id 'z1foakr' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '6n25n5f7gl' --route-id 'z1foakr' --authorization-type 'NONE'
+
+# p6p323otkc GET /ips
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'p6p323otkc' --route-id '1xf8e54' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'p6p323otkc' --route-id '1xf8e54' --authorization-type 'NONE'
+
+# pauqkkti3h GET /ips
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'pauqkkti3h' --route-id 'r3f6b7e' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'pauqkkti3h' --route-id 'r3f6b7e' --authorization-type 'NONE'
+
+# 8poqpy53hb GET /functions
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '8poqpy53hb' --route-id 'djhmfkb' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '8poqpy53hb' --route-id 'djhmfkb' --authorization-type 'NONE'
+
+# ghlahh3is7 POST /instances
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ghlahh3is7' --route-id 'cvbw1gp' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'ghlahh3is7' --route-id 'cvbw1gp' --authorization-type 'NONE'
+
+# qyymy9lfmj POST /ip
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'qyymy9lfmj' --route-id '70asiu1' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id 'qyymy9lfmj' --route-id '70asiu1' --authorization-type 'NONE'
+
+# 4ghkg4pl80 POST /resize
+aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '4ghkg4pl80' --route-id 'nc0g18h' --authorization-type AWS_IAM
+# Emergency rollback (reopens public access):
+# aws --profile default --region eu-west-2 apigatewayv2 update-route --api-id '4ghkg4pl80' --route-id 'nc0g18h' --authorization-type 'NONE'

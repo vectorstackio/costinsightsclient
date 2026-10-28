@@ -1,3 +1,4 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import 'server-only'
 import { fetchReportData, requireReportAccess } from '@/lib/reports/auth'
 import { formatCurrency } from './format'
@@ -284,7 +285,7 @@ export const getOrCreateReport = async (
     month
   )
 
-  const response = await fetch(
+  const response = await apiGatewayFetch(
     url.toString(),
     {
       method: 'GET',

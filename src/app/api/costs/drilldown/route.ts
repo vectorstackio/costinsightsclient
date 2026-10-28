@@ -1,10 +1,11 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import { withAuth } from '@/lib/auth/server'
 // app/api/costs/drilldown/route.ts
 
 async function handlePOST(req: Request) {
   const body = await req.json()
 
-  const res = await fetch(`${process.env.COST_API_URL}/query`, {
+  const res = await apiGatewayFetch(`${process.env.COST_API_URL}/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

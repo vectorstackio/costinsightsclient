@@ -1,0 +1,30 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CostInsightsVerifiedCallers",
+      "Effect": "Allow",
+      "Action": "execute-api:Invoke",
+      "Resource": [
+        "arn:aws:execute-api:eu-west-2:625490134717:ac04q3lq02/$default/POST/allocate",
+        "arn:aws:execute-api:eu-west-2:625490134717:0pgjhei4hj/$default/POST/associate",
+        "arn:aws:execute-api:eu-west-2:625490134717:k46c9hivf4/dev/GET/metrics/history",
+        "arn:aws:execute-api:eu-west-2:625490134717:xjrtmr3nw1/dev/GET/metrics",
+        "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/dev/GET/costs/summary",
+        "arn:aws:execute-api:eu-west-2:625490134717:milf80yd66/dev/POST/costs/query",
+        "arn:aws:execute-api:eu-west-2:625490134717:2g8a5kp7ma/$default/POST/snapshot/create",
+        "arn:aws:execute-api:eu-west-2:625490134717:otvqmst167/$default/POST/volume",
+        "arn:aws:execute-api:eu-west-2:625490134717:j4ozdfaq1b/$default/POST/expand",
+        "arn:aws:execute-api:eu-west-2:625490134717:ubdryd06n7/$default/GET/instances",
+        "arn:aws:execute-api:eu-west-2:625490134717:ubdryd06n7/$default/GET/idle",
+        "arn:aws:execute-api:eu-west-2:625490134717:d6utwa7414/$default/GET/gateways",
+        "arn:aws:execute-api:eu-west-2:625490134717:6n25n5f7gl/$default/GET/volumes",
+        "arn:aws:execute-api:eu-west-2:625490134717:pauqkkti3h/$default/GET/ips",
+        "arn:aws:execute-api:eu-west-2:625490134717:8poqpy53hb/$default/GET/functions",
+        "arn:aws:execute-api:eu-west-2:625490134717:ghlahh3is7/$default/POST/instances",
+        "arn:aws:execute-api:eu-west-2:625490134717:qyymy9lfmj/$default/POST/ip",
+        "arn:aws:execute-api:eu-west-2:625490134717:4ghkg4pl80/$default/POST/resize"
+      ]
+    }
+  ]
+}

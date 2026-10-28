@@ -1,0 +1,167 @@
+{
+  "stageEvidence": "Local mappings; 14 grants had historical production configuration evidence. Reverify all 18 against the current release before use.",
+  "routes": [
+    {
+      "api": "ac04q3lq02",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/allocate",
+      "caller": "/api/ec2/elasticips/allocate",
+      "productionEvidence": {
+        "source": "user-reported",
+        "configuration": "Variable manually added to production",
+        "reportedCommit": "fbbb863",
+        "reportedFunctionalCheck": "Elastic IP listing worked after deployment; write operations not verified",
+        "currentEnvironmentIndependentlyVerified": false,
+        "sigv4ReadinessVerified": false,
+        "grantStatus": "pending-independent-production-verification"
+      }
+    },
+    {
+      "api": "0pgjhei4hj",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/associate",
+      "caller": "/api/ec2/elasticips/associate",
+      "productionEvidence": {
+        "source": "user-reported",
+        "configuration": "Variable manually added to production",
+        "reportedCommit": "fbbb863",
+        "reportedFunctionalCheck": "Elastic IP listing worked after deployment; write operations not verified",
+        "currentEnvironmentIndependentlyVerified": false,
+        "sigv4ReadinessVerified": false,
+        "grantStatus": "pending-independent-production-verification"
+      }
+    },
+    {
+      "api": "k46c9hivf4",
+      "stage": "dev",
+      "method": "GET",
+      "path": "/metrics/history",
+      "caller": "/api/infrastructure/history"
+    },
+    {
+      "api": "xjrtmr3nw1",
+      "stage": "dev",
+      "method": "GET",
+      "path": "/metrics",
+      "caller": "/api/infrastructure; /api/infrastructure/summary; /api/infrastructure/topCost"
+    },
+    {
+      "api": "milf80yd66",
+      "stage": "dev",
+      "method": "GET",
+      "path": "/costs/summary",
+      "caller": "/api/costs; src/lib/reports/index.ts including ReportJob"
+    },
+    {
+      "api": "milf80yd66",
+      "stage": "dev",
+      "method": "POST",
+      "path": "/costs/query",
+      "caller": "/api/costs/drilldown"
+    },
+    {
+      "api": "2g8a5kp7ma",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/snapshot/create",
+      "caller": "/api/ebs/snapshot"
+    },
+    {
+      "api": "otvqmst167",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/volume",
+      "caller": "/api/ebs/delete"
+    },
+    {
+      "api": "j4ozdfaq1b",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/expand",
+      "caller": "/api/ebs/expand"
+    },
+    {
+      "api": "ubdryd06n7",
+      "stage": "$default",
+      "method": "GET",
+      "path": "/instances",
+      "caller": "/api/ec2"
+    },
+    {
+      "api": "ubdryd06n7",
+      "stage": "$default",
+      "method": "GET",
+      "path": "/idle",
+      "caller": "/api/ec2/idle"
+    },
+    {
+      "api": "d6utwa7414",
+      "stage": "$default",
+      "method": "GET",
+      "path": "/gateways",
+      "caller": "/api/apigateway"
+    },
+    {
+      "api": "6n25n5f7gl",
+      "stage": "$default",
+      "method": "GET",
+      "path": "/volumes",
+      "caller": "/api/ebs/volumes"
+    },
+    {
+      "api": "pauqkkti3h",
+      "stage": "$default",
+      "method": "GET",
+      "path": "/ips",
+      "caller": "/api/ec2/elasticips",
+      "productionEvidence": {
+        "source": "user-reported",
+        "configuration": "Variable manually added to production",
+        "reportedCommit": "fbbb863",
+        "reportedFunctionalCheck": "Elastic IP listing worked after deployment; write operations not verified",
+        "currentEnvironmentIndependentlyVerified": false,
+        "sigv4ReadinessVerified": false,
+        "grantStatus": "pending-independent-production-verification"
+      }
+    },
+    {
+      "api": "8poqpy53hb",
+      "stage": "$default",
+      "method": "GET",
+      "path": "/functions",
+      "caller": "/api/lambda"
+    },
+    {
+      "api": "ghlahh3is7",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/instances",
+      "caller": "/api/ec2"
+    },
+    {
+      "api": "qyymy9lfmj",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/ip",
+      "caller": "/api/ec2/elasticips/release",
+      "productionEvidence": {
+        "source": "user-reported",
+        "configuration": "Variable manually added to production",
+        "reportedCommit": "fbbb863",
+        "reportedFunctionalCheck": "Elastic IP listing worked after deployment; write operations not verified",
+        "currentEnvironmentIndependentlyVerified": false,
+        "sigv4ReadinessVerified": false,
+        "grantStatus": "pending-independent-production-verification"
+      }
+    },
+    {
+      "api": "4ghkg4pl80",
+      "stage": "$default",
+      "method": "POST",
+      "path": "/resize",
+      "caller": "/api/ebs/resize"
+    }
+  ]
+}

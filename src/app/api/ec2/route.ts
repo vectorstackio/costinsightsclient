@@ -1,10 +1,11 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import { withAuth } from '@/lib/auth/server'
 // app/api/ec2/route.ts
 
 async function handlePOST(req: Request) {
   const body = await req.json()
 
-  const res = await fetch(`${process.env.EC2_MANAGE_INSTANCES_API_URL}`, {
+  const res = await apiGatewayFetch(`${process.env.EC2_MANAGE_INSTANCES_API_URL}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -18,7 +19,7 @@ async function handlePOST(req: Request) {
 }
 
 async function handleGET(_request: Request) {
-  const res = await fetch(`${process.env.EC2_GET_INSTANCES_API_URL}/instances`, {
+  const res = await apiGatewayFetch(`${process.env.EC2_GET_INSTANCES_API_URL}/instances`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

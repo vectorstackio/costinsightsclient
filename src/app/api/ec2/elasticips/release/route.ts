@@ -1,10 +1,11 @@
+import { apiGatewayFetch } from '@/lib/aws/api-gateway'
 import { withAuth } from '@/lib/auth/server'
 // app/api/ec2/elasticips/release/route.ts
 
 async function handlePOST(req: Request) {
   const body = await req.json()
 
-  const res = await fetch(`${process.env.EC2_RELEASE_ELASTIC_IP_API_URL}`, {
+  const res = await apiGatewayFetch(`${process.env.EC2_RELEASE_ELASTIC_IP_API_URL}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
